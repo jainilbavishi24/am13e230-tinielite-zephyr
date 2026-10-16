@@ -6,6 +6,7 @@ project(am13e230_tinielite_demo)
 
 target_sources(app PRIVATE
   src/main.c
+  src/app_clock.c
   src/app_npu.c
   src/app_uart.c
 )

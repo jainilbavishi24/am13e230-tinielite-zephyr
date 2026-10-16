@@ -25,16 +25,20 @@ MODEL_DIR = Path(__file__).resolve().parents[1] / "models" / "waveform_classifie
 FRAME_MAGIC = b"\x5a\xa5"
 PROTOCOL_VERSION = 1
 FRAME_INFER_REQUEST = 0x01
+FRAME_CLOCK_REQUEST = 0x02
 FRAME_READY = 0x80
 FRAME_ACK = 0x81
 FRAME_RESULT = 0x82
+FRAME_CLOCK_STATUS = 0x83
 FRAME_ERROR = 0xFF
 FRAME_HEADER = struct.Struct("<2sBBHH")
 FRAME_CRC = struct.Struct("<I")
 RESULT_PAYLOAD = struct.Struct("<bbbIII")
 ERROR_PAYLOAD = struct.Struct("<Bh")
 CAPABILITIES_PAYLOAD = struct.Struct("<HH")
+CLOCK_STATUS_PAYLOAD = struct.Struct("<12I")
 MAX_FRAME_PAYLOAD = 1024
+CLOCK_VALIDATION_REQUIRED = 0x1F
 
 ERROR_NAMES = {
     1: "timeout",
@@ -298,6 +302,75 @@ def run_crc_fault_test(serial_port: Any, reader: FrameReader, ready_timeout: flo
     print("CRC fault injection: PASS (corruption rejected and server recovered)")
 
 
+def decode_clock_status(payload: bytes) -> dict[str, Any]:
+    if len(payload) != CLOCK_STATUS_PAYLOAD.size:
+        raise ProtocolError("CLOCK_STATUS frame has a malformed payload")
+    values = CLOCK_STATUS_PAYLOAD.unpack(payload)
+    names = (
+        "expected_mclk_hz",
+        "derived_mclk_hz",
+        "uart_clock_hz",
+        "mclkcfg",
+        "hsclken",
+        "hsclkcfg",
+        "pllcfg0",
+        "pllcfg1",
+        "genclken",
+        "clkstatus",
+        "flash_control",
+        "validation_flags",
+    )
+    status = dict(zip(names, values, strict=True))
+    status["valid"] = (
+        status["validation_flags"] & CLOCK_VALIDATION_REQUIRED
+    ) == CLOCK_VALIDATION_REQUIRED
+    status["flash_wait_states"] = (
+        0
+        if status["flash_control"] & 1
+        else (status["flash_control"] >> 8) & 0xF
+    )
+    return status
+
+
+def request_clock_status(
+    serial_port: Any, reader: FrameReader, ready_timeout: float
+) -> dict[str, Any]:
+    ready = wait_for_frame(reader, {FRAME_READY}, ready_timeout)
+    validate_ready(ready)
+    sequence = 1
+    serial_port.write(encode_frame(FRAME_CLOCK_REQUEST, sequence))
+    serial_port.flush()
+    response = wait_for_frame(
+        reader, {FRAME_CLOCK_STATUS, FRAME_ERROR}, 3.0, sequence=sequence
+    )
+    if response["type"] == FRAME_ERROR:
+        raise ProtocolError(describe_error(response))
+    return decode_clock_status(response["payload"])
+
+
+def print_clock_status(status: dict[str, Any]) -> None:
+    verdict = "PASS" if status["valid"] else "FAIL"
+    print(f"Clock validation: {verdict}")
+    print(
+        f"MCLK: derived={status['derived_mclk_hz']} Hz, "
+        f"expected={status['expected_mclk_hz']} Hz"
+    )
+    print(f"UART configured clock: {status['uart_clock_hz']} Hz")
+    print(f"Flash wait states: {status['flash_wait_states']}")
+    for name in (
+        "mclkcfg",
+        "hsclken",
+        "hsclkcfg",
+        "pllcfg0",
+        "pllcfg1",
+        "genclken",
+        "clkstatus",
+        "flash_control",
+        "validation_flags",
+    ):
+        print(f"{name}: 0x{status[name]:08x}")
+
+
 def percentile(values: list[int], percentage: float) -> int:
     if not values:
         raise ValueError("Cannot calculate a percentile of an empty collection")
@@ -322,6 +395,9 @@ def parse_args() -> argparse.Namespace:
     selection = parser.add_mutually_exclusive_group()
     selection.add_argument("--index", type=int, default=0, help="golden vector index (default: 0)")
     selection.add_argument("--all", action="store_true", help="run every bundled golden vector")
+    selection.add_argument(
+        "--clock-status", action="store_true", help="read and validate clock registers"
+    )
     parser.add_argument("--repeat", type=int, default=1, help="repeat the selected set N times")
     parser.add_argument("--retries", type=int, default=2, help="transport retries per inference")
     parser.add_argument("--fault-test", action="store_true", help="verify CRC rejection before inference")
@@ -358,6 +434,20 @@ def main() -> int:
             port.dtr = False
             port.rts = False
             reader = FrameReader(port)
+            if args.clock_status:
+                status = request_clock_status(port, reader, args.ready_timeout)
+                print_clock_status(status)
+                if args.json_output:
+                    report = {
+                        "timestamp_utc": datetime.now(timezone.utc).isoformat(),
+                        "protocol_version": PROTOCOL_VERSION,
+                        "clock_status": status,
+                    }
+                    args.json_output.write_text(
+                        json.dumps(report, indent=2) + "\n", encoding="utf-8"
+                    )
+                    print(f"Wrote {args.json_output}")
+                return 0 if status["valid"] else 1
             if args.fault_test:
                 run_crc_fault_test(port, reader, args.ready_timeout)
             for position, (vector_index, vector) in enumerate(work, start=1):

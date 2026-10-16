@@ -12,6 +12,8 @@ square waveforms.
 ## What is demonstrated
 
 - Custom Zephyr support for the preview AM13E23019 Cortex-M33 device and board.
+- Explicit TI-aligned 200 MHz PLL startup, flash wait-state setup, and
+  register read-back validation.
 - A polling-mode UNICOMM UART driver and versioned, CRC32-protected protocol.
 - TI TINIElite power/reset/privilege setup aligned with TI's AM13E2x SDK.
 - A linked accelerator model containing four TINIElite hardware kernels.
@@ -24,8 +26,8 @@ square waveforms.
 The reorganized implementation has been erased, programmed, verified, and run
 on the LaunchPad. All six supplied vectors produced their exact golden scores,
 and a subsequent 600-inference stress run completed with no failures or
-transport retries. The observed median inference time was 345 us. That timing
-is a prototype result pending clock-tree verification. See
+transport retries. Under the read-back-validated 200 MHz configuration, median
+end-to-end inference time was 668 us. See
 [docs/VALIDATION.md](docs/VALIDATION.md) for the recorded evidence and caveats.
 
 ## Architecture
@@ -134,6 +136,13 @@ Run protocol fault injection and a 600-inference stress test with:
   --json-output docs/evidence/hardware_stress.json
 ```
 
+Read back and validate the active clock tree independently of inference with:
+
+```bash
+./scripts/test.sh --clock-status \
+  --json-output docs/evidence/hardware_clock.json
+```
+
 ## Honest project claims
 
 Good resume wording:
@@ -146,8 +155,9 @@ Good resume wording:
 Avoid claiming “100% model accuracy,” “interrupt-driven NPU,” “production
 ready,” or “CI-tested firmware.” The present evidence includes six golden
 regression vectors repeated successfully over 600 inferences, CRC fault
-recovery, polled accelerator completion, host-only CI, and prototype hardware
-validation. See [docs/QUALITY_GATES.md](docs/QUALITY_GATES.md) for the live
+recovery, explicit/read-back-validated 200 MHz clock setup, polled accelerator
+completion, host-only CI, and prototype hardware validation. See
+[docs/QUALITY_GATES.md](docs/QUALITY_GATES.md) for the live
 completion matrix and [docs/AUDIT.md](docs/AUDIT.md) for the assessment.
 
 ## Licensing

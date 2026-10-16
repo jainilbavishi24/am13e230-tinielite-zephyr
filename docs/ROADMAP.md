@@ -2,7 +2,8 @@
 
 ## P0 — publishable hardware baseline
 
-- [ ] Read and log the effective CPU/MCLK and UART clock configuration.
+- [x] Explicitly initialize and read back the 200 MHz MCLK, 100 MHz UART bus
+  clock, PLL state, and flash wait states.
 - [ ] Install Device Tree Compiler and remove avoidable build warnings.
 - [x] Confirm that the model and golden data may be published by their owner.
 

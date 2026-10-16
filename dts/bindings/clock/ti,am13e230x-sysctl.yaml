@@ -1,0 +1,22 @@
+description: TI AM13E230x system clock controller telemetry
+
+compatible: "ti,am13e230x-sysctl"
+
+include: base.yaml
+
+properties:
+  reg:
+    required: true
+
+  reg-names:
+    required: true
+
+  ti,hfclk-frequency:
+    type: int
+    required: true
+    description: External crystal or digital HFCLK input frequency in hertz
+
+  ti,sysosc-frequency:
+    type: int
+    required: true
+    description: Nominal SYSOSC frequency in hertz

@@ -7,9 +7,9 @@ Performed on 2026-10-17 in WSL Ubuntu 22.04:
 - Clean Zephyr source at `9574b65fbaa01aa0c8f418bd7a6b97beb15fcc54`
 - GNU Arm Embedded GCC 10.3.1
 - Zephyr configure, compile, and link: pass
-- Output: 22,520 bytes flash; 43,520 bytes RAM (including a conservative
+- Output: 23,480 bytes flash; 43,584 bytes RAM (including a conservative
   32 KiB main stack)
-- Python unit tests: 7/7 pass
+- Python unit tests: 8/8 pass
 - ShellCheck and Bash syntax: pass
 - Model SHA-256 verification: pass
 - ELF inspection: four TINIElite kernels, TI handler, model entry point, and NPU
@@ -31,9 +31,11 @@ LP-AM13E230 through XDS110 from WSL. Representative results were:
 - CPU/runtime portion around 50 us
 - hybrid inference around 340 us
 
-These figures are retained as historical evidence only. The measurement uses
-Zephyr cycle conversion configured for 200 MHz and must be repeated after
-clock read-back/initialization is verified.
+These figures are retained as historical evidence only and must not be quoted
+as valid latency. Hardware read-back later proved the CPU was actually running
+at 32 MHz while Zephyr converted cycles as if it were 200 MHz. Functional
+outputs remain valid; these timing values were understated by approximately
+6.25 times.
 
 ## Reorganized firmware hardware gate
 
@@ -55,15 +57,44 @@ Results:
 - One serial session completed all six vectors: pass.
 - Exact score comparisons: 6/6 pass (two sawtooth, two sine, two square).
 - NPU stage timeouts or board errors: none.
-- Accelerator wait: 283-284 us.
-- Runtime/CPU portion: 45 us.
-- End-to-end inference: 343 us.
+- Accelerator wait: 283-284 us as originally reported.
+- Runtime/CPU portion: 45 us as originally reported.
+- End-to-end inference: 343 us as originally reported.
 
 During validation, the end-to-end timestamp was moved ahead of profiler UART
 prints after the first run showed that those prints had inflated the total to
 1,064 us. The corrected image was rebuilt, reprogrammed, verified, and all six
-vectors were rerun successfully. Timing remains subject to the clock-tree
-verification caveat described above.
+vectors were rerun successfully. The later register audit proved that moving
+the timestamp removed UART-print overhead but did not correct the erroneous
+32 MHz versus 200 MHz cycle conversion; these timing values are superseded.
+
+## Clock initialization and read-back gate
+
+Status: **passed on 2026-10-17** through XDS110 from WSL.
+
+The first read-only telemetry image reproduced the defect: MCLK was 32 MHz,
+the PLL was disabled, and flash used zero wait states while devicetree and
+Zephyr timing metadata declared 200 MHz. The implementation was then changed
+to match TI SDK 26.01.00.03's generated sequence:
+
+- Set three flash read wait states from a RAM-resident routine.
+- Configure the LP-AM13E230 X1/X2 pins and start its 25 MHz crystal.
+- Configure PLL `/2` predivide, `x32` feedback, and `/2` CLK0 output.
+- Switch MCLK through `/4`, `/2`, and bypass stages to 200 MHz.
+- Configure the UART for its resulting 100 MHz bus clock.
+
+Command:
+
+```bash
+./scripts/pipeline.sh --clock-status \
+  --json-output docs/evidence/hardware_clock_2026-10-17.json
+```
+
+Read-back result: pass. Derived MCLK was 200,000,000 Hz, UART configuration was
+100,000,000 Hz, flash wait states were three, `SYSPLLCFG0=0x00000031`,
+`SYSPLLCFG1=0x00001f01`, and all required validation flags (`0x1f`) were set.
+Raw evidence is retained in
+[`evidence/hardware_clock_2026-10-17.json`](evidence/hardware_clock_2026-10-17.json).
 
 ## Protocol and stress gate
 
@@ -85,11 +116,11 @@ Results:
 - Recovery after the corrupt request: pass, without resetting the board.
 - Acceptance regression: 6/6 exact vectors, zero transport retries.
 - Stress regression: 600/600 exact vectors, zero transport retries.
-- Accelerator latency: 284 us minimum, 286 us median and p95, 286 us maximum.
-- Runtime/CPU latency: 46 us median, 51 us maximum.
-- End-to-end latency: 343 us minimum, 345 us median and p95, 349 us maximum.
+- Accelerator latency: 509 us minimum, 510 us median and p95, 510 us maximum.
+- Runtime/CPU latency: 128 us median and p95, 140 us maximum.
+- End-to-end latency: 666 us minimum, 668 us median and p95, 679 us maximum.
 
 Every stress result and its score/timing data is retained in
 [`evidence/hardware_stress_2026-10-17.json`](evidence/hardware_stress_2026-10-17.json).
-Latency remains provisional until the clock configuration is explicitly read
-back and verified.
+These are the current clock-validated latency figures; the earlier 343-345 us
+figures are explicitly superseded.

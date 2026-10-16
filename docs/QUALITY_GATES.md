@@ -12,7 +12,7 @@ passed only when reproducible evidence exists.
 | Robust framed transport | PASS | Version, length, sequence, CRC-32, errors, deadlines, retry budget, resynchronization |
 | Transport fault recovery | PASS | Deliberate CRC corruption rejected; following transaction succeeds |
 | Repeated inference | PASS | 600/600 exact results, zero retries; raw JSON retained |
-| Explicit clock configuration/read-back | PENDING | Log and validate effective CPU, MCLK, accelerator, and UART clocks |
+| Explicit clock configuration/read-back | PASS | Staged 200 MHz PLL initialization, 100 MHz UART divisor, three flash wait states, raw register evidence |
 | True NPU interrupt completion | PENDING | Enable, service, clear, and validate the IP interrupt without polling |
 | Watchdog/fault recovery | PENDING | Demonstrate recovery from a deliberately stalled inference and transport fault |
 | Production UART integration | PENDING | Zephyr pinctrl plus status/error handling and interrupt or async operation |

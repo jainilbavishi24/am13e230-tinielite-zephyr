@@ -25,13 +25,21 @@ with polynomial `0xedb88320`, initial state `0xffffffff`, and final XOR
 | Type | Name | Direction | Payload |
 |---:|---|---|---|
 | `0x01` | `INFERENCE_REQUEST` | host to board | 256 signed 8-bit model inputs |
+| `0x02` | `CLOCK_REQUEST` | host to board | empty |
 | `0x80` | `READY` | board to host | input length and output length as two `uint16` values |
 | `0x81` | `ACK` | board to host | empty |
 | `0x82` | `RESULT` | board to host | three `int8` scores, then accelerator, runtime, and total microseconds as three `uint32` values |
+| `0x83` | `CLOCK_STATUS` | board to host | twelve `uint32` clock/status fields described below |
 | `0xff` | `ERROR` | board to host | error code byte |
 
-Requests, acknowledgements, results, and errors use the same sequence number.
-`READY` advertises the next sequence number the board expects.
+Requests, acknowledgements, results, status, and errors use the same sequence
+number. `READY` uses sequence zero; the host chooses each request sequence.
+
+The `CLOCK_STATUS` words are expected MCLK, register-derived MCLK, configured
+UART clock, `MCLKCFG`, `HSCLKEN`, `HSCLKCFG`, `SYSPLLCFG0`, `SYSPLLCFG1`,
+`GENCLKEN`, `CLKSTATUS`, flash read control, and validation flags. The required
+validation mask is `0x1f`: active MCLK source, healthy HSCLK, healthy selected
+PLL/HFCLK, expected frequency, and sufficient flash wait states.
 
 ## Error codes
 

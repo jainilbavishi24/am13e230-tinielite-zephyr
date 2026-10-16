@@ -21,7 +21,7 @@
 };
 
 &semimclk {
-	clock-frequency = <32000000>;
+	clock-frequency = <100000000>;
 };
 
 &flash0 {

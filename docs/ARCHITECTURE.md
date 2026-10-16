@@ -2,19 +2,25 @@
 
 ## Execution path
 
-1. The host parses one of six float feature vectors and applies the generated
+1. A pre-kernel SoC initializer configures three flash wait states, starts the
+   25 MHz board crystal, configures and locks the PLL, and switches MCLK through
+   `/4`, `/2`, and bypass stages to 200 MHz before the Zephyr system timer starts.
+2. The host parses one of six float feature vectors and applies the generated
    model's bias, scale, shift, truncation, and int8 clipping.
-2. It sends a versioned inference frame with a sequence number, explicit
+3. It sends a versioned inference frame with a sequence number, explicit
    payload length, 256 payload bytes, and an IEEE CRC32.
-3. The Zephyr application resynchronizes on the magic bytes, validates the
+4. The Zephyr application resynchronizes on the magic bytes, validates the
    complete frame under a single deadline, and returns a sequence-matched ACK
    or structured error.
-4. `tvmgen_default_run()` starts the generated hybrid graph.
-5. The application polls TINIElite CTL5 for each hardware stage, calls the TI
+5. `tvmgen_default_run()` starts the generated hybrid graph.
+6. The application polls TINIElite CTL5 for each hardware stage, calls the TI
    runtime continuation handler, and enforces a 100 ms per-stage timeout.
-6. Three signed class scores and three timing fields return in a CRC-protected
+7. Three signed class scores and three timing fields return in a CRC-protected
    result frame.
-7. The host compares all three scores exactly with the golden fixture.
+8. The host compares all three scores exactly with the golden fixture.
+
+A separate clock-status request returns the relevant raw SYSCTL/FRI registers,
+derived MCLK, configured UART clock, flash wait states, and validation flags.
 
 See [PROTOCOL.md](PROTOCOL.md) for the byte-level contract and recovery rules.
 

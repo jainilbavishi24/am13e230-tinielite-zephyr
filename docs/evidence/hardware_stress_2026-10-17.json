@@ -1,31 +1,31 @@
 {
   "summary": {
-    "timestamp_utc": "2026-10-16T18:55:49.576936+00:00",
+    "timestamp_utc": "2026-10-16T19:11:54.312042+00:00",
     "protocol_version": 1,
     "total": 600,
     "passed": 600,
     "failed": 0,
     "transport_retries": 0,
     "accelerator_us": {
-      "min": 284,
-      "mean": 285.872,
-      "median": 286,
-      "p95": 286,
-      "max": 286
+      "min": 509,
+      "mean": 509.975,
+      "median": 510,
+      "p95": 510,
+      "max": 510
     },
     "runtime_us": {
-      "min": 46,
-      "mean": 46.015,
-      "median": 46,
-      "p95": 46,
-      "max": 51
+      "min": 128,
+      "mean": 128.06,
+      "median": 128,
+      "p95": 128,
+      "max": 140
     },
     "total_us": {
-      "min": 343,
-      "mean": 344.775,
-      "median": 345,
-      "p95": 345,
-      "max": 349
+      "min": 666,
+      "mean": 668.012,
+      "median": 668,
+      "p95": 668,
+      "max": 679
     }
   },
   "results": [
@@ -46,9 +46,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 285,
-      "runtime_us": 46,
-      "total_us": 343
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 2,
@@ -67,9 +67,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 285,
-      "runtime_us": 46,
-      "total_us": 343
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 3,
@@ -88,9 +88,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 285,
-      "runtime_us": 46,
-      "total_us": 343
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 4,
@@ -109,9 +109,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 285,
-      "runtime_us": 46,
-      "total_us": 343
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 5,
@@ -130,9 +130,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 285,
-      "runtime_us": 46,
-      "total_us": 343
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 6,
@@ -151,9 +151,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 285,
-      "runtime_us": 46,
-      "total_us": 343
+      "accelerator_us": 509,
+      "runtime_us": 128,
+      "total_us": 666
     },
     {
       "sequence": 7,
@@ -172,9 +172,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 284,
-      "runtime_us": 46,
-      "total_us": 343
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 8,
@@ -193,9 +193,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 285,
-      "runtime_us": 46,
-      "total_us": 343
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 9,
@@ -214,9 +214,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 285,
-      "runtime_us": 46,
-      "total_us": 343
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 10,
@@ -235,9 +235,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 285,
-      "runtime_us": 46,
-      "total_us": 343
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 11,
@@ -256,9 +256,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 284,
-      "runtime_us": 46,
-      "total_us": 343
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 12,
@@ -277,9 +277,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 285,
-      "runtime_us": 46,
-      "total_us": 343
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 13,
@@ -298,9 +298,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 285,
-      "runtime_us": 46,
-      "total_us": 343
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 14,
@@ -319,9 +319,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 285,
-      "runtime_us": 46,
-      "total_us": 343
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 15,
@@ -340,9 +340,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 285,
-      "runtime_us": 46,
-      "total_us": 343
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 16,
@@ -361,9 +361,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 285,
-      "runtime_us": 46,
-      "total_us": 343
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 17,
@@ -382,9 +382,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 285,
-      "runtime_us": 46,
-      "total_us": 343
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 18,
@@ -403,9 +403,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 285,
-      "runtime_us": 46,
-      "total_us": 343
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 19,
@@ -424,9 +424,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 285,
-      "runtime_us": 46,
-      "total_us": 343
+      "accelerator_us": 509,
+      "runtime_us": 128,
+      "total_us": 666
     },
     {
       "sequence": 20,
@@ -445,9 +445,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 285,
-      "runtime_us": 46,
-      "total_us": 343
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 21,
@@ -466,9 +466,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 285,
-      "runtime_us": 46,
-      "total_us": 343
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 22,
@@ -487,9 +487,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 285,
-      "runtime_us": 46,
-      "total_us": 343
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 23,
@@ -508,9 +508,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 285,
-      "runtime_us": 46,
-      "total_us": 343
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 24,
@@ -529,9 +529,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 285,
-      "runtime_us": 46,
-      "total_us": 343
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 25,
@@ -550,9 +550,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 285,
-      "runtime_us": 46,
-      "total_us": 343
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 26,
@@ -571,9 +571,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 285,
-      "runtime_us": 46,
-      "total_us": 343
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 27,
@@ -592,9 +592,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 285,
-      "runtime_us": 46,
-      "total_us": 343
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 28,
@@ -613,9 +613,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 285,
-      "runtime_us": 46,
-      "total_us": 343
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 29,
@@ -634,9 +634,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 285,
-      "runtime_us": 46,
-      "total_us": 343
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 30,
@@ -655,9 +655,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 285,
-      "runtime_us": 46,
-      "total_us": 343
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 31,
@@ -676,9 +676,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 285,
-      "runtime_us": 46,
-      "total_us": 343
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 32,
@@ -697,9 +697,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 285,
-      "runtime_us": 46,
-      "total_us": 343
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 33,
@@ -718,9 +718,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 285,
-      "runtime_us": 46,
-      "total_us": 343
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 34,
@@ -739,9 +739,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 285,
-      "runtime_us": 46,
-      "total_us": 343
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 35,
@@ -760,9 +760,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 285,
-      "runtime_us": 46,
-      "total_us": 343
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 36,
@@ -781,9 +781,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 285,
-      "runtime_us": 46,
-      "total_us": 343
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 37,
@@ -802,9 +802,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 285,
-      "runtime_us": 46,
-      "total_us": 343
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 38,
@@ -823,9 +823,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 285,
-      "runtime_us": 46,
-      "total_us": 343
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 39,
@@ -844,9 +844,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 285,
-      "runtime_us": 46,
-      "total_us": 343
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 40,
@@ -865,9 +865,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 285,
-      "runtime_us": 46,
-      "total_us": 343
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 41,
@@ -886,9 +886,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 285,
-      "runtime_us": 46,
-      "total_us": 343
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 42,
@@ -907,9 +907,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 285,
-      "runtime_us": 46,
-      "total_us": 343
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 43,
@@ -928,9 +928,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 285,
-      "runtime_us": 46,
-      "total_us": 343
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 44,
@@ -949,9 +949,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 285,
-      "runtime_us": 46,
-      "total_us": 343
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 45,
@@ -970,9 +970,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 46,
@@ -991,9 +991,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 47,
@@ -1012,9 +1012,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 48,
@@ -1033,9 +1033,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 49,
@@ -1054,9 +1054,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 50,
@@ -1075,9 +1075,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 51,
@@ -1096,9 +1096,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 52,
@@ -1117,9 +1117,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 53,
@@ -1138,9 +1138,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 54,
@@ -1159,9 +1159,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 509,
+      "runtime_us": 128,
+      "total_us": 666
     },
     {
       "sequence": 55,
@@ -1180,9 +1180,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 56,
@@ -1201,9 +1201,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 57,
@@ -1222,9 +1222,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 58,
@@ -1243,9 +1243,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 59,
@@ -1264,9 +1264,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 60,
@@ -1285,9 +1285,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 61,
@@ -1306,9 +1306,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 285,
-      "runtime_us": 46,
-      "total_us": 343
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 62,
@@ -1327,9 +1327,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 63,
@@ -1348,9 +1348,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 509,
+      "runtime_us": 128,
+      "total_us": 666
     },
     {
       "sequence": 64,
@@ -1369,9 +1369,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 65,
@@ -1390,9 +1390,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 285,
-      "runtime_us": 46,
-      "total_us": 344
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 66,
@@ -1411,9 +1411,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 67,
@@ -1432,9 +1432,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 68,
@@ -1453,9 +1453,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 69,
@@ -1474,9 +1474,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 70,
@@ -1495,9 +1495,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 71,
@@ -1516,9 +1516,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 72,
@@ -1537,9 +1537,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 73,
@@ -1558,9 +1558,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 74,
@@ -1579,9 +1579,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 75,
@@ -1600,9 +1600,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 76,
@@ -1621,9 +1621,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 77,
@@ -1642,9 +1642,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 78,
@@ -1663,9 +1663,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 79,
@@ -1684,9 +1684,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 80,
@@ -1705,9 +1705,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 81,
@@ -1726,9 +1726,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 82,
@@ -1747,9 +1747,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 83,
@@ -1768,9 +1768,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 84,
@@ -1789,9 +1789,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 85,
@@ -1810,9 +1810,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 86,
@@ -1831,9 +1831,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 87,
@@ -1852,9 +1852,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 88,
@@ -1873,9 +1873,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 89,
@@ -1894,9 +1894,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 90,
@@ -1915,9 +1915,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 91,
@@ -1936,9 +1936,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 92,
@@ -1957,9 +1957,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 93,
@@ -1978,9 +1978,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 94,
@@ -1999,9 +1999,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 95,
@@ -2020,9 +2020,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 96,
@@ -2041,9 +2041,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 97,
@@ -2062,9 +2062,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 509,
+      "runtime_us": 128,
+      "total_us": 666
     },
     {
       "sequence": 98,
@@ -2083,9 +2083,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 99,
@@ -2104,9 +2104,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 100,
@@ -2125,9 +2125,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 285,
-      "runtime_us": 46,
-      "total_us": 343
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 101,
@@ -2146,9 +2146,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 102,
@@ -2167,9 +2167,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 103,
@@ -2188,9 +2188,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 104,
@@ -2209,9 +2209,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 105,
@@ -2230,9 +2230,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 106,
@@ -2251,9 +2251,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 107,
@@ -2272,9 +2272,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 108,
@@ -2293,9 +2293,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 109,
@@ -2314,9 +2314,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 110,
@@ -2335,9 +2335,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 111,
@@ -2356,9 +2356,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 112,
@@ -2377,9 +2377,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 113,
@@ -2398,9 +2398,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 114,
@@ -2419,9 +2419,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 115,
@@ -2440,9 +2440,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 116,
@@ -2461,9 +2461,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 117,
@@ -2482,9 +2482,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 118,
@@ -2503,9 +2503,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 119,
@@ -2524,9 +2524,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 120,
@@ -2545,9 +2545,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 121,
@@ -2566,9 +2566,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 122,
@@ -2587,9 +2587,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 123,
@@ -2608,9 +2608,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 285,
-      "runtime_us": 50,
-      "total_us": 348
+      "accelerator_us": 509,
+      "runtime_us": 128,
+      "total_us": 667
     },
     {
       "sequence": 124,
@@ -2629,9 +2629,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 125,
@@ -2650,9 +2650,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 126,
@@ -2671,9 +2671,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 127,
@@ -2692,9 +2692,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 285,
-      "runtime_us": 46,
-      "total_us": 343
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 128,
@@ -2713,9 +2713,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 129,
@@ -2734,9 +2734,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 130,
@@ -2755,9 +2755,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 131,
@@ -2776,9 +2776,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 132,
@@ -2797,9 +2797,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 133,
@@ -2818,9 +2818,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 134,
@@ -2839,9 +2839,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 135,
@@ -2860,9 +2860,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 136,
@@ -2881,9 +2881,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 137,
@@ -2902,9 +2902,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 138,
@@ -2923,9 +2923,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 139,
@@ -2944,9 +2944,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 140,
@@ -2965,9 +2965,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 141,
@@ -2986,9 +2986,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 142,
@@ -3007,9 +3007,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 140,
+      "total_us": 679
     },
     {
       "sequence": 143,
@@ -3028,9 +3028,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 144,
@@ -3049,9 +3049,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 145,
@@ -3070,9 +3070,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 146,
@@ -3091,9 +3091,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 147,
@@ -3112,9 +3112,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 148,
@@ -3133,9 +3133,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 149,
@@ -3154,9 +3154,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 150,
@@ -3175,9 +3175,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 151,
@@ -3196,9 +3196,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 152,
@@ -3217,9 +3217,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 153,
@@ -3238,9 +3238,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 154,
@@ -3259,9 +3259,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 155,
@@ -3280,9 +3280,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 156,
@@ -3301,9 +3301,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 157,
@@ -3322,9 +3322,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 158,
@@ -3343,9 +3343,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 159,
@@ -3364,9 +3364,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 160,
@@ -3385,9 +3385,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 161,
@@ -3406,9 +3406,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 162,
@@ -3427,9 +3427,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 163,
@@ -3448,9 +3448,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 164,
@@ -3469,9 +3469,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 165,
@@ -3490,9 +3490,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 166,
@@ -3511,9 +3511,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 167,
@@ -3532,9 +3532,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 168,
@@ -3553,9 +3553,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 169,
@@ -3574,9 +3574,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 170,
@@ -3595,9 +3595,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 171,
@@ -3616,9 +3616,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 172,
@@ -3637,9 +3637,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 173,
@@ -3658,9 +3658,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 174,
@@ -3679,9 +3679,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 285,
-      "runtime_us": 46,
-      "total_us": 343
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 175,
@@ -3700,9 +3700,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 176,
@@ -3721,9 +3721,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 177,
@@ -3742,9 +3742,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 178,
@@ -3763,9 +3763,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 285,
-      "runtime_us": 46,
-      "total_us": 343
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 179,
@@ -3784,9 +3784,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 180,
@@ -3805,9 +3805,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 181,
@@ -3826,9 +3826,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 182,
@@ -3847,9 +3847,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 183,
@@ -3868,9 +3868,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 184,
@@ -3889,9 +3889,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 185,
@@ -3910,9 +3910,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 186,
@@ -3931,9 +3931,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 187,
@@ -3952,9 +3952,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 188,
@@ -3973,9 +3973,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 189,
@@ -3994,9 +3994,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 190,
@@ -4015,9 +4015,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 191,
@@ -4036,9 +4036,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 192,
@@ -4057,9 +4057,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 193,
@@ -4078,9 +4078,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 194,
@@ -4099,9 +4099,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 195,
@@ -4120,9 +4120,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 196,
@@ -4141,9 +4141,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 197,
@@ -4162,9 +4162,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 198,
@@ -4183,9 +4183,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 199,
@@ -4204,9 +4204,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 200,
@@ -4225,9 +4225,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 201,
@@ -4246,9 +4246,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 202,
@@ -4267,9 +4267,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 203,
@@ -4288,9 +4288,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 204,
@@ -4309,9 +4309,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 205,
@@ -4330,9 +4330,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 206,
@@ -4351,9 +4351,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 207,
@@ -4372,9 +4372,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 208,
@@ -4393,9 +4393,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 209,
@@ -4414,9 +4414,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 210,
@@ -4435,9 +4435,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 211,
@@ -4456,9 +4456,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 212,
@@ -4477,9 +4477,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 213,
@@ -4498,9 +4498,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 214,
@@ -4519,9 +4519,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 215,
@@ -4540,9 +4540,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 216,
@@ -4561,9 +4561,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 217,
@@ -4582,9 +4582,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 218,
@@ -4603,9 +4603,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 219,
@@ -4624,9 +4624,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 220,
@@ -4645,9 +4645,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 221,
@@ -4666,9 +4666,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 222,
@@ -4687,9 +4687,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 223,
@@ -4708,9 +4708,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 224,
@@ -4729,9 +4729,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 225,
@@ -4750,9 +4750,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 226,
@@ -4771,9 +4771,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 227,
@@ -4792,9 +4792,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 228,
@@ -4813,9 +4813,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 229,
@@ -4834,9 +4834,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 230,
@@ -4855,9 +4855,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 231,
@@ -4876,9 +4876,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 232,
@@ -4897,9 +4897,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 233,
@@ -4918,9 +4918,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 234,
@@ -4939,9 +4939,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 235,
@@ -4960,9 +4960,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 236,
@@ -4981,9 +4981,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 237,
@@ -5002,9 +5002,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 238,
@@ -5023,9 +5023,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 239,
@@ -5044,9 +5044,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 240,
@@ -5065,9 +5065,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 285,
-      "runtime_us": 46,
-      "total_us": 343
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 241,
@@ -5086,9 +5086,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 242,
@@ -5107,9 +5107,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 243,
@@ -5128,9 +5128,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 244,
@@ -5149,9 +5149,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 245,
@@ -5170,9 +5170,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 246,
@@ -5191,9 +5191,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 247,
@@ -5212,9 +5212,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 248,
@@ -5233,9 +5233,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 249,
@@ -5254,9 +5254,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 250,
@@ -5275,9 +5275,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 251,
@@ -5296,9 +5296,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 252,
@@ -5317,9 +5317,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 253,
@@ -5338,9 +5338,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 254,
@@ -5359,9 +5359,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 255,
@@ -5380,9 +5380,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 256,
@@ -5401,9 +5401,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 257,
@@ -5422,9 +5422,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 258,
@@ -5443,9 +5443,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 259,
@@ -5464,9 +5464,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 285,
-      "runtime_us": 46,
-      "total_us": 343
+      "accelerator_us": 509,
+      "runtime_us": 128,
+      "total_us": 666
     },
     {
       "sequence": 260,
@@ -5485,9 +5485,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 261,
@@ -5506,9 +5506,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 262,
@@ -5527,9 +5527,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 263,
@@ -5548,9 +5548,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 285,
-      "runtime_us": 46,
-      "total_us": 343
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 264,
@@ -5569,9 +5569,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 265,
@@ -5590,9 +5590,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 509,
+      "runtime_us": 128,
+      "total_us": 666
     },
     {
       "sequence": 266,
@@ -5611,9 +5611,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 267,
@@ -5632,9 +5632,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 285,
-      "runtime_us": 46,
-      "total_us": 343
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 268,
@@ -5653,9 +5653,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 269,
@@ -5674,9 +5674,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 270,
@@ -5695,9 +5695,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 271,
@@ -5716,9 +5716,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 272,
@@ -5737,9 +5737,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 273,
@@ -5758,9 +5758,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 274,
@@ -5779,9 +5779,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 275,
@@ -5800,9 +5800,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 276,
@@ -5821,9 +5821,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 277,
@@ -5842,9 +5842,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 278,
@@ -5863,9 +5863,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 279,
@@ -5884,9 +5884,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 280,
@@ -5905,9 +5905,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 140,
+      "total_us": 679
     },
     {
       "sequence": 281,
@@ -5926,9 +5926,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 282,
@@ -5947,9 +5947,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 283,
@@ -5968,9 +5968,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 284,
@@ -5989,9 +5989,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 285,
@@ -6010,9 +6010,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 286,
@@ -6031,9 +6031,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 287,
@@ -6052,9 +6052,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 288,
@@ -6073,9 +6073,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 289,
@@ -6094,9 +6094,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 290,
@@ -6115,9 +6115,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 291,
@@ -6136,9 +6136,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 292,
@@ -6157,9 +6157,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 293,
@@ -6178,9 +6178,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 294,
@@ -6199,9 +6199,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 295,
@@ -6220,9 +6220,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 296,
@@ -6241,9 +6241,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 297,
@@ -6262,9 +6262,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 298,
@@ -6283,9 +6283,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 299,
@@ -6304,9 +6304,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 300,
@@ -6325,9 +6325,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 301,
@@ -6346,9 +6346,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 302,
@@ -6367,9 +6367,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 285,
-      "runtime_us": 46,
-      "total_us": 344
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 303,
@@ -6388,9 +6388,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 304,
@@ -6409,9 +6409,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 305,
@@ -6430,9 +6430,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 306,
@@ -6451,9 +6451,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 285,
-      "runtime_us": 46,
-      "total_us": 343
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 307,
@@ -6472,9 +6472,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 308,
@@ -6493,9 +6493,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 309,
@@ -6514,9 +6514,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 310,
@@ -6535,9 +6535,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 509,
+      "runtime_us": 128,
+      "total_us": 666
     },
     {
       "sequence": 311,
@@ -6556,9 +6556,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 312,
@@ -6577,9 +6577,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 313,
@@ -6598,9 +6598,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 314,
@@ -6619,9 +6619,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 315,
@@ -6640,9 +6640,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 316,
@@ -6661,9 +6661,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 317,
@@ -6682,9 +6682,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 318,
@@ -6703,9 +6703,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 319,
@@ -6724,9 +6724,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 320,
@@ -6745,9 +6745,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 321,
@@ -6766,9 +6766,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 322,
@@ -6787,9 +6787,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 323,
@@ -6808,9 +6808,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 509,
+      "runtime_us": 128,
+      "total_us": 666
     },
     {
       "sequence": 324,
@@ -6829,9 +6829,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 325,
@@ -6850,9 +6850,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 326,
@@ -6871,9 +6871,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 327,
@@ -6892,9 +6892,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 328,
@@ -6913,9 +6913,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 329,
@@ -6934,9 +6934,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 330,
@@ -6955,9 +6955,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 331,
@@ -6976,9 +6976,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 332,
@@ -6997,9 +6997,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 333,
@@ -7018,9 +7018,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 334,
@@ -7039,9 +7039,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 335,
@@ -7060,9 +7060,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 336,
@@ -7081,9 +7081,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 337,
@@ -7102,9 +7102,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 285,
-      "runtime_us": 46,
-      "total_us": 343
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 338,
@@ -7123,9 +7123,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 339,
@@ -7144,9 +7144,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 340,
@@ -7165,9 +7165,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 341,
@@ -7186,9 +7186,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 285,
-      "runtime_us": 46,
-      "total_us": 343
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 342,
@@ -7207,9 +7207,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 343,
@@ -7228,9 +7228,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 344,
@@ -7249,9 +7249,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 345,
@@ -7270,9 +7270,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 285,
-      "runtime_us": 46,
-      "total_us": 343
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 346,
@@ -7291,9 +7291,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 347,
@@ -7312,9 +7312,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 348,
@@ -7333,9 +7333,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 349,
@@ -7354,9 +7354,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 285,
-      "runtime_us": 46,
-      "total_us": 343
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 350,
@@ -7375,9 +7375,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 351,
@@ -7396,9 +7396,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 352,
@@ -7417,9 +7417,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 353,
@@ -7438,9 +7438,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 285,
-      "runtime_us": 46,
-      "total_us": 343
+      "accelerator_us": 509,
+      "runtime_us": 128,
+      "total_us": 666
     },
     {
       "sequence": 354,
@@ -7459,9 +7459,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 355,
@@ -7480,9 +7480,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 356,
@@ -7501,9 +7501,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 357,
@@ -7522,9 +7522,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 344
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 358,
@@ -7543,9 +7543,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 359,
@@ -7564,9 +7564,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 360,
@@ -7585,9 +7585,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 361,
@@ -7606,9 +7606,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 362,
@@ -7627,9 +7627,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 363,
@@ -7648,9 +7648,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 364,
@@ -7669,9 +7669,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 365,
@@ -7690,9 +7690,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 366,
@@ -7711,9 +7711,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 367,
@@ -7732,9 +7732,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 368,
@@ -7753,9 +7753,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 140,
+      "total_us": 679
     },
     {
       "sequence": 369,
@@ -7774,9 +7774,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 370,
@@ -7795,9 +7795,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 371,
@@ -7816,9 +7816,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 372,
@@ -7837,9 +7837,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 373,
@@ -7858,9 +7858,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 374,
@@ -7879,9 +7879,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 375,
@@ -7900,9 +7900,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 376,
@@ -7921,9 +7921,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 377,
@@ -7942,9 +7942,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 378,
@@ -7963,9 +7963,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 379,
@@ -7984,9 +7984,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 380,
@@ -8005,9 +8005,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 285,
-      "runtime_us": 51,
-      "total_us": 348
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 381,
@@ -8026,9 +8026,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 382,
@@ -8047,9 +8047,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 509,
+      "runtime_us": 128,
+      "total_us": 667
     },
     {
       "sequence": 383,
@@ -8068,9 +8068,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 384,
@@ -8089,9 +8089,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 285,
-      "runtime_us": 46,
-      "total_us": 343
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 385,
@@ -8110,9 +8110,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 386,
@@ -8131,9 +8131,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 387,
@@ -8152,9 +8152,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 388,
@@ -8173,9 +8173,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 285,
-      "runtime_us": 46,
-      "total_us": 343
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 389,
@@ -8194,9 +8194,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 390,
@@ -8215,9 +8215,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 391,
@@ -8236,9 +8236,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 392,
@@ -8257,9 +8257,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 393,
@@ -8278,9 +8278,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 394,
@@ -8299,9 +8299,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 395,
@@ -8320,9 +8320,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 396,
@@ -8341,9 +8341,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 397,
@@ -8362,9 +8362,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 398,
@@ -8383,9 +8383,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 399,
@@ -8404,9 +8404,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 400,
@@ -8425,9 +8425,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 401,
@@ -8446,9 +8446,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 402,
@@ -8467,9 +8467,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 403,
@@ -8488,9 +8488,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 404,
@@ -8509,9 +8509,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 405,
@@ -8530,9 +8530,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 406,
@@ -8551,9 +8551,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 407,
@@ -8572,9 +8572,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 408,
@@ -8593,9 +8593,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 409,
@@ -8614,9 +8614,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 410,
@@ -8635,9 +8635,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 411,
@@ -8656,9 +8656,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 285,
-      "runtime_us": 46,
-      "total_us": 343
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 412,
@@ -8677,9 +8677,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 413,
@@ -8698,9 +8698,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 414,
@@ -8719,9 +8719,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 415,
@@ -8740,9 +8740,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 285,
-      "runtime_us": 46,
-      "total_us": 343
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 416,
@@ -8761,9 +8761,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 417,
@@ -8782,9 +8782,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 418,
@@ -8803,9 +8803,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 419,
@@ -8824,9 +8824,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 509,
+      "runtime_us": 128,
+      "total_us": 666
     },
     {
       "sequence": 420,
@@ -8845,9 +8845,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 421,
@@ -8866,9 +8866,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 422,
@@ -8887,9 +8887,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 423,
@@ -8908,9 +8908,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 424,
@@ -8929,9 +8929,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 425,
@@ -8950,9 +8950,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 426,
@@ -8971,9 +8971,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 427,
@@ -8992,9 +8992,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 428,
@@ -9013,9 +9013,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 429,
@@ -9034,9 +9034,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 430,
@@ -9055,9 +9055,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 431,
@@ -9076,9 +9076,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 432,
@@ -9097,9 +9097,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 433,
@@ -9118,9 +9118,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 434,
@@ -9139,9 +9139,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 435,
@@ -9160,9 +9160,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 436,
@@ -9181,9 +9181,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 437,
@@ -9202,9 +9202,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 438,
@@ -9223,9 +9223,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 439,
@@ -9244,9 +9244,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 440,
@@ -9265,9 +9265,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 441,
@@ -9286,9 +9286,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 442,
@@ -9307,9 +9307,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 349
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 443,
@@ -9328,9 +9328,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 444,
@@ -9349,9 +9349,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 445,
@@ -9370,9 +9370,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 446,
@@ -9391,9 +9391,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 285,
-      "runtime_us": 46,
-      "total_us": 343
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 447,
@@ -9412,9 +9412,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 448,
@@ -9433,9 +9433,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 449,
@@ -9454,9 +9454,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 450,
@@ -9475,9 +9475,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 451,
@@ -9496,9 +9496,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 452,
@@ -9517,9 +9517,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 453,
@@ -9538,9 +9538,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 454,
@@ -9559,9 +9559,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 455,
@@ -9580,9 +9580,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 456,
@@ -9601,9 +9601,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 457,
@@ -9622,9 +9622,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 458,
@@ -9643,9 +9643,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 459,
@@ -9664,9 +9664,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 460,
@@ -9685,9 +9685,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 461,
@@ -9706,9 +9706,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 462,
@@ -9727,9 +9727,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 463,
@@ -9748,9 +9748,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 464,
@@ -9769,9 +9769,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 465,
@@ -9790,9 +9790,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 466,
@@ -9811,9 +9811,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 467,
@@ -9832,9 +9832,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 468,
@@ -9853,9 +9853,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 469,
@@ -9874,9 +9874,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 470,
@@ -9895,9 +9895,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 471,
@@ -9916,9 +9916,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 472,
@@ -9937,9 +9937,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 473,
@@ -9958,9 +9958,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 474,
@@ -9979,9 +9979,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 475,
@@ -10000,9 +10000,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 476,
@@ -10021,9 +10021,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 477,
@@ -10042,9 +10042,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 478,
@@ -10063,9 +10063,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 479,
@@ -10084,9 +10084,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 480,
@@ -10105,9 +10105,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 481,
@@ -10126,9 +10126,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 285,
-      "runtime_us": 46,
-      "total_us": 343
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 482,
@@ -10147,9 +10147,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 483,
@@ -10168,9 +10168,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 484,
@@ -10189,9 +10189,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 485,
@@ -10210,9 +10210,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 285,
-      "runtime_us": 46,
-      "total_us": 343
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 486,
@@ -10231,9 +10231,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 487,
@@ -10252,9 +10252,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 509,
+      "runtime_us": 128,
+      "total_us": 667
     },
     {
       "sequence": 488,
@@ -10273,9 +10273,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 489,
@@ -10294,9 +10294,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 490,
@@ -10315,9 +10315,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 491,
@@ -10336,9 +10336,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 492,
@@ -10357,9 +10357,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 493,
@@ -10378,9 +10378,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 494,
@@ -10399,9 +10399,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 495,
@@ -10420,9 +10420,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 496,
@@ -10441,9 +10441,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 497,
@@ -10462,9 +10462,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 498,
@@ -10483,9 +10483,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 499,
@@ -10504,9 +10504,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 500,
@@ -10525,9 +10525,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 501,
@@ -10546,9 +10546,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 502,
@@ -10567,9 +10567,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 503,
@@ -10588,9 +10588,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 504,
@@ -10609,9 +10609,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 505,
@@ -10630,9 +10630,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 506,
@@ -10651,9 +10651,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 507,
@@ -10672,9 +10672,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 508,
@@ -10693,9 +10693,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 285,
-      "runtime_us": 46,
-      "total_us": 343
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 509,
@@ -10714,9 +10714,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 510,
@@ -10735,9 +10735,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 511,
@@ -10756,9 +10756,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 512,
@@ -10777,9 +10777,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 344
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 513,
@@ -10798,9 +10798,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 514,
@@ -10819,9 +10819,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 515,
@@ -10840,9 +10840,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 516,
@@ -10861,9 +10861,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 517,
@@ -10882,9 +10882,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 518,
@@ -10903,9 +10903,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 519,
@@ -10924,9 +10924,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 520,
@@ -10945,9 +10945,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 521,
@@ -10966,9 +10966,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 522,
@@ -10987,9 +10987,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 523,
@@ -11008,9 +11008,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 524,
@@ -11029,9 +11029,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 525,
@@ -11050,9 +11050,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 526,
@@ -11071,9 +11071,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 527,
@@ -11092,9 +11092,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 528,
@@ -11113,9 +11113,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 529,
@@ -11134,9 +11134,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 530,
@@ -11155,9 +11155,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 531,
@@ -11176,9 +11176,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 532,
@@ -11197,9 +11197,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 533,
@@ -11218,9 +11218,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 534,
@@ -11239,9 +11239,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 535,
@@ -11260,9 +11260,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 536,
@@ -11281,9 +11281,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 537,
@@ -11302,9 +11302,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 538,
@@ -11323,9 +11323,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 539,
@@ -11344,9 +11344,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 540,
@@ -11365,9 +11365,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 541,
@@ -11386,9 +11386,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 542,
@@ -11407,9 +11407,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 543,
@@ -11428,9 +11428,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 285,
-      "runtime_us": 46,
-      "total_us": 343
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 544,
@@ -11449,9 +11449,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 545,
@@ -11470,9 +11470,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 546,
@@ -11491,9 +11491,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 547,
@@ -11512,9 +11512,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 285,
-      "runtime_us": 46,
-      "total_us": 343
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 548,
@@ -11533,9 +11533,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 549,
@@ -11554,9 +11554,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 550,
@@ -11575,9 +11575,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 551,
@@ -11596,9 +11596,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 285,
-      "runtime_us": 46,
-      "total_us": 343
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 552,
@@ -11617,9 +11617,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 553,
@@ -11638,9 +11638,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 554,
@@ -11659,9 +11659,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 555,
@@ -11680,9 +11680,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 556,
@@ -11701,9 +11701,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 557,
@@ -11722,9 +11722,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 558,
@@ -11743,9 +11743,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 559,
@@ -11764,9 +11764,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 560,
@@ -11785,9 +11785,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 561,
@@ -11806,9 +11806,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 562,
@@ -11827,9 +11827,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 563,
@@ -11848,9 +11848,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 564,
@@ -11869,9 +11869,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 565,
@@ -11890,9 +11890,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 566,
@@ -11911,9 +11911,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 567,
@@ -11932,9 +11932,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 568,
@@ -11953,9 +11953,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 569,
@@ -11974,9 +11974,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 570,
@@ -11995,9 +11995,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 571,
@@ -12016,9 +12016,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 572,
@@ -12037,9 +12037,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 573,
@@ -12058,9 +12058,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 574,
@@ -12079,9 +12079,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 575,
@@ -12100,9 +12100,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 576,
@@ -12121,9 +12121,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 509,
+      "runtime_us": 128,
+      "total_us": 667
     },
     {
       "sequence": 577,
@@ -12142,9 +12142,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 578,
@@ -12163,9 +12163,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 285,
-      "runtime_us": 46,
-      "total_us": 344
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 579,
@@ -12184,9 +12184,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 580,
@@ -12205,9 +12205,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 581,
@@ -12226,9 +12226,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 582,
@@ -12247,9 +12247,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 583,
@@ -12268,9 +12268,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 584,
@@ -12289,9 +12289,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 585,
@@ -12310,9 +12310,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 586,
@@ -12331,9 +12331,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 587,
@@ -12352,9 +12352,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 588,
@@ -12373,9 +12373,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 589,
@@ -12394,9 +12394,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 590,
@@ -12415,9 +12415,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 591,
@@ -12436,9 +12436,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 592,
@@ -12457,9 +12457,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 593,
@@ -12478,9 +12478,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 594,
@@ -12499,9 +12499,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 595,
@@ -12520,9 +12520,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 596,
@@ -12541,9 +12541,9 @@
       "winner": "Sawtooth",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 597,
@@ -12562,9 +12562,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 598,
@@ -12583,9 +12583,9 @@
       "winner": "Sine",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 599,
@@ -12604,9 +12604,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     },
     {
       "sequence": 600,
@@ -12625,9 +12625,9 @@
       "winner": "Square",
       "passed": true,
       "attempts": 1,
-      "accelerator_us": 286,
-      "runtime_us": 46,
-      "total_us": 345
+      "accelerator_us": 510,
+      "runtime_us": 128,
+      "total_us": 668
     }
   ]
 }

@@ -65,6 +65,26 @@ class HostToolTests(unittest.TestCase):
         self.assertEqual(1, SEND_TENSOR.percentile([1], 0.95))
         self.assertEqual(5, SEND_TENSOR.percentile([1, 2, 3, 4, 5], 0.95))
 
+    def test_clock_status_decode_and_validation(self):
+        payload = SEND_TENSOR.CLOCK_STATUS_PAYLOAD.pack(
+            200_000_000,
+            200_000_000,
+            32_000_000,
+            0x00010000,
+            0x00000100,
+            0,
+            0x31,
+            0x1F01,
+            0,
+            0x00200B10,
+            0x00000300,
+            SEND_TENSOR.CLOCK_VALIDATION_REQUIRED,
+        )
+        status = SEND_TENSOR.decode_clock_status(payload)
+        self.assertTrue(status["valid"])
+        self.assertEqual(3, status["flash_wait_states"])
+        self.assertEqual(200_000_000, status["derived_mclk_hz"])
+
 
 if __name__ == "__main__":
     unittest.main()

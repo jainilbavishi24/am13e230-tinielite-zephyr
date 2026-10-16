@@ -12,11 +12,13 @@
 #include <zephyr/drivers/uart.h>
 #include <zephyr/kernel.h>
 
-#define UART_NODE              DT_CHOSEN(zephyr_console)
-#define FRAME_HEADER_SIZE      8U
-#define FRAME_CRC_SIZE         4U
-#define FRAME_MAX_PAYLOAD_SIZE APP_NPU_INPUT_SIZE
-#define RESULT_PAYLOAD_SIZE    15U
+#define UART_NODE                 DT_CHOSEN(zephyr_console)
+#define FRAME_HEADER_SIZE         8U
+#define FRAME_CRC_SIZE            4U
+#define FRAME_MAX_PAYLOAD_SIZE    APP_NPU_INPUT_SIZE
+#define RESULT_PAYLOAD_SIZE       15U
+#define CLOCK_STATUS_WORDS        12U
+#define CLOCK_STATUS_PAYLOAD_SIZE (CLOCK_STATUS_WORDS * sizeof(uint32_t))
 
 static const struct device *const uart_dev = DEVICE_DT_GET(UART_NODE);
 
@@ -156,7 +158,7 @@ int app_uart_init(void)
 	return device_is_ready(uart_dev) ? 0 : -ENODEV;
 }
 
-int app_uart_receive_tensor(int8_t *buffer, uint32_t size, uint16_t *sequence)
+int app_uart_receive_request(int8_t *buffer, uint32_t size, struct app_uart_request *request)
 {
 	uint8_t header[FRAME_HEADER_SIZE] = {
 		APP_UART_FRAME_MAGIC_0,
@@ -169,7 +171,7 @@ int app_uart_receive_tensor(int8_t *buffer, uint32_t size, uint16_t *sequence)
 	uint32_t start;
 	int ret;
 
-	if ((buffer == NULL) || (sequence == NULL) || (size == 0U) ||
+	if ((buffer == NULL) || (request == NULL) || (size == 0U) ||
 	    (size > FRAME_MAX_PAYLOAD_SIZE)) {
 		return -EINVAL;
 	}
@@ -190,17 +192,20 @@ int app_uart_receive_tensor(int8_t *buffer, uint32_t size, uint16_t *sequence)
 	}
 
 	frame_sequence = decode_le16(&header[4]);
-	*sequence = frame_sequence;
+	request->sequence = frame_sequence;
 	payload_length = decode_le16(&header[6]);
 	if (header[2] != APP_UART_PROTOCOL_VERSION) {
 		app_uart_send_error(frame_sequence, APP_UART_ERROR_VERSION, -EPROTO);
 		return -EPROTO;
 	}
-	if (header[3] != APP_UART_FRAME_INFER_REQUEST) {
+	if ((header[3] != APP_UART_FRAME_INFER_REQUEST) &&
+	    (header[3] != APP_UART_FRAME_CLOCK_REQUEST)) {
 		app_uart_send_error(frame_sequence, APP_UART_ERROR_TYPE, -EPROTO);
 		return -EPROTO;
 	}
-	if (payload_length != size) {
+	request->type = (enum app_uart_frame_type)header[3];
+	if (((request->type == APP_UART_FRAME_INFER_REQUEST) && (payload_length != size)) ||
+	    ((request->type == APP_UART_FRAME_CLOCK_REQUEST) && (payload_length != 0U))) {
 		app_uart_send_error(frame_sequence, APP_UART_ERROR_LENGTH, -EMSGSIZE);
 		return -EMSGSIZE;
 	}
@@ -220,7 +225,10 @@ int app_uart_receive_tensor(int8_t *buffer, uint32_t size, uint16_t *sequence)
 		return -EBADMSG;
 	}
 
-	return send_frame(APP_UART_FRAME_ACK, frame_sequence, NULL, 0U);
+	if (request->type == APP_UART_FRAME_INFER_REQUEST) {
+		return send_frame(APP_UART_FRAME_ACK, frame_sequence, NULL, 0U);
+	}
+	return 0;
 }
 
 void app_uart_send_error(uint16_t sequence, enum app_uart_error_code code, int error)
@@ -257,4 +265,31 @@ int app_uart_send_result(uint16_t sequence, const int8_t *result, uint32_t size,
 	encode_le32(&payload[7], metrics->runtime_us);
 	encode_le32(&payload[11], metrics->total_us);
 	return send_frame(APP_UART_FRAME_RESULT, sequence, payload, sizeof(payload));
+}
+
+int app_uart_send_clock_status(uint16_t sequence, const struct app_clock_status *status)
+{
+	uint8_t payload[CLOCK_STATUS_PAYLOAD_SIZE];
+	const uint32_t values[CLOCK_STATUS_WORDS] = {
+		status != NULL ? status->expected_mclk_hz : 0U,
+		status != NULL ? status->derived_mclk_hz : 0U,
+		status != NULL ? status->uart_clock_hz : 0U,
+		status != NULL ? status->mclkcfg : 0U,
+		status != NULL ? status->hsclken : 0U,
+		status != NULL ? status->hsclkcfg : 0U,
+		status != NULL ? status->pllcfg0 : 0U,
+		status != NULL ? status->pllcfg1 : 0U,
+		status != NULL ? status->genclken : 0U,
+		status != NULL ? status->clkstatus : 0U,
+		status != NULL ? status->flash_control : 0U,
+		status != NULL ? status->validation_flags : 0U,
+	};
+
+	if (status == NULL) {
+		return -EINVAL;
+	}
+	for (uint32_t i = 0U; i < CLOCK_STATUS_WORDS; ++i) {
+		encode_le32(&payload[i * sizeof(uint32_t)], values[i]);
+	}
+	return send_frame(APP_UART_FRAME_CLOCK_STATUS, sequence, payload, sizeof(payload));
 }

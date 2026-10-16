@@ -81,6 +81,9 @@ not re-audited; its exact revision was identified and pinned.
   protocol carrying sequence numbers, structured errors, and timing metadata.
 - Added bounded host retries, stream resynchronization, deliberate CRC fault
   injection, repeat mode, latency statistics, and machine-readable evidence.
+- Reproduced the original clock mismatch on hardware, invalidated the old
+  timing claim, added TI-aligned staged PLL/flash initialization, corrected the
+  100 MHz UART bus clock, and added raw register read-back validation.
 - Added unit tests, artifact hash verification, host CI, shell checks, and
   reproducible build/flash scripts.
 
@@ -90,9 +93,6 @@ not re-audited; its exact revision was identified and pinned.
   consecutive hardware inferences with 600 exact results and zero retries.
   Multi-hour soak, repeated reset, brownout, and broader fault-injection tests
   are still pending.
-- The CPU and peripheral clock tree is assumed to have been established by the
-  device startup/debug environment. Read-back or explicit clock initialization
-  is needed before publishing clock-normalized benchmark claims.
 - The UART driver implements polling only; error-status reporting, standard
   Zephyr pinctrl, interrupts, and async APIs are not implemented.
 - The NPU memory callback ABI returns `void`, so archive memory-write errors can
