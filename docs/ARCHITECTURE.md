@@ -4,13 +4,19 @@
 
 1. The host parses one of six float feature vectors and applies the generated
    model's bias, scale, shift, truncation, and int8 clipping.
-2. It sends magic `5A A5`, 256 payload bytes, and an 8-bit additive checksum.
-3. The Zephyr application validates the packet and acknowledges it.
+2. It sends a versioned inference frame with a sequence number, explicit
+   payload length, 256 payload bytes, and an IEEE CRC32.
+3. The Zephyr application resynchronizes on the magic bytes, validates the
+   complete frame under a single deadline, and returns a sequence-matched ACK
+   or structured error.
 4. `tvmgen_default_run()` starts the generated hybrid graph.
 5. The application polls TINIElite CTL5 for each hardware stage, calls the TI
    runtime continuation handler, and enforces a 100 ms per-stage timeout.
-6. Three signed class scores and profiling lines return over UART.
+6. Three signed class scores and three timing fields return in a CRC-protected
+   result frame.
 7. The host compares all three scores exactly with the golden fixture.
+
+See [PROTOCOL.md](PROTOCOL.md) for the byte-level contract and recovery rules.
 
 ## Hardware map used
 
@@ -30,6 +36,8 @@
 
 The current design is intentionally single-request and synchronous. It avoids
 queueing tensors while inference is active, keeps the wire protocol ordered,
-and makes hardware faults visible. Throughput-oriented double buffering is a
-future optimization after interrupt completion and protocol sequencing are
-implemented correctly.
+and makes hardware faults visible. Sequence numbers prevent stale ACK/result
+frames from satisfying a newer request. The host applies a bounded retry
+budget, while the firmware drains stale bytes before advertising readiness.
+Throughput-oriented double buffering remains a future optimization after
+interrupt completion is implemented correctly.

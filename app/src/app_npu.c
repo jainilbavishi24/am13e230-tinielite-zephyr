@@ -9,8 +9,6 @@
 #include <zephyr/device.h>
 #include <zephyr/devicetree.h>
 #include <zephyr/kernel.h>
-#include <zephyr/sys/printk.h>
-
 #include <tvmgen_default.h>
 
 #define TINYENGINE_NODE      DT_COMPAT_GET_ANY_STATUS_OKAY(ti_am13e230x_tinyengine)
@@ -23,7 +21,7 @@ int app_npu_init(void)
 	return device_is_ready(npu_dev) ? 0 : -ENODEV;
 }
 
-int app_npu_run_inference(int8_t *input, int8_t *output)
+int app_npu_run_inference(int8_t *input, int8_t *output, struct app_npu_metrics *metrics)
 {
 	struct tvmgen_default_inputs inputs = {
 		.onnx__Add_0 = input,
@@ -38,7 +36,7 @@ int app_npu_run_inference(int8_t *input, int8_t *output)
 	uint32_t runtime_start;
 	int32_t run_status;
 
-	if ((input == NULL) || (output == NULL)) {
+	if ((input == NULL) || (output == NULL) || (metrics == NULL)) {
 		return -EINVAL;
 	}
 
@@ -70,9 +68,9 @@ int app_npu_run_inference(int8_t *input, int8_t *output)
 	}
 	total_us = k_cyc_to_us_floor32(k_cycle_get_32() - total_start);
 
-	printk("[PROFILER] Accelerator wait: %u us\n", accelerator_us);
-	printk("[PROFILER] Runtime/CPU: %u us\n", runtime_us);
-	printk("[PROFILER] End-to-end inference: %u us\n", total_us);
+	metrics->accelerator_us = accelerator_us;
+	metrics->runtime_us = runtime_us;
+	metrics->total_us = total_us;
 
 	return 0;
 }

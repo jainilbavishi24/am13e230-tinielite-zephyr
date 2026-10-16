@@ -26,14 +26,44 @@ class HostToolTests(unittest.TestCase):
         self.assertEqual(127, SEND_TENSOR.quantize(1000.0, -70.02075, 187.0, 6))
         self.assertEqual(-3, SEND_TENSOR.quantize(69.0, -70.02075, 187.0, 6))
 
-    def test_packet_shape_and_checksum(self):
+    def test_versioned_frame_shape_and_crc(self):
         vector = SEND_TENSOR.parse_vectors(SEND_TENSOR.MODEL_DIR)[0]
-        packet = SEND_TENSOR.make_packet(
+        payload = SEND_TENSOR.make_payload(
             vector["input"], SEND_TENSOR.parse_normalization(SEND_TENSOR.MODEL_DIR)
         )
-        self.assertEqual(259, len(packet))
-        self.assertEqual(bytes((0x5A, 0xA5)), packet[:2])
-        self.assertEqual(sum(packet[2:-1]) & 0xFF, packet[-1])
+        packet = SEND_TENSOR.encode_frame(SEND_TENSOR.FRAME_INFER_REQUEST, 42, payload)
+        decoded = SEND_TENSOR.decode_frame(packet)
+        self.assertEqual(268, len(packet))
+        self.assertEqual(SEND_TENSOR.FRAME_MAGIC, packet[:2])
+        self.assertEqual(SEND_TENSOR.FRAME_INFER_REQUEST, decoded["type"])
+        self.assertEqual(42, decoded["sequence"])
+        self.assertEqual(payload, decoded["payload"])
+
+    def test_crc_corruption_is_rejected(self):
+        packet = bytearray(SEND_TENSOR.encode_frame(SEND_TENSOR.FRAME_ACK, 7))
+        packet[-1] ^= 1
+        with self.assertRaisesRegex(SEND_TENSOR.ProtocolError, "CRC mismatch"):
+            SEND_TENSOR.decode_frame(bytes(packet))
+
+    def test_frame_reader_resynchronizes_after_boot_text(self):
+        class FakeSerial:
+            def __init__(self, data):
+                self.data = bytearray(data)
+
+            def read(self, size):
+                result = self.data[:size]
+                del self.data[:size]
+                return bytes(result)
+
+        expected = SEND_TENSOR.encode_frame(SEND_TENSOR.FRAME_READY, 0, b"\x00\x01\x03\x00")
+        reader = SEND_TENSOR.FrameReader(FakeSerial(b"boot log\r\n" + expected))
+        frame = reader.read_frame(0.1)
+        self.assertEqual(SEND_TENSOR.FRAME_READY, frame["type"])
+        self.assertEqual(b"\x00\x01\x03\x00", frame["payload"])
+
+    def test_percentile_is_deterministic(self):
+        self.assertEqual(1, SEND_TENSOR.percentile([1], 0.95))
+        self.assertEqual(5, SEND_TENSOR.percentile([1, 2, 3, 4, 5], 0.95))
 
 
 if __name__ == "__main__":

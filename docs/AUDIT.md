@@ -1,6 +1,6 @@
 # Critical engineering audit
 
-Audit date: 2026-10-16
+Audit date: 2026-10-17
 
 ## Verdict
 
@@ -77,21 +77,24 @@ not re-audited; its exact revision was identified and pinned.
 - Replaced cycle-count UART timeouts with millisecond uptime timeouts.
 - Added exact golden-score comparisons, index validation, monotonic deadlines,
   `--all`, actionable reset guidance, and reliable nonzero failure codes.
+- Replaced the additive checksum with a versioned, length-delimited CRC-32
+  protocol carrying sequence numbers, structured errors, and timing metadata.
+- Added bounded host retries, stream resynchronization, deliberate CRC fault
+  injection, repeat mode, latency statistics, and machine-readable evidence.
 - Added unit tests, artifact hash verification, host CI, shell checks, and
   reproducible build/flash scripts.
 
 ## Remaining limitations
 
-- Hardware acceptance currently consists of one program/verify cycle and one
-  six-vector regression run. Repeated, long-duration, and fault-injection tests
-  have not been performed.
+- The framed transport passed deliberate CRC corruption/recovery and 600
+  consecutive hardware inferences with 600 exact results and zero retries.
+  Multi-hour soak, repeated reset, brownout, and broader fault-injection tests
+  are still pending.
 - The CPU and peripheral clock tree is assumed to have been established by the
   device startup/debug environment. Read-back or explicit clock initialization
   is needed before publishing clock-normalized benchmark claims.
 - The UART driver implements polling only; error-status reporting, standard
   Zephyr pinctrl, interrupts, and async APIs are not implemented.
-- The protocol uses fixed length and an 8-bit additive checksum. It lacks a
-  version, length, sequence number, CRC, retry budget, and structured errors.
 - The NPU memory callback ABI returns `void`, so archive memory-write errors can
   only be logged rather than propagated into the generated runtime.
 - CI validates host code and artifact integrity, not the cross-compiled
@@ -100,6 +103,9 @@ not re-audited; its exact revision was identified and pinned.
 - Six golden fixtures are regression coverage, not an accuracy evaluation.
 - AM13E230 collateral is preview-era and current TI pages contain changing
   frequency information. Pin the document/SDK revision used for every claim.
+
+The live completion matrix and acceptance criteria are maintained in
+[`QUALITY_GATES.md`](QUALITY_GATES.md).
 
 ## Resume assessment
 

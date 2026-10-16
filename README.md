@@ -5,41 +5,45 @@ inference demo for the Texas Instruments LP-AM13E230 LaunchPad. A generated
 TVM/TI model classifies 256-element feature tensors as sawtooth, sine, or
 square waveforms.
 
-> Project status: hardware-validated engineering prototype. It is suitable for
-> a portfolio or resume when described with the limitations below; it is not a
-> production inference platform.
+> Project status: hardware-validated engineering prototype under systematic
+> hardening. It is suitable for a portfolio or resume when described with the
+> limitations below; it is not yet a production inference platform.
 
 ## What is demonstrated
 
 - Custom Zephyr support for the preview AM13E23019 Cortex-M33 device and board.
-- A polling-mode UNICOMM UART driver and binary host/device protocol.
+- A polling-mode UNICOMM UART driver and versioned, CRC32-protected protocol.
 - TI TINIElite power/reset/privilege setup aligned with TI's AM13E2x SDK.
 - A linked accelerator model containing four TINIElite hardware kernels.
 - Native WSL build, native Linux UniFlash/DSLite programming, and UART testing.
 - Host regression tooling that checks exact outputs for all six supplied
   golden vectors and returns a nonzero status on failure.
+- Structured device errors, sequence validation, bounded transport retries,
+  protocol fault injection, stress runs, and JSON evidence output.
 
 The reorganized implementation has been erased, programmed, verified, and run
-on the LaunchPad. All six supplied vectors produced their exact golden scores;
-the observed inference time was about 343 us. That timing is a prototype
-result, not a guaranteed benchmark. See
+on the LaunchPad. All six supplied vectors produced their exact golden scores,
+and a subsequent 600-inference stress run completed with no failures or
+transport retries. The observed median inference time was 345 us. That timing
+is a prototype result pending clock-tree verification. See
 [docs/VALIDATION.md](docs/VALIDATION.md) for the recorded evidence and caveats.
 
 ## Architecture
 
 ```text
-Python host ──259-byte UART packet──> Zephyr application
+Python host ──versioned CRC32 frame──> Zephyr application
                                              │
                               generated TVM/TI runtime
                                   │                 │
                              TINIElite NPU       CPU stages
                                   └────────┬────────┘
                                            │
-Python host <──scores + profiler text──── UART
+Python host <──framed scores + timing──── UART
 ```
 
-See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for memory maps, protocol, and
-execution details.
+See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for memory maps and execution
+details. The byte-level wire contract is in
+[docs/PROTOCOL.md](docs/PROTOCOL.md).
 
 ## Repository layout
 
@@ -123,6 +127,13 @@ button once. The host now times out with this instruction instead of waiting
 forever. `scripts/test.sh` keeps one serial connection open and runs all six
 vectors sequentially.
 
+Run protocol fault injection and a 600-inference stress test with:
+
+```bash
+./scripts/test.sh --fault-test --repeat 100 --quiet \
+  --json-output docs/evidence/hardware_stress.json
+```
+
 ## Honest project claims
 
 Good resume wording:
@@ -133,9 +144,11 @@ Good resume wording:
 > over a custom UART regression protocol.
 
 Avoid claiming “100% model accuracy,” “interrupt-driven NPU,” “production
-ready,” or “CI-tested firmware.” The present evidence is six golden regression
-vectors, polled accelerator completion, host-only CI, and prototype hardware
-validation. See [docs/AUDIT.md](docs/AUDIT.md) for the complete assessment.
+ready,” or “CI-tested firmware.” The present evidence includes six golden
+regression vectors repeated successfully over 600 inferences, CRC fault
+recovery, polled accelerator completion, host-only CI, and prototype hardware
+validation. See [docs/QUALITY_GATES.md](docs/QUALITY_GATES.md) for the live
+completion matrix and [docs/AUDIT.md](docs/AUDIT.md) for the assessment.
 
 ## Licensing
 
