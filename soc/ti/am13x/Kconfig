@@ -1,0 +1,9 @@
+# SPDX-License-Identifier: Apache-2.0
+
+config SOC_SERIES_AM13X
+	bool
+
+config SOC_SERIES
+	default "am13x" if SOC_SERIES_AM13X
+
+rsource "Kconfig.soc"

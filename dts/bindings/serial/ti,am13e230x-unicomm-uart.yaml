@@ -1,0 +1,30 @@
+# SPDX-License-Identifier: Apache-2.0
+
+description: TI AM13E230x UNICOMM UART
+
+compatible: "ti,am13e230x-unicomm-uart"
+
+include: [uart-controller.yaml, base.yaml]
+
+properties:
+  reg:
+    required: true
+
+  reg-names:
+    required: true
+
+  clocks:
+    required: true
+
+  current-speed:
+    required: true
+
+  ti,tx-pincm:
+    type: int
+    required: true
+    description: PINCM register value for the board's UART transmit pin
+
+  ti,rx-pincm:
+    type: int
+    required: true
+    description: PINCM register value for the board's UART receive pin

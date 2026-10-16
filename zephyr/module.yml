@@ -1,0 +1,8 @@
+name: am13e230_tinielite
+build:
+  cmake: .
+  kconfig: Kconfig
+  settings:
+    board_root: .
+    dts_root: .
+    soc_root: .

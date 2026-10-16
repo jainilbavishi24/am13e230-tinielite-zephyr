@@ -1,0 +1,4 @@
+# SPDX-License-Identifier: Apache-2.0
+
+config BOARD_LP_AM13E230
+	select SOC_AM13E23019

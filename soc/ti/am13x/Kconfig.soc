@@ -1,0 +1,19 @@
+# SPDX-License-Identifier: Apache-2.0
+
+config SOC_SERIES_AM13X
+	bool
+	select ARM
+	select CPU_CORTEX_M33
+	select CPU_CORTEX_M_HAS_DWT
+	select CPU_HAS_FPU
+	select CPU_HAS_ARM_MPU
+	select ARM_MPU
+	select ARMV8_M_DSP
+	select FPU
+
+config SOC_AM13E23019
+	bool
+	select SOC_SERIES_AM13X
+
+config SOC
+	default "am13e23019" if SOC_AM13E23019

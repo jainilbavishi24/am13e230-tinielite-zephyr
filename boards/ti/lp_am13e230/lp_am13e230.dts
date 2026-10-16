@@ -1,0 +1,33 @@
+/* SPDX-License-Identifier: Apache-2.0 */
+
+/dts-v1/;
+
+#include <ti/am13e23019.dtsi>
+
+/ {
+	model = "TI LP-AM13E230/AM13E23019";
+	compatible = "ti,lp-am13e230", "ti,am13e23019";
+
+	chosen {
+		zephyr,sram = &sram0;
+		zephyr,flash = &flash0;
+
+		zephyr,console = &uart1;
+	};
+};
+
+&cpu0 {
+	clock-frequency = <200000000>;
+};
+
+&semimclk {
+	clock-frequency = <32000000>;
+};
+
+&flash0 {
+	status = "okay";
+};
+
+&uart1 {
+	status = "okay";
+};

@@ -1,0 +1,10 @@
+# SPDX-License-Identifier: Apache-2.0
+
+config UART_AM13E230X
+	bool "TI AM13E230x UNICOMM UART polling driver"
+	default y
+	depends on DT_HAS_TI_AM13E230X_UNICOMM_UART_ENABLED
+	select SERIAL_HAS_DRIVER
+	help
+	  Enable polling-mode UART support for the AM13E230x UNICOMM block.
+	  Interrupt-driven and asynchronous UART APIs are not implemented.

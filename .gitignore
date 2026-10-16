@@ -1,0 +1,23 @@
+# Zephyr and CMake build output
+build/
+build-*/
+*.elf
+*.hex
+*.bin
+*.map
+
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+
+# Editors and operating systems
+.vscode/
+.idea/
+*.swp
+.DS_Store
+
+# West workspace metadata (created above/alongside this repository)
+.west/

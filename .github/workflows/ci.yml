@@ -1,0 +1,19 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  host-tests:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Run host-side unit tests
+        run: python -m unittest discover -s tests -v
+      - name: Verify generated artifacts
+        working-directory: models/waveform_classifier
+        run: sha256sum --check SHA256SUMS

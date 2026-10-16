@@ -1,0 +1,15 @@
+# SPDX-License-Identifier: Apache-2.0
+
+config TINYENGINE_AM13E230X
+	bool "TI AM13E230x TINIElite NPU support"
+	default y
+	depends on DT_HAS_TI_AM13E230X_TINYENGINE_ENABLED
+	help
+	  Enable the low-level adapter used by TI's generated TINIElite model
+	  archive. Model completion is currently serviced by application polling.
+
+config TINYENGINE_LOG_LEVEL
+	int "TINIElite driver log level"
+	range 0 4
+	default 3
+	depends on TINYENGINE_AM13E230X

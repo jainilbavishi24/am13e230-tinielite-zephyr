@@ -1,0 +1,3 @@
+# XDS110 composite device and bootloader/DFU mode; restrict access to dialout.
+SUBSYSTEM=="usb", ATTR{idVendor}=="0451", ATTR{idProduct}=="bef3", MODE="0660", GROUP="dialout"
+SUBSYSTEM=="usb", ATTR{idVendor}=="1cbe", ATTR{idProduct}=="00ff", MODE="0660", GROUP="dialout"

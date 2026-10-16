@@ -1,0 +1,11 @@
+# SPDX-License-Identifier: Apache-2.0
+
+if SOC_SERIES_AM13X
+
+config NUM_IRQS
+	default 48
+
+config SYS_CLOCK_HW_CYCLES_PER_SEC
+	default 200000000
+
+endif

@@ -1,0 +1,85 @@
+/* SPDX-License-Identifier: Apache-2.0 */
+
+#include <arm/armv8-m.dtsi>
+
+/ {
+	cpus {
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		cpu0: cpu@0 {
+			device_type = "cpu";
+			compatible = "arm,cortex-m33";
+			reg = <0>;
+		};
+	};
+
+	sram0: memory@20000000 {
+		compatible = "mmio-sram";
+		reg = <0x20000000 0x18000>;
+	};
+
+	sram_code: memory@c18000 {
+		compatible = "mmio-sram";
+		reg = <0x00c18000 0x8000>;
+	};
+
+	sysclk: system-clock {
+		compatible = "fixed-clock";
+		clock-frequency = <200000000>;
+		#clock-cells = <0>;
+	};
+	semimclk: semim-clock {
+		compatible = "fixed-clock";
+		clock-frequency = <32000000>;
+		#clock-cells = <0>;
+	};
+
+	soc {
+		compatible = "simple-bus";
+		#address-cells = <1>;
+		#size-cells = <1>;
+		ranges;
+
+		flash-controller@40042000 {
+			compatible = "ti,am13e230x-flash-controller";
+			reg = <0x40042000 0x1000>;
+			#address-cells = <1>;
+			#size-cells = <1>;
+
+			flash0: flash@0 {
+				compatible = "soc-nv-flash";
+				reg = <0x00000000 0x80000>;
+			};
+		};
+		uart1: serial@40601000 {
+			compatible = "ti,am13e230x-unicomm-uart";
+			reg = <0x40601000 0x1000>,
+			      <0x40632000 0x2000>,
+			      <0x400cc000 0x8>;
+			reg-names = "uart", "unicomm", "pinmux";
+			clocks = <&semimclk>;
+			current-speed = <115200>;
+			ti,tx-pincm = <0x00000089>;
+			ti,rx-pincm = <0x00040089>;
+			status = "disabled";
+		};
+
+		tinyengine: npu@408ff000 {
+			compatible = "ti,am13e230x-tinyengine";
+			reg = <0x408ff000 0x3000>,
+			      <0x400b0434 0x4>,
+			      <0x400b0438 0x4>,
+			      <0x400b043c 0x4>,
+			      <0x40047224 0x4>;
+			reg-names = "npu", "pwren", "reset_assert", "reset_clear",
+				    "gsc_priv";
+			interrupts = <41 0>;
+			status = "disabled";
+		};
+	};
+};
+
+&nvic {
+	arm,num-irq-priority-bits = <4>;
+};

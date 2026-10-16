@@ -1,0 +1,6 @@
+board:
+  name: lp_am13e230
+  full_name: AM13E230 LaunchPad
+  vendor: ti
+  socs:
+    - name: am13e23019

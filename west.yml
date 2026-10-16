@@ -1,0 +1,16 @@
+manifest:
+  remotes:
+    - name: zephyrproject
+      url-base: https://github.com/zephyrproject-rtos
+
+  projects:
+    - name: zephyr
+      remote: zephyrproject
+      revision: 9574b65fbaa01aa0c8f418bd7a6b97beb15fcc54
+      import:
+        name-allowlist:
+          - cmsis
+          - cmsis_6
+
+  self:
+    path: am13e230-tinielite-zephyr
