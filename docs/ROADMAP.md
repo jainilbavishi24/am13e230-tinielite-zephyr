@@ -18,7 +18,8 @@
   latency baseline.
 - [x] Add and hardware-validate bounded NPU-stall timeout, structured error,
   cold-system reset, restored readiness, and post-reset stress inference.
-- [ ] Add an independent hardware watchdog for whole-firmware deadlocks.
+- [x] Add and hardware-validate an independent WWDT0 watchdog for
+  whole-firmware deadlocks, including reset-cause read-back.
 - [x] Add repeated/stress inference tests with machine-readable results.
 - [ ] Move UART pin routing to standard Zephyr pinctrl and implement error flags.
 

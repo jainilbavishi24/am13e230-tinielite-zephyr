@@ -1,3 +1,7 @@
 &tinyengine {
 	status = "okay";
 };
+
+&wwdt0 {
+	status = "okay";
+};

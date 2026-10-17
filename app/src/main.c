@@ -10,6 +10,7 @@
 #include "app_clock.h"
 #include "app_npu.h"
 #include "app_uart.h"
+#include "app_watchdog.h"
 
 static int8_t model_input[APP_NPU_INPUT_SIZE] __aligned(16);
 static int8_t model_output[APP_NPU_OUTPUT_SIZE] __aligned(16);
@@ -26,6 +27,7 @@ int main(void)
 	struct app_npu_metrics metrics;
 	struct app_uart_request request;
 	struct app_clock_status clock_status;
+	struct app_watchdog_status watchdog_status;
 	int ret;
 
 	printk("\n*** AM13E230 Zephyr TINIElite demo ***\n");
@@ -37,6 +39,12 @@ int main(void)
 		return ret;
 	}
 
+	ret = app_watchdog_init();
+	if (ret != 0) {
+		printk("FATAL: hardware watchdog initialization failed (%d)\n", ret);
+		return ret;
+	}
+
 	ret = app_npu_init();
 	if (ret != 0) {
 		printk("FATAL: NPU initialization failed (%d)\n", ret);
@@ -44,10 +52,16 @@ int main(void)
 	}
 
 	for (;;) {
+		ret = app_watchdog_feed();
+		if (ret != 0) {
+			printk("FATAL: hardware watchdog feed failed (%d)\n", ret);
+			return ret;
+		}
 		ret = app_uart_receive_request(model_input, sizeof(model_input), &request);
 		if (ret != 0) {
 			continue;
 		}
+		(void)app_watchdog_feed();
 		if (request.type == APP_UART_FRAME_CLOCK_REQUEST) {
 			app_clock_read_status(&clock_status);
 			ret = app_uart_send_clock_status(request.sequence, &clock_status);
@@ -55,6 +69,17 @@ int main(void)
 				app_uart_send_error(request.sequence, APP_UART_ERROR_INTERNAL, ret);
 			}
 			continue;
+		}
+		if (request.type == APP_UART_FRAME_WATCHDOG_STATUS_REQUEST) {
+			app_watchdog_read_status(&watchdog_status);
+			ret = app_uart_send_watchdog_status(request.sequence, &watchdog_status);
+			if (ret != 0) {
+				app_uart_send_error(request.sequence, APP_UART_ERROR_INTERNAL, ret);
+			}
+			continue;
+		}
+		if (request.type == APP_UART_FRAME_WATCHDOG_STALL_REQUEST) {
+			app_watchdog_test_stall();
 		}
 		if (request.type == APP_UART_FRAME_NPU_STALL_REQUEST) {
 			ret = app_npu_test_stall_timeout();

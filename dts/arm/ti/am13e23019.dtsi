@@ -89,6 +89,13 @@
 			interrupts = <41 0>;
 			status = "disabled";
 		};
+
+		wwdt0: watchdog@400d0000 {
+			compatible = "ti,am13e230x-wwdt";
+			reg = <0x400d0000 0x1200>;
+			clock-frequency = <32768>;
+			status = "disabled";
+		};
 	};
 };
 

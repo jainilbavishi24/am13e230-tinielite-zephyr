@@ -26,6 +26,8 @@ square waveforms.
   protocol fault injection, stress runs, and JSON evidence output.
 - Deliberate NPU-stall injection with a bounded timeout, structured error,
   cold-system reset, and verified post-reset inference recovery.
+- An independent 4-second hardware watchdog fed only by main-loop progress,
+  with deliberate deadlock injection and reset-cause verification.
 
 The reorganized implementation has been erased, programmed, verified, and run
 on the LaunchPad. All six supplied vectors produced their exact golden scores,
@@ -146,6 +148,13 @@ Exercise the real NPU wait-timeout and automatic reset path before the stress
 run with `--npu-fault-test`. This diagnostic is controlled by
 `CONFIG_APP_NPU_FAULT_INJECTION` and should be disabled in deployed builds.
 
+Exercise independent recovery from a whole-firmware stall with
+`--watchdog-fault-test`. The host requires a fresh `READY`, reads the latched
+reset cause, and accepts only the AM13E230 WWDT0 cause (`0x0e`) with the
+watchdog running again. This diagnostic is controlled by
+`CONFIG_APP_WATCHDOG_FAULT_INJECTION` and should be disabled in deployed
+builds.
+
 Read back and validate the active clock tree independently of inference with:
 
 ```bash
@@ -166,7 +175,8 @@ Avoid claiming “100% model accuracy,” “production ready,” or independent
 evaluation. The present evidence supports interrupt-driven NPU completion: six
 golden regression vectors were repeated successfully over 600 inferences with
 3,000 acknowledged DONE interrupts, zero spurious interrupts, CRC fault
-recovery, and explicit/read-back-validated 200 MHz clock setup. GitHub Actions
+recovery, verified NPU-timeout and hardware-watchdog resets, and
+explicit/read-back-validated 200 MHz clock setup. GitHub Actions
 also cross-builds the firmware, checks linked NPU/IRQ symbols, and publishes
 the resulting ELF, HEX, map, and symbol files. See
 [docs/QUALITY_GATES.md](docs/QUALITY_GATES.md) for the live

@@ -110,6 +110,17 @@ class HostToolTests(unittest.TestCase):
             "inference-failure (detail -116)", SEND_TENSOR.describe_error(frame)
         )
 
+    def test_watchdog_status_decode(self):
+        payload = SEND_TENSOR.WATCHDOG_STATUS_PAYLOAD.pack(0x0E, 4000, 1)
+        status = SEND_TENSOR.decode_watchdog_status(payload)
+        self.assertEqual(0x0E, status["reset_cause"])
+        self.assertEqual(4000, status["timeout_ms"])
+        self.assertTrue(status["running"])
+
+    def test_watchdog_status_rejects_malformed_payload(self):
+        with self.assertRaisesRegex(SEND_TENSOR.ProtocolError, "malformed"):
+            SEND_TENSOR.decode_watchdog_status(bytes(11))
+
 
 if __name__ == "__main__":
     unittest.main()

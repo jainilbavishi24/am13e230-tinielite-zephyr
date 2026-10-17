@@ -32,6 +32,13 @@ after reset and then reruns normal inference. The full reset is intentional
 because the binary-only model archive may retain opaque continuation state that
 a peripheral-only reset cannot safely repair.
 
+WWDT0 independently supervises the whole synchronous server. It uses the
+32.768 kHz low-frequency clock with a four-second period and no closed feed
+window. Only forward progress in the main request loop feeds it; there is no
+background feeder that could hide a deadlocked application. A test-only
+request withholds feeding, and after reboot the host reads the latched SYSCTL
+reset cause and requires `BOOTWWDT0` (`0x0e`).
+
 See [PROTOCOL.md](PROTOCOL.md) for the byte-level contract and recovery rules.
 
 ## Hardware map used
@@ -44,6 +51,7 @@ See [PROTOCOL.md](PROTOCOL.md) for the byte-level contract and recovery rules.
 | UNICOMM UART | `0x40601000` |
 | UNICOMM wrapper | `0x40632000` |
 | TINIElite | `0x408ff000` |
+| WWDT0 | `0x400d0000` |
 | TINIElite CTL5 | base + `0x1120` |
 | Instruction memory | base + `0x2000`, 256 words |
 | Parameter memory | base + `0x2800`, 512 words |
@@ -55,5 +63,6 @@ queueing tensors while inference is active, keeps the wire protocol ordered,
 and makes hardware faults visible. Sequence numbers prevent stale ACK/result
 frames from satisfying a newer request. The host applies a bounded retry
 budget, while the firmware drains stale bytes before advertising readiness.
-Throughput-oriented double buffering remains a future optimization after the
-single-request path has additional reset and watchdog fault testing.
+Throughput-oriented double buffering remains a future optimization; the
+single-request path is retained because it keeps timing, recovery, and opaque
+model-runtime state transitions deterministic.

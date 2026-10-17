@@ -1,0 +1,17 @@
+# SPDX-License-Identifier: Apache-2.0
+
+description: TI AM13E230x window watchdog timer
+
+compatible: "ti,am13e230x-wwdt"
+
+include: base.yaml
+
+properties:
+  reg:
+    required: true
+
+  clock-frequency:
+    type: int
+    required: true
+    const: 32768
+    description: Fixed low-frequency watchdog clock in hertz

@@ -7,9 +7,9 @@ Performed on 2026-10-17 in WSL Ubuntu 22.04:
 - Clean Zephyr source at `9574b65fbaa01aa0c8f418bd7a6b97beb15fcc54`
 - GNU Arm Embedded GCC 10.3.1
 - Zephyr configure, compile, and link: pass
-- Output: 24,604 bytes flash; 43,608 bytes RAM (including a conservative
+- Output: 25,100 bytes flash; 43,616 bytes RAM (including a conservative
   32 KiB main stack)
-- Python unit tests: 11/11 pass
+- Python unit tests: 13/13 pass
 - ShellCheck and Bash syntax: pass
 - Model SHA-256 verification: pass
 - ELF inspection: four TINIElite kernels, TI handler, model entry point, and NPU
@@ -20,10 +20,10 @@ old ccache. Install `device-tree-compiler`; update ccache or disable it to make
 the local build log clean.
 
 GitHub Actions run
-[`39005309316`](https://github.com/jainilbavishi24/am13e230-tinielite-zephyr/actions/runs/39005309316)
+[`39005494218`](https://github.com/jainilbavishi24/am13e230-tinielite-zephyr/actions/runs/39005494218)
 also passed the host suite, clean workspace initialization, Arm firmware
 cross-build, linked NPU/IRQ symbol checks, and firmware artifact upload for
-commit `ee9293c`.
+the recovery-enabled baseline preceding the watchdog change.
 
 ## Earlier hardware evidence
 
@@ -191,3 +191,30 @@ Results:
 Machine-readable evidence, including explicit pass fields for both injected
 faults, is retained in
 [`evidence/hardware_recovery_2026-10-17.json`](evidence/hardware_recovery_2026-10-17.json).
+
+## Independent hardware-watchdog recovery gate
+
+Status: **passed on 2026-10-17** through XDS110 from WSL.
+
+WWDT0 was configured from the independent 32.768 kHz low-frequency clock for
+a four-second timeout and fed only by main-loop progress. A test-only request
+was acknowledged and then deliberately stopped all feeds. The watchdog reset
+the board without software assistance; after reboot, SYSCTL reported reset
+cause `0x0e` (`BOOTWWDT0`) and the status request confirmed WWDT0 was running
+again.
+
+The same serial session exercised CRC corruption recovery and the NPU timeout
+reset before the watchdog test, then ran the full 600-inference stress set.
+
+Results:
+
+- CRC corruption rejection and recovery: pass.
+- NPU timeout, structured error, software reset, and restored readiness: pass.
+- Independent WWDT0 expiry and reset cause `0x0e`: pass.
+- WWDT0 automatically configured and running after recovery: pass.
+- Post-recovery regression: 600/600 exact results, zero transport retries.
+- Hardware interrupts: 3,000 completions, zero spurious entries.
+- Latency: 554 us accelerator wait, 129 us runtime/CPU, and 701 us end-to-end.
+
+Machine-readable results are retained in
+[`evidence/hardware_watchdog_recovery_2026-10-17.json`](evidence/hardware_watchdog_recovery_2026-10-17.json).

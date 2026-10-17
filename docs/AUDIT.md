@@ -94,6 +94,9 @@ not re-audited; its exact revision was identified and pinned.
 - Added a test-only deliberate NPU stall, verified the 100 ms timeout and
   structured error, cold-reset the complete opaque runtime state, and passed
   another 600/600 exact inferences after recovery.
+- Added a 4-second independent WWDT0 watchdog fed only by main-loop progress;
+  deliberate feed starvation produced reset cause `0x0e`, restarted cleanly,
+  and was followed by 600/600 exact inferences.
 
 ## Remaining limitations
 
@@ -101,6 +104,9 @@ not re-audited; its exact revision was identified and pinned.
   consecutive hardware inferences with 600 exact results and zero retries.
   Multi-hour soak, repeated reset, brownout, and broader fault-injection tests
   are still pending.
+- WWDT0 now covers a stopped main loop after application initialization, but
+  failures during earlier boot, brownout behavior, clock-source failure, and
+  repeated watchdog-reset endurance remain untested.
 - The UART driver implements polling only; error-status reporting, standard
   Zephyr pinctrl, interrupts, and async APIs are not implemented.
 - The NPU memory callback ABI returns `void`, so archive memory-write errors can

@@ -15,7 +15,7 @@ passed only when reproducible evidence exists.
 | Explicit clock configuration/read-back | PASS | Staged 200 MHz PLL initialization, 100 MHz UART divisor, three flash wait states, raw register evidence |
 | True NPU interrupt completion | PASS | 600 runs, five acknowledged DONE IRQs per inference, zero spurious IRQs; protocol-v2 JSON retained |
 | Inference timeout/reset recovery | PASS | Deliberate NPU stall returns `-ETIMEDOUT`, cold-resets, restores `READY`, then passes 600/600 inferences |
-| Independent hardware watchdog | PENDING | Recover from a whole-firmware deadlock rather than only the bounded inference path |
+| Independent hardware watchdog | PASS | Deliberate feed starvation causes WWDT0 BOOTRST; reset cause `0x0e`, restarted watchdog, and 600/600 post-reset inferences verified |
 | Production UART integration | PENDING | Zephyr pinctrl plus status/error handling and interrupt or async operation |
 | Firmware CI | PASS | GitHub Actions provisions the Arm GNU toolchain and pinned west workspace, cross-builds, verifies key ELF symbols, and publishes firmware artifacts |
 | Static and Zephyr-native tests | PENDING | Static analysis and Twister coverage for protocol/state logic |

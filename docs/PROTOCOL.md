@@ -27,11 +27,14 @@ with polynomial `0xedb88320`, initial state `0xffffffff`, and final XOR
 | `0x01` | `INFERENCE_REQUEST` | host to board | 256 signed 8-bit model inputs |
 | `0x02` | `CLOCK_REQUEST` | host to board | empty |
 | `0x03` | `NPU_STALL_REQUEST` | host to board | empty; test builds only, deliberately exercises timeout/reset recovery |
+| `0x04` | `WATCHDOG_STALL_REQUEST` | host to board | empty; test builds only, deliberately stops WWDT0 servicing |
+| `0x05` | `WATCHDOG_STATUS_REQUEST` | host to board | empty |
 | `0x80` | `READY` | board to host | input length and output length as two `uint16` values |
 | `0x81` | `ACK` | board to host | empty |
 | `0x82` | `RESULT` | board to host | three `int8` scores, then accelerator, runtime, total microseconds, acknowledged NPU completion interrupts, and spurious NPU interrupts as five `uint32` values |
 | `0x83` | `CLOCK_STATUS` | board to host | twelve `uint32` clock/status fields described below |
-| `0xff` | `ERROR` | board to host | error code byte |
+| `0x84` | `WATCHDOG_STATUS` | board to host | reset cause, configured timeout in ms, and running flag as three `uint32` values |
+| `0xff` | `ERROR` | board to host | error code byte followed by signed 16-bit detail |
 
 Requests, acknowledgements, results, status, and errors use the same sequence
 number. `READY` uses sequence zero; the host chooses each request sequence.
@@ -74,3 +77,7 @@ PLL/HFCLK, expected frequency, and sufficient flash wait states.
   error `-ETIMEDOUT`, flushes it to UART, performs a cold system reset, and the
   host requires a new valid `READY` before continuing. Disable this diagnostic
   request in deployed configurations.
+- When `CONFIG_APP_WATCHDOG_FAULT_INJECTION=y`, `--watchdog-fault-test`
+  acknowledges the request and then deliberately stops the only WWDT0 feed
+  path. The host requires a rebooted `READY`, requests `WATCHDOG_STATUS`, and
+  accepts recovery only when reset cause is `0x0e` and WWDT0 is running again.

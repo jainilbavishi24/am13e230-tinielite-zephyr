@@ -27,10 +27,13 @@ PROTOCOL_VERSION = 2
 FRAME_INFER_REQUEST = 0x01
 FRAME_CLOCK_REQUEST = 0x02
 FRAME_NPU_STALL_REQUEST = 0x03
+FRAME_WATCHDOG_STALL_REQUEST = 0x04
+FRAME_WATCHDOG_STATUS_REQUEST = 0x05
 FRAME_READY = 0x80
 FRAME_ACK = 0x81
 FRAME_RESULT = 0x82
 FRAME_CLOCK_STATUS = 0x83
+FRAME_WATCHDOG_STATUS = 0x84
 FRAME_ERROR = 0xFF
 FRAME_HEADER = struct.Struct("<2sBBHH")
 FRAME_CRC = struct.Struct("<I")
@@ -38,9 +41,11 @@ RESULT_PAYLOAD = struct.Struct("<bbbIIIII")
 ERROR_PAYLOAD = struct.Struct("<Bh")
 CAPABILITIES_PAYLOAD = struct.Struct("<HH")
 CLOCK_STATUS_PAYLOAD = struct.Struct("<12I")
+WATCHDOG_STATUS_PAYLOAD = struct.Struct("<3I")
 MAX_FRAME_PAYLOAD = 1024
 CLOCK_VALIDATION_REQUIRED = 0x1F
 ZEPHYR_ETIMEDOUT = 116
+WWDT0_RESET_CAUSE = 0x0E
 
 ERROR_NAMES = {
     1: "timeout",
@@ -360,6 +365,60 @@ def run_npu_stall_test(serial_port: Any, reader: FrameReader, ready_timeout: flo
     print("NPU stall recovery: PASS (timeout reported, system reset, READY restored)")
 
 
+def decode_watchdog_status(payload: bytes) -> dict[str, int | bool]:
+    if len(payload) != WATCHDOG_STATUS_PAYLOAD.size:
+        raise ProtocolError("WATCHDOG_STATUS frame has a malformed payload")
+    reset_cause, timeout_ms, running = WATCHDOG_STATUS_PAYLOAD.unpack(payload)
+    return {
+        "reset_cause": reset_cause,
+        "timeout_ms": timeout_ms,
+        "running": running == 1,
+    }
+
+
+def request_watchdog_status(
+    serial_port: Any, reader: FrameReader, sequence: int
+) -> dict[str, int | bool]:
+    serial_port.write(encode_frame(FRAME_WATCHDOG_STATUS_REQUEST, sequence))
+    serial_port.flush()
+    response = wait_for_frame(
+        reader, {FRAME_WATCHDOG_STATUS, FRAME_ERROR}, 3.0, sequence=sequence
+    )
+    if response["type"] == FRAME_ERROR:
+        raise ProtocolError(describe_error(response))
+    return decode_watchdog_status(response["payload"])
+
+
+def run_watchdog_stall_test(
+    serial_port: Any, reader: FrameReader, ready_timeout: float
+) -> dict[str, int | bool]:
+    ready = wait_for_frame(reader, {FRAME_READY}, ready_timeout)
+    validate_ready(ready)
+    sequence = 0xD06D
+    serial_port.write(encode_frame(FRAME_WATCHDOG_STALL_REQUEST, sequence))
+    serial_port.flush()
+    acknowledgement = wait_for_frame(
+        reader, {FRAME_ACK, FRAME_ERROR}, 3.0, sequence=sequence
+    )
+    if acknowledgement["type"] == FRAME_ERROR:
+        raise ProtocolError(describe_error(acknowledgement))
+
+    recovered = wait_for_frame(reader, {FRAME_READY}, ready_timeout)
+    validate_ready(recovered)
+    status = request_watchdog_status(serial_port, reader, sequence + 1)
+    if status["reset_cause"] != WWDT0_RESET_CAUSE:
+        raise ProtocolError(
+            f"reset cause is 0x{status['reset_cause']:02x}, expected WWDT0 (0x0e)"
+        )
+    if not status["running"]:
+        raise ProtocolError("WWDT0 did not restart after watchdog recovery")
+    print(
+        "Hardware watchdog recovery: PASS "
+        f"(WWDT0 reset cause 0x0e, timeout {status['timeout_ms']} ms, watchdog running)"
+    )
+    return status
+
+
 def decode_clock_status(payload: bytes) -> dict[str, Any]:
     if len(payload) != CLOCK_STATUS_PAYLOAD.size:
         raise ProtocolError("CLOCK_STATUS frame has a malformed payload")
@@ -464,6 +523,11 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="trigger an NPU wait timeout and verify reset recovery",
     )
+    parser.add_argument(
+        "--watchdog-fault-test",
+        action="store_true",
+        help="stop servicing WWDT0 and verify its reset cause after recovery",
+    )
     parser.add_argument("--quiet", action="store_true", help="print only summary and failures")
     parser.add_argument("--json-output", type=Path, help="write machine-readable results")
     parser.add_argument("--port", default=default_port(), help="UART path")
@@ -491,6 +555,7 @@ def main() -> int:
     work = selected * args.repeat
     normalization = parse_normalization(MODEL_DIR)
     results: list[dict[str, Any]] = []
+    watchdog_status: dict[str, int | bool] | None = None
 
     try:
         with serial.Serial(args.port, BAUD_RATE, timeout=0.05, dsrdtr=False, rtscts=False) as port:
@@ -515,6 +580,10 @@ def main() -> int:
                 run_crc_fault_test(port, reader, args.ready_timeout)
             if args.npu_fault_test:
                 run_npu_stall_test(port, reader, args.ready_timeout)
+            if args.watchdog_fault_test:
+                watchdog_status = run_watchdog_stall_test(
+                    port, reader, args.ready_timeout
+                )
             for position, (vector_index, vector) in enumerate(work, start=1):
                 sequence = position & 0xFFFF or 1
                 results.append(
@@ -545,6 +614,8 @@ def main() -> int:
         "transport_retries": retries_used,
         "crc_fault_test_passed": args.fault_test,
         "npu_stall_recovery_test_passed": args.npu_fault_test,
+        "watchdog_recovery_test_passed": args.watchdog_fault_test,
+        "watchdog_status": watchdog_status,
         "accelerator_us": summarize_metric(results, "accelerator_us"),
         "runtime_us": summarize_metric(results, "runtime_us"),
         "total_us": summarize_metric(results, "total_us"),

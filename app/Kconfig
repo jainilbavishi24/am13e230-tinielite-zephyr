@@ -11,3 +11,11 @@ config APP_NPU_FAULT_INJECTION
 	  without starting TINIElite. The firmware reports the expected timeout and
 	  performs a full system reset. Disable this diagnostic interface in a
 	  deployed product.
+
+config APP_WATCHDOG_FAULT_INJECTION
+	bool "Enable the UART-triggered hardware watchdog recovery test"
+	help
+	  Allow the host regression client to deliberately stop servicing WWDT0.
+	  The host verifies that the independent watchdog resets the board and that
+	  the latched reset cause identifies WWDT0. Disable this diagnostic
+	  interface in a deployed product.

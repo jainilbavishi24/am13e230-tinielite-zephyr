@@ -9,6 +9,7 @@ target_sources(app PRIVATE
   src/app_clock.c
   src/app_npu.c
   src/app_uart.c
+  src/app_watchdog.c
 )
 
 set(MODEL_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../models/waveform_classifier")

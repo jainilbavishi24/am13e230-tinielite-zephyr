@@ -58,6 +58,7 @@ jobs:
           grep -q 'tvmgen_default_ti_npu_convolveNHWC_0' build/zephyr/symbols.txt
           grep -q 'TI_NPU_NNC_IRQHandler' build/zephyr/symbols.txt
           grep -q 'tinyengine_wait_for_completion' build/zephyr/symbols.txt
+          grep -q 'app_watchdog_init' build/zephyr/symbols.txt
       - uses: actions/upload-artifact@v4
         with:
           name: am13e230-firmware

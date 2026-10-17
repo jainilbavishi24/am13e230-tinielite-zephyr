@@ -12,13 +12,15 @@
 #include <zephyr/drivers/uart.h>
 #include <zephyr/kernel.h>
 
-#define UART_NODE                 DT_CHOSEN(zephyr_console)
-#define FRAME_HEADER_SIZE         8U
-#define FRAME_CRC_SIZE            4U
-#define FRAME_MAX_PAYLOAD_SIZE    APP_NPU_INPUT_SIZE
-#define RESULT_PAYLOAD_SIZE       23U
-#define CLOCK_STATUS_WORDS        12U
-#define CLOCK_STATUS_PAYLOAD_SIZE (CLOCK_STATUS_WORDS * sizeof(uint32_t))
+#define UART_NODE                    DT_CHOSEN(zephyr_console)
+#define FRAME_HEADER_SIZE            8U
+#define FRAME_CRC_SIZE               4U
+#define FRAME_MAX_PAYLOAD_SIZE       APP_NPU_INPUT_SIZE
+#define RESULT_PAYLOAD_SIZE          23U
+#define CLOCK_STATUS_WORDS           12U
+#define CLOCK_STATUS_PAYLOAD_SIZE    (CLOCK_STATUS_WORDS * sizeof(uint32_t))
+#define WATCHDOG_STATUS_WORDS        3U
+#define WATCHDOG_STATUS_PAYLOAD_SIZE (WATCHDOG_STATUS_WORDS * sizeof(uint32_t))
 
 static const struct device *const uart_dev = DEVICE_DT_GET(UART_NODE);
 
@@ -200,15 +202,20 @@ int app_uart_receive_request(int8_t *buffer, uint32_t size, struct app_uart_requ
 	}
 	if ((header[3] != APP_UART_FRAME_INFER_REQUEST) &&
 	    (header[3] != APP_UART_FRAME_CLOCK_REQUEST) &&
+	    (header[3] != APP_UART_FRAME_WATCHDOG_STATUS_REQUEST) &&
 	    (!IS_ENABLED(CONFIG_APP_NPU_FAULT_INJECTION) ||
-	     (header[3] != APP_UART_FRAME_NPU_STALL_REQUEST))) {
+	     (header[3] != APP_UART_FRAME_NPU_STALL_REQUEST)) &&
+	    (!IS_ENABLED(CONFIG_APP_WATCHDOG_FAULT_INJECTION) ||
+	     (header[3] != APP_UART_FRAME_WATCHDOG_STALL_REQUEST))) {
 		app_uart_send_error(frame_sequence, APP_UART_ERROR_TYPE, -EPROTO);
 		return -EPROTO;
 	}
 	request->type = (enum app_uart_frame_type)header[3];
 	if (((request->type == APP_UART_FRAME_INFER_REQUEST) && (payload_length != size)) ||
 	    (((request->type == APP_UART_FRAME_CLOCK_REQUEST) ||
-	      (request->type == APP_UART_FRAME_NPU_STALL_REQUEST)) &&
+	      (request->type == APP_UART_FRAME_NPU_STALL_REQUEST) ||
+	      (request->type == APP_UART_FRAME_WATCHDOG_STALL_REQUEST) ||
+	      (request->type == APP_UART_FRAME_WATCHDOG_STATUS_REQUEST)) &&
 	     (payload_length != 0U))) {
 		app_uart_send_error(frame_sequence, APP_UART_ERROR_LENGTH, -EMSGSIZE);
 		return -EMSGSIZE;
@@ -230,7 +237,8 @@ int app_uart_receive_request(int8_t *buffer, uint32_t size, struct app_uart_requ
 	}
 
 	if ((request->type == APP_UART_FRAME_INFER_REQUEST) ||
-	    (request->type == APP_UART_FRAME_NPU_STALL_REQUEST)) {
+	    (request->type == APP_UART_FRAME_NPU_STALL_REQUEST) ||
+	    (request->type == APP_UART_FRAME_WATCHDOG_STALL_REQUEST)) {
 		return send_frame(APP_UART_FRAME_ACK, frame_sequence, NULL, 0U);
 	}
 	return 0;
@@ -299,4 +307,18 @@ int app_uart_send_clock_status(uint16_t sequence, const struct app_clock_status 
 		encode_le32(&payload[i * sizeof(uint32_t)], values[i]);
 	}
 	return send_frame(APP_UART_FRAME_CLOCK_STATUS, sequence, payload, sizeof(payload));
+}
+
+int app_uart_send_watchdog_status(uint16_t sequence, const struct app_watchdog_status *status)
+{
+	uint8_t payload[WATCHDOG_STATUS_PAYLOAD_SIZE];
+
+	if (status == NULL) {
+		return -EINVAL;
+	}
+
+	encode_le32(&payload[0], status->reset_cause);
+	encode_le32(&payload[4], status->timeout_ms);
+	encode_le32(&payload[8], status->running);
+	return send_frame(APP_UART_FRAME_WATCHDOG_STATUS, sequence, payload, sizeof(payload));
 }

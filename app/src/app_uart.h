@@ -7,6 +7,7 @@
 
 #include "app_clock.h"
 #include "app_npu.h"
+#include "app_watchdog.h"
 
 #define APP_UART_FRAME_MAGIC_0    0x5AU
 #define APP_UART_FRAME_MAGIC_1    0xA5U
@@ -17,10 +18,13 @@ enum app_uart_frame_type {
 	APP_UART_FRAME_INFER_REQUEST = 0x01,
 	APP_UART_FRAME_CLOCK_REQUEST = 0x02,
 	APP_UART_FRAME_NPU_STALL_REQUEST = 0x03,
+	APP_UART_FRAME_WATCHDOG_STALL_REQUEST = 0x04,
+	APP_UART_FRAME_WATCHDOG_STATUS_REQUEST = 0x05,
 	APP_UART_FRAME_READY = 0x80,
 	APP_UART_FRAME_ACK = 0x81,
 	APP_UART_FRAME_RESULT = 0x82,
 	APP_UART_FRAME_CLOCK_STATUS = 0x83,
+	APP_UART_FRAME_WATCHDOG_STATUS = 0x84,
 	APP_UART_FRAME_ERROR = 0xFF,
 };
 
@@ -45,5 +49,6 @@ void app_uart_send_error(uint16_t sequence, enum app_uart_error_code code, int e
 int app_uart_send_result(uint16_t sequence, const int8_t *result, uint32_t size,
 			 const struct app_npu_metrics *metrics);
 int app_uart_send_clock_status(uint16_t sequence, const struct app_clock_status *status);
+int app_uart_send_watchdog_status(uint16_t sequence, const struct app_watchdog_status *status);
 
 #endif /* APP_UART_H_ */
