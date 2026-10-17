@@ -20,10 +20,10 @@ old ccache. Install `device-tree-compiler`; update ccache or disable it to make
 the local build log clean.
 
 GitHub Actions run
-[`39005494218`](https://github.com/jainilbavishi24/am13e230-tinielite-zephyr/actions/runs/39005494218)
+[`39006672584`](https://github.com/jainilbavishi24/am13e230-tinielite-zephyr/actions/runs/39006672584)
 also passed the host suite, clean workspace initialization, Arm firmware
 cross-build, linked NPU/IRQ symbol checks, and firmware artifact upload for
-the recovery-enabled baseline preceding the watchdog change.
+watchdog-enabled commit `e2eae52`.
 
 ## Earlier hardware evidence
 
