@@ -23,7 +23,7 @@ OUTPUT_SIZE = 3
 MODEL_DIR = Path(__file__).resolve().parents[1] / "models" / "waveform_classifier"
 
 FRAME_MAGIC = b"\x5a\xa5"
-PROTOCOL_VERSION = 1
+PROTOCOL_VERSION = 2
 FRAME_INFER_REQUEST = 0x01
 FRAME_CLOCK_REQUEST = 0x02
 FRAME_READY = 0x80
@@ -33,7 +33,7 @@ FRAME_CLOCK_STATUS = 0x83
 FRAME_ERROR = 0xFF
 FRAME_HEADER = struct.Struct("<2sBBHH")
 FRAME_CRC = struct.Struct("<I")
-RESULT_PAYLOAD = struct.Struct("<bbbIII")
+RESULT_PAYLOAD = struct.Struct("<bbbIIIII")
 ERROR_PAYLOAD = struct.Struct("<Bh")
 CAPABILITIES_PAYLOAD = struct.Struct("<HH")
 CLOCK_STATUS_PAYLOAD = struct.Struct("<12I")
@@ -218,6 +218,35 @@ def validate_ready(frame: dict[str, Any]) -> None:
         )
 
 
+def decode_result(payload: bytes) -> dict[str, Any]:
+    if len(payload) != RESULT_PAYLOAD.size:
+        raise ProtocolError("RESULT frame has a malformed payload")
+    (
+        score_0,
+        score_1,
+        score_2,
+        accelerator_us,
+        runtime_us,
+        total_us,
+        npu_interrupts,
+        npu_spurious_interrupts,
+    ) = RESULT_PAYLOAD.unpack(payload)
+    if npu_interrupts == 0:
+        raise ProtocolError("RESULT reports no TINIElite completion interrupt")
+    if npu_spurious_interrupts != 0:
+        raise ProtocolError(
+            f"RESULT reports {npu_spurious_interrupts} spurious TINIElite interrupt(s)"
+        )
+    return {
+        "scores": [score_0, score_1, score_2],
+        "accelerator_us": accelerator_us,
+        "runtime_us": runtime_us,
+        "total_us": total_us,
+        "npu_interrupts": npu_interrupts,
+        "npu_spurious_interrupts": npu_spurious_interrupts,
+    }
+
+
 def run_vector(
     serial_port: Any,
     reader: FrameReader,
@@ -250,13 +279,13 @@ def run_vector(
             )
             if response["type"] == FRAME_ERROR:
                 raise ProtocolError(describe_error(response))
-            if len(response["payload"]) != RESULT_PAYLOAD.size:
-                raise ProtocolError("RESULT frame has a malformed payload")
-
-            score_0, score_1, score_2, accelerator_us, runtime_us, total_us = (
-                RESULT_PAYLOAD.unpack(response["payload"])
-            )
-            scores = [score_0, score_1, score_2]
+            decoded_result = decode_result(response["payload"])
+            scores = decoded_result["scores"]
+            accelerator_us = decoded_result["accelerator_us"]
+            runtime_us = decoded_result["runtime_us"]
+            total_us = decoded_result["total_us"]
+            npu_interrupts = decoded_result["npu_interrupts"]
+            npu_spurious_interrupts = decoded_result["npu_spurious_interrupts"]
             expected = vector["expected"]
             passed = scores == expected
             result = {
@@ -271,12 +300,14 @@ def run_vector(
                 "accelerator_us": accelerator_us,
                 "runtime_us": runtime_us,
                 "total_us": total_us,
+                "npu_interrupts": npu_interrupts,
+                "npu_spurious_interrupts": npu_spurious_interrupts,
             }
             if not quiet:
                 status = "PASS" if passed else "FAIL"
                 print(
                     f"[{sequence:05d}] {vector['class']} scores={scores}, "
-                    f"expected={expected}, total={total_us} us: {status}"
+                    f"expected={expected}, IRQs={npu_interrupts}, total={total_us} us: {status}"
                 )
             return result
         except (ProtocolError, TimeoutError) as error:
@@ -481,6 +512,8 @@ def main() -> int:
         "accelerator_us": summarize_metric(results, "accelerator_us"),
         "runtime_us": summarize_metric(results, "runtime_us"),
         "total_us": summarize_metric(results, "total_us"),
+        "npu_interrupts": summarize_metric(results, "npu_interrupts"),
+        "npu_spurious_interrupts": summarize_metric(results, "npu_spurious_interrupts"),
     }
     print(f"\nRegression summary: {summary['passed']}/{summary['total']} passed")
     print(f"Transport retries: {retries_used}")
@@ -490,6 +523,18 @@ def main() -> int:
             f"{name}: min={metric['min']}, median={metric['median']}, "
             f"p95={metric['p95']}, max={metric['max']} us"
         )
+    interrupt_metric = summary["npu_interrupts"]
+    print(
+        "npu_interrupts: "
+        f"min={interrupt_metric['min']}, median={interrupt_metric['median']}, "
+        f"p95={interrupt_metric['p95']}, max={interrupt_metric['max']}"
+    )
+    spurious_metric = summary["npu_spurious_interrupts"]
+    spurious_total = sum(item["npu_spurious_interrupts"] for item in results)
+    print(
+        f"npu_spurious_interrupts: total={spurious_total}, "
+        f"max={spurious_metric['max']}"
+    )
 
     if args.json_output:
         report = {"summary": summary, "results": results}

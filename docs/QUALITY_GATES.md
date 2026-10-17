@@ -13,10 +13,10 @@ passed only when reproducible evidence exists.
 | Transport fault recovery | PASS | Deliberate CRC corruption rejected; following transaction succeeds |
 | Repeated inference | PASS | 600/600 exact results, zero retries; raw JSON retained |
 | Explicit clock configuration/read-back | PASS | Staged 200 MHz PLL initialization, 100 MHz UART divisor, three flash wait states, raw register evidence |
-| True NPU interrupt completion | PENDING | Enable, service, clear, and validate the IP interrupt without polling |
+| True NPU interrupt completion | PASS | 600 runs, five acknowledged DONE IRQs per inference, zero spurious IRQs; protocol-v2 JSON retained |
 | Watchdog/fault recovery | PENDING | Demonstrate recovery from a deliberately stalled inference and transport fault |
 | Production UART integration | PENDING | Zephyr pinctrl plus status/error handling and interrupt or async operation |
-| Firmware CI | PENDING | Reproducible cross-build using pinned, redistributable toolchain/container |
+| Firmware CI | IMPLEMENTED / REMOTE RUN PENDING | GitHub Actions provisions the Arm GNU toolchain, pinned west workspace, cross-builds, verifies key ELF symbols, and publishes firmware artifacts |
 | Static and Zephyr-native tests | PENDING | Static analysis and Twister coverage for protocol/state logic |
 | Independent model evaluation | PENDING | Labeled dataset, provenance, preprocessing, confusion matrix, precision/recall |
 | Comparative benchmarking | PENDING | Verified clocks, CPU baseline, NPU speedup, utilization, and power |

@@ -71,7 +71,9 @@ not re-audited; its exact revision was identified and pinned.
 - Kept one active model and recorded artifact hashes and licensing.
 - Derived NPU, SYSCTL, GSC, UART, UNICOMM, and pinmux data from devicetree.
 - Matched TI's documented reset, power, and privilege sequence.
-- Removed the misleading NPU IRQ counter/claim; execution is explicitly polled.
+- Replaced CTL5 polling with a real IRQ 41 path: the driver enables and clears
+  the IP-level DONE source, signals a semaphore, counts completion/spurious
+  entries, and leaves the generated continuation in thread context.
 - Added runtime-status handling and a timeout for every NPU hardware stage.
 - Removed the background UART thread so readiness and inference are serialized.
 - Replaced cycle-count UART timeouts with millisecond uptime timeouts.
@@ -85,7 +87,10 @@ not re-audited; its exact revision was identified and pinned.
   timing claim, added TI-aligned staged PLL/flash initialization, corrected the
   100 MHz UART bus clock, and added raw register read-back validation.
 - Added unit tests, artifact hash verification, host CI, shell checks, and
-  reproducible build/flash scripts.
+  reproducible build/flash scripts; a firmware cross-build job is now defined.
+- Hardware-validated protocol v2 over 600 consecutive inferences: exactly five
+  completion interrupts per inference, zero spurious interrupts, zero retries,
+  and exact scores throughout.
 
 ## Remaining limitations
 
@@ -97,9 +102,8 @@ not re-audited; its exact revision was identified and pinned.
   Zephyr pinctrl, interrupts, and async APIs are not implemented.
 - The NPU memory callback ABI returns `void`, so archive memory-write errors can
   only be logged rather than propagated into the generated runtime.
-- CI validates host code and artifact integrity, not the cross-compiled
-  firmware. A container/toolchain job should be added when the compiler setup
-  is made redistributable and stable.
+- GitHub Actions now includes a firmware cross-build and linked-symbol check,
+  but the remote job and a digest-pinned build container remain to be verified.
 - Six golden fixtures are regression coverage, not an accuracy evaluation.
 - AM13E230 collateral is preview-era and current TI pages contain changing
   frequency information. Pin the document/SDK revision used for every claim.

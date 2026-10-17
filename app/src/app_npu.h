@@ -12,6 +12,8 @@ struct app_npu_metrics {
 	uint32_t accelerator_us;
 	uint32_t runtime_us;
 	uint32_t total_us;
+	uint32_t npu_interrupts;
+	uint32_t npu_spurious_interrupts;
 };
 
 int app_npu_init(void);

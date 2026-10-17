@@ -85,6 +85,24 @@ class HostToolTests(unittest.TestCase):
         self.assertEqual(3, status["flash_wait_states"])
         self.assertEqual(200_000_000, status["derived_mclk_hz"])
 
+    def test_result_requires_hardware_completion_interrupt(self):
+        valid = SEND_TENSOR.RESULT_PAYLOAD.pack(1, -1, 0, 500, 100, 650, 4, 0)
+        result = SEND_TENSOR.decode_result(valid)
+        self.assertEqual([1, -1, 0], result["scores"])
+        self.assertEqual(4, result["npu_interrupts"])
+
+        missing_interrupt = SEND_TENSOR.RESULT_PAYLOAD.pack(1, -1, 0, 500, 100, 650, 0, 0)
+        with self.assertRaisesRegex(SEND_TENSOR.ProtocolError, "no TINIElite"):
+            SEND_TENSOR.decode_result(missing_interrupt)
+
+        spurious_interrupt = SEND_TENSOR.RESULT_PAYLOAD.pack(1, -1, 0, 500, 100, 650, 4, 1)
+        with self.assertRaisesRegex(SEND_TENSOR.ProtocolError, "spurious TINIElite"):
+            SEND_TENSOR.decode_result(spurious_interrupt)
+
+    def test_result_rejects_malformed_payload(self):
+        with self.assertRaisesRegex(SEND_TENSOR.ProtocolError, "malformed"):
+            SEND_TENSOR.decode_result(bytes(SEND_TENSOR.RESULT_PAYLOAD.size - 1))
+
 
 if __name__ == "__main__":
     unittest.main()

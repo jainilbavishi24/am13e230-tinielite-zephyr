@@ -21,7 +21,7 @@ int main(void)
 	int ret;
 
 	printk("\n*** AM13E230 Zephyr TINIElite demo ***\n");
-	printk("Execution mode: polled NPU completion, framed protocol v1\n");
+	printk("Execution mode: interrupt-driven NPU completion, framed protocol v2\n");
 
 	ret = app_uart_init();
 	if (ret != 0) {

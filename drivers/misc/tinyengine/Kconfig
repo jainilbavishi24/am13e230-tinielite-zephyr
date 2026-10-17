@@ -6,7 +6,8 @@ config TINYENGINE_AM13E230X
 	depends on DT_HAS_TI_AM13E230X_TINYENGINE_ENABLED
 	help
 	  Enable the low-level adapter used by TI's generated TINIElite model
-	  archive. Model completion is currently serviced by application polling.
+	  archive. Hardware completion is acknowledged by the driver ISR and
+	  delivered to thread context through a semaphore.
 
 config TINYENGINE_LOG_LEVEL
 	int "TINIElite driver log level"

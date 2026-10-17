@@ -1,4 +1,4 @@
-# UART protocol version 1
+# UART protocol version 2
 
 The host and firmware exchange binary, length-delimited frames. Multi-byte
 integers use little-endian byte order.
@@ -8,7 +8,7 @@ integers use little-endian byte order.
 | Offset | Size | Field |
 |---:|---:|---|
 | 0 | 2 | Magic bytes `5a a5` |
-| 2 | 1 | Protocol version (`1`) |
+| 2 | 1 | Protocol version (`2`) |
 | 3 | 1 | Message type |
 | 4 | 2 | Sequence number |
 | 6 | 2 | Payload length |
@@ -28,12 +28,17 @@ with polynomial `0xedb88320`, initial state `0xffffffff`, and final XOR
 | `0x02` | `CLOCK_REQUEST` | host to board | empty |
 | `0x80` | `READY` | board to host | input length and output length as two `uint16` values |
 | `0x81` | `ACK` | board to host | empty |
-| `0x82` | `RESULT` | board to host | three `int8` scores, then accelerator, runtime, and total microseconds as three `uint32` values |
+| `0x82` | `RESULT` | board to host | three `int8` scores, then accelerator, runtime, total microseconds, acknowledged NPU completion interrupts, and spurious NPU interrupts as five `uint32` values |
 | `0x83` | `CLOCK_STATUS` | board to host | twelve `uint32` clock/status fields described below |
 | `0xff` | `ERROR` | board to host | error code byte |
 
 Requests, acknowledgements, results, status, and errors use the same sequence
 number. `READY` uses sequence zero; the host chooses each request sequence.
+
+Protocol version 2 adds completion and spurious-interrupt counts to `RESULT`.
+The host rejects zero completions or any spurious interrupt, so a build cannot
+silently claim interrupt-driven NPU completion while actually polling the
+peripheral or accepting unrelated interrupt entries.
 
 The `CLOCK_STATUS` words are expected MCLK, register-derived MCLK, configured
 UART clock, `MCLKCFG`, `HSCLKEN`, `HSCLKCFG`, `SYSPLLCFG0`, `SYSPLLCFG1`,

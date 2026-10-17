@@ -13,10 +13,12 @@
    complete frame under a single deadline, and returns a sequence-matched ACK
    or structured error.
 5. `tvmgen_default_run()` starts the generated hybrid graph.
-6. The application polls TINIElite CTL5 for each hardware stage, calls the TI
-   runtime continuation handler, and enforces a 100 ms per-stage timeout.
-7. Three signed class scores and three timing fields return in a CRC-protected
-   result frame.
+6. The TINIElite IP asserts DONE on IRQ 41. The driver ISR reads masked status,
+   acknowledges DONE, increments an atomic completion counter, and signals a
+   semaphore. The application waits up to 100 ms per hardware stage and calls
+   the TI runtime continuation handler in thread context.
+7. Three signed class scores, three timing fields, and the acknowledged NPU
+   interrupt count return in a CRC-protected result frame.
 8. The host compares all three scores exactly with the golden fixture.
 
 A separate clock-status request returns the relevant raw SYSCTL/FRI registers,
@@ -45,5 +47,5 @@ queueing tensors while inference is active, keeps the wire protocol ordered,
 and makes hardware faults visible. Sequence numbers prevent stale ACK/result
 frames from satisfying a newer request. The host applies a bounded retry
 budget, while the firmware drains stale bytes before advertising readiness.
-Throughput-oriented double buffering remains a future optimization after
-interrupt completion is implemented correctly.
+Throughput-oriented double buffering remains a future optimization after the
+single-request path has additional reset and watchdog fault testing.

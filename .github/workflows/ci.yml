@@ -14,6 +14,56 @@ jobs:
           python-version: "3.12"
       - name: Run host-side unit tests
         run: python -m unittest discover -s tests -v
+      - name: Check Python syntax
+        run: python -m py_compile tools/send_tensor.py tests/test_host_tools.py
+      - name: Check shell scripts
+        run: shellcheck scripts/*.sh
       - name: Verify generated artifacts
         working-directory: models/waveform_classifier
         run: sha256sum --check SHA256SUMS
+
+  firmware-build:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: am13e230-tinielite-zephyr
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: |
+            am13e230-tinielite-zephyr/requirements.txt
+      - name: Install system build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends -y \
+            cmake device-tree-compiler gcc-arm-none-eabi gperf ninja-build
+      - name: Initialize pinned west workspace
+        run: |
+          python -m pip install west
+          west init -l am13e230-tinielite-zephyr
+          west update
+      - name: Install Zephyr Python dependencies
+        run: |
+          python -m pip install -r zephyr/scripts/requirements.txt
+          python -m pip install -r am13e230-tinielite-zephyr/requirements.txt
+      - name: Cross-compile firmware
+        working-directory: am13e230-tinielite-zephyr
+        run: ./scripts/build.sh
+      - name: Verify linked accelerator and interrupt symbols
+        working-directory: am13e230-tinielite-zephyr
+        run: |
+          arm-none-eabi-nm build/zephyr/zephyr.elf > build/zephyr/symbols.txt
+          grep -q 'tvmgen_default_ti_npu_convolveNHWC_0' build/zephyr/symbols.txt
+          grep -q 'TI_NPU_NNC_IRQHandler' build/zephyr/symbols.txt
+          grep -q 'tinyengine_wait_for_completion' build/zephyr/symbols.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: am13e230-firmware
+          path: |
+            am13e230-tinielite-zephyr/build/zephyr/zephyr.elf
+            am13e230-tinielite-zephyr/build/zephyr/zephyr.hex
+            am13e230-tinielite-zephyr/build/zephyr/zephyr.map
+            am13e230-tinielite-zephyr/build/zephyr/symbols.txt
+          if-no-files-found: error

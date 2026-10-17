@@ -16,6 +16,8 @@ square waveforms.
   register read-back validation.
 - A polling-mode UNICOMM UART driver and versioned, CRC32-protected protocol.
 - TI TINIElite power/reset/privilege setup aligned with TI's AM13E2x SDK.
+- Interrupt-driven TINIElite completion with IP acknowledge, bounded waits,
+  completion telemetry, and spurious-interrupt detection.
 - A linked accelerator model containing four TINIElite hardware kernels.
 - Native WSL build, native Linux UniFlash/DSLite programming, and UART testing.
 - Host regression tooling that checks exact outputs for all six supplied
@@ -27,7 +29,9 @@ The reorganized implementation has been erased, programmed, verified, and run
 on the LaunchPad. All six supplied vectors produced their exact golden scores,
 and a subsequent 600-inference stress run completed with no failures or
 transport retries. Under the read-back-validated 200 MHz configuration, median
-end-to-end inference time was 668 us. See
+end-to-end inference time was 689 us. Each inference generated exactly five
+acknowledged NPU completion interrupts; 600 runs produced zero spurious
+interrupts. See
 [docs/VALIDATION.md](docs/VALIDATION.md) for the recorded evidence and caveats.
 
 ## Architecture
@@ -152,11 +156,13 @@ Good resume wording:
 > TINIElite NPU model and verified accelerator symbols and on-board inference
 > over a custom UART regression protocol.
 
-Avoid claiming “100% model accuracy,” “interrupt-driven NPU,” “production
-ready,” or “CI-tested firmware.” The present evidence includes six golden
-regression vectors repeated successfully over 600 inferences, CRC fault
-recovery, explicit/read-back-validated 200 MHz clock setup, polled accelerator
-completion, host-only CI, and prototype hardware validation. See
+Avoid claiming “100% model accuracy,” “production ready,” or independent model
+evaluation. The present evidence supports interrupt-driven NPU completion: six
+golden regression vectors were repeated successfully over 600 inferences with
+3,000 acknowledged DONE interrupts, zero spurious interrupts, CRC fault
+recovery, and explicit/read-back-validated 200 MHz clock setup. The firmware CI
+job is defined but should only be called CI-validated after its first remote
+GitHub run passes. See
 [docs/QUALITY_GATES.md](docs/QUALITY_GATES.md) for the live
 completion matrix and [docs/AUDIT.md](docs/AUDIT.md) for the assessment.
 

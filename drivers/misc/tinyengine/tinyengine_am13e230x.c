@@ -7,8 +7,11 @@
 
 #include <zephyr/device.h>
 #include <zephyr/devicetree.h>
+#include <zephyr/drivers/tinyengine.h>
+#include <zephyr/irq.h>
 #include <zephyr/kernel.h>
 #include <zephyr/logging/log.h>
+#include <zephyr/sys/atomic.h>
 #include <zephyr/sys/sys_io.h>
 
 LOG_MODULE_REGISTER(tinyengine_am13e230x, CONFIG_TINYENGINE_LOG_LEVEL);
@@ -18,17 +21,40 @@ LOG_MODULE_REGISTER(tinyengine_am13e230x, CONFIG_TINYENGINE_LOG_LEVEL);
 #define TINIE_PERIPHERAL_MASK BIT(0)
 #define GSC_TINIE_PRIV_MASK   BIT(0)
 
-#define TINIE_CTL5_OFFSET     0x1120U
-#define TINIE_INSTMEM_OFFSET  0x2000U
-#define TINIE_PARAMMEM_OFFSET 0x2800U
-#define TINIE_INSTMEM_WORDS   256U
-#define TINIE_PARAMMEM_WORDS  512U
+#define TINIE_INT_IMASK_OFFSET 0x1028U
+#define TINIE_INT_MIS_OFFSET   0x1038U
+#define TINIE_INT_ICLR_OFFSET  0x1048U
+#define TINIE_INT_DONE         BIT(0)
+#define TINIE_CTL5_OFFSET      0x1120U
+#define TINIE_INSTMEM_OFFSET   0x2000U
+#define TINIE_PARAMMEM_OFFSET  0x2800U
+#define TINIE_INSTMEM_WORDS    256U
+#define TINIE_PARAMMEM_WORDS   512U
 
 #define TINIE_BASE         DT_INST_REG_ADDR_BY_NAME(0, npu)
 #define TINIE_PWREN        DT_INST_REG_ADDR_BY_NAME(0, pwren)
 #define TINIE_RESET_ASSERT DT_INST_REG_ADDR_BY_NAME(0, reset_assert)
 #define TINIE_RESET_CLEAR  DT_INST_REG_ADDR_BY_NAME(0, reset_clear)
 #define TINIE_GSC_PRIV     DT_INST_REG_ADDR_BY_NAME(0, gsc_priv)
+
+K_SEM_DEFINE(tinyengine_completion, 0, 1);
+
+static atomic_t completion_count;
+static atomic_t spurious_count;
+
+static void tinyengine_am13e230x_isr(const void *arg)
+{
+	uint32_t status = sys_read32(TINIE_BASE + TINIE_INT_MIS_OFFSET);
+
+	ARG_UNUSED(arg);
+	if ((status & TINIE_INT_DONE) != 0U) {
+		sys_write32(TINIE_INT_DONE, TINIE_BASE + TINIE_INT_ICLR_OFFSET);
+		atomic_inc(&completion_count);
+		k_sem_give(&tinyengine_completion);
+	} else {
+		atomic_inc(&spurious_count);
+	}
+}
 
 static int tinyengine_am13e230x_init(const struct device *dev)
 {
@@ -42,12 +68,44 @@ static int tinyengine_am13e230x_init(const struct device *dev)
 	k_busy_wait(100U);
 	sys_write32(sys_read32(TINIE_GSC_PRIV) | GSC_TINIE_PRIV_MASK, TINIE_GSC_PRIV);
 
-	LOG_INF("TINIElite initialized for polled completion");
+	sys_write32(TINIE_INT_DONE, TINIE_BASE + TINIE_INT_ICLR_OFFSET);
+	sys_write32(sys_read32(TINIE_BASE + TINIE_INT_IMASK_OFFSET) | TINIE_INT_DONE,
+		    TINIE_BASE + TINIE_INT_IMASK_OFFSET);
+	IRQ_CONNECT(DT_INST_IRQN(0), DT_INST_IRQ(0, priority), tinyengine_am13e230x_isr, NULL, 0);
+	NVIC_ClearPendingIRQ(DT_INST_IRQN(0));
+	irq_enable(DT_INST_IRQN(0));
+
+	LOG_INF("TINIElite initialized with IRQ %u completion", DT_INST_IRQN(0));
 	return 0;
 }
 
 DEVICE_DT_INST_DEFINE(0, tinyengine_am13e230x_init, NULL, NULL, NULL, POST_KERNEL,
 		      CONFIG_KERNEL_INIT_PRIORITY_DEVICE, NULL);
+
+int tinyengine_prepare_inference(void)
+{
+	irq_disable(DT_INST_IRQN(0));
+	sys_write32(TINIE_INT_DONE, TINIE_BASE + TINIE_INT_ICLR_OFFSET);
+	k_sem_reset(&tinyengine_completion);
+	NVIC_ClearPendingIRQ(DT_INST_IRQN(0));
+	irq_enable(DT_INST_IRQN(0));
+	return 0;
+}
+
+int tinyengine_wait_for_completion(k_timeout_t timeout)
+{
+	return k_sem_take(&tinyengine_completion, timeout);
+}
+
+uint32_t tinyengine_completion_count(void)
+{
+	return (uint32_t)atomic_get(&completion_count);
+}
+
+uint32_t tinyengine_spurious_count(void)
+{
+	return (uint32_t)atomic_get(&spurious_count);
+}
 
 /* ABI expected by TI's generated model archive. */
 uint32_t NPU_getCtlReg(void)

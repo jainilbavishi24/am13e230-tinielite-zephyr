@@ -8,6 +8,7 @@
 
 #include <zephyr/device.h>
 #include <zephyr/devicetree.h>
+#include <zephyr/drivers/tinyengine.h>
 #include <zephyr/kernel.h>
 #include <tvmgen_default.h>
 
@@ -34,13 +35,22 @@ int app_npu_run_inference(int8_t *input, int8_t *output, struct app_npu_metrics 
 	uint32_t accelerator_us = 0U;
 	uint32_t runtime_us = 0U;
 	uint32_t runtime_start;
+	uint32_t interrupt_start;
+	uint32_t spurious_start;
 	int32_t run_status;
+	int ret;
 
 	if ((input == NULL) || (output == NULL) || (metrics == NULL)) {
 		return -EINVAL;
 	}
 
 	tvmgen_default_finished = 0;
+	ret = tinyengine_prepare_inference();
+	if (ret != 0) {
+		return ret;
+	}
+	interrupt_start = tinyengine_completion_count();
+	spurious_start = tinyengine_spurious_count();
 	total_start = k_cycle_get_32();
 
 	runtime_start = k_cycle_get_32();
@@ -51,13 +61,11 @@ int app_npu_run_inference(int8_t *input, int8_t *output, struct app_npu_metrics 
 	}
 
 	while (tvmgen_default_finished == 0) {
-		uint32_t deadline = k_uptime_get_32();
 		uint32_t accelerator_start = k_cycle_get_32();
 
-		while (*(volatile uint32_t *)(uintptr_t)NPU_getCtlReg() != 0U) {
-			if ((k_uptime_get_32() - deadline) >= NPU_STAGE_TIMEOUT_MS) {
-				return -ETIMEDOUT;
-			}
+		ret = tinyengine_wait_for_completion(K_MSEC(NPU_STAGE_TIMEOUT_MS));
+		if (ret != 0) {
+			return ret;
 		}
 		accelerator_us += k_cyc_to_us_floor32(k_cycle_get_32() - accelerator_start);
 
@@ -71,6 +79,11 @@ int app_npu_run_inference(int8_t *input, int8_t *output, struct app_npu_metrics 
 	metrics->accelerator_us = accelerator_us;
 	metrics->runtime_us = runtime_us;
 	metrics->total_us = total_us;
+	metrics->npu_interrupts = tinyengine_completion_count() - interrupt_start;
+	metrics->npu_spurious_interrupts = tinyengine_spurious_count() - spurious_start;
+	if ((metrics->npu_interrupts == 0U) || (metrics->npu_spurious_interrupts != 0U)) {
+		return -EIO;
+	}
 
 	return 0;
 }

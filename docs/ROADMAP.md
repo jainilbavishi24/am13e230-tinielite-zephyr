@@ -12,15 +12,18 @@
 - [x] Replace the additive checksum with a versioned frame containing length,
   sequence number, and CRC-16/CRC-32.
 - [x] Add bounded retry/resynchronization behavior and structured device errors.
-- [ ] Implement actual TINIElite interrupt completion, including IP mask/status/
-  clear handling, then compare CPU utilization and latency with polling.
+- [x] Hardware-validate TINIElite IRQ 41 completion, including IP mask/status/
+  clear handling and completion/spurious counters.
+- [ ] Measure CPU utilization and formally compare it with the retained polling
+  latency baseline.
 - [ ] Add watchdog recovery.
 - [x] Add repeated/stress inference tests with machine-readable results.
 - [ ] Move UART pin routing to standard Zephyr pinctrl and implement error flags.
 
 ## P2 — evidence and automation
 
-- [ ] Add a reproducible firmware CI container with the supported Arm toolchain.
+- [ ] Confirm the new GitHub Actions firmware cross-build, then pin a
+  redistributable build-container digest for stronger toolchain reproducibility.
 - [ ] Add static analysis and Zephyr Twister tests for protocol/state logic.
 - [ ] Validate on an independent labeled dataset and report confusion matrix,
   per-class precision/recall, dataset provenance, and preprocessing.

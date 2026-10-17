@@ -16,7 +16,7 @@
 #define FRAME_HEADER_SIZE         8U
 #define FRAME_CRC_SIZE            4U
 #define FRAME_MAX_PAYLOAD_SIZE    APP_NPU_INPUT_SIZE
-#define RESULT_PAYLOAD_SIZE       15U
+#define RESULT_PAYLOAD_SIZE       23U
 #define CLOCK_STATUS_WORDS        12U
 #define CLOCK_STATUS_PAYLOAD_SIZE (CLOCK_STATUS_WORDS * sizeof(uint32_t))
 
@@ -264,6 +264,8 @@ int app_uart_send_result(uint16_t sequence, const int8_t *result, uint32_t size,
 	encode_le32(&payload[3], metrics->accelerator_us);
 	encode_le32(&payload[7], metrics->runtime_us);
 	encode_le32(&payload[11], metrics->total_us);
+	encode_le32(&payload[15], metrics->npu_interrupts);
+	encode_le32(&payload[19], metrics->npu_spurious_interrupts);
 	return send_frame(APP_UART_FRAME_RESULT, sequence, payload, sizeof(payload));
 }
 

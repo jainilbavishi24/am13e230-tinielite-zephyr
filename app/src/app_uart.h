@@ -10,7 +10,7 @@
 
 #define APP_UART_FRAME_MAGIC_0    0x5AU
 #define APP_UART_FRAME_MAGIC_1    0xA5U
-#define APP_UART_PROTOCOL_VERSION 1U
+#define APP_UART_PROTOCOL_VERSION 2U
 #define APP_UART_RX_TIMEOUT_MS    1000U
 
 enum app_uart_frame_type {

@@ -7,9 +7,9 @@ Performed on 2026-10-17 in WSL Ubuntu 22.04:
 - Clean Zephyr source at `9574b65fbaa01aa0c8f418bd7a6b97beb15fcc54`
 - GNU Arm Embedded GCC 10.3.1
 - Zephyr configure, compile, and link: pass
-- Output: 23,480 bytes flash; 43,584 bytes RAM (including a conservative
+- Output: 24,352 bytes flash; 43,608 bytes RAM (including a conservative
   32 KiB main stack)
-- Python unit tests: 8/8 pass
+- Python unit tests: 10/10 pass
 - ShellCheck and Bash syntax: pass
 - Model SHA-256 verification: pass
 - ELF inspection: four TINIElite kernels, TI handler, model entry point, and NPU
@@ -96,7 +96,7 @@ Read-back result: pass. Derived MCLK was 200,000,000 Hz, UART configuration was
 Raw evidence is retained in
 [`evidence/hardware_clock_2026-10-17.json`](evidence/hardware_clock_2026-10-17.json).
 
-## Protocol and stress gate
+## Polling protocol and stress baseline
 
 Status: **passed on 2026-10-17** through XDS110 from WSL.
 
@@ -122,5 +122,41 @@ Results:
 
 Every stress result and its score/timing data is retained in
 [`evidence/hardware_stress_2026-10-17.json`](evidence/hardware_stress_2026-10-17.json).
-These are the current clock-validated latency figures; the earlier 343-345 us
-figures are explicitly superseded.
+These were the clock-validated polling baseline. The interrupt-driven result
+below supersedes it for the current firmware.
+
+## Interrupt-driven completion and stress gate
+
+Status: **passed on 2026-10-17** through XDS110 from WSL.
+
+Protocol v2 replaced CTL5 polling with a driver-owned IRQ 41 handler. The ISR
+checks masked DONE status, clears the IP interrupt, increments an atomic
+completion counter, and signals a semaphore. The application performs the TI
+runtime continuation in thread context and enforces a 100 ms wait deadline.
+
+The flashed image was verified with:
+
+```bash
+./scripts/test.sh --fault-test --repeat 100 --quiet \
+  --json-output docs/evidence/hardware_irq_stress_2026-10-17.json
+./scripts/test.sh --clock-status \
+  --json-output docs/evidence/hardware_irq_clock_2026-10-17.json
+```
+
+Results:
+
+- DSLite erase/program/verify: pass.
+- Deliberately corrupted CRC and following recovery transaction: pass.
+- Stress regression: 600/600 exact vectors, zero transport retries.
+- Hardware DONE interrupts: exactly five per inference, 3,000 total.
+- Spurious TINIElite interrupts: zero.
+- Accelerator wait: 554 us minimum, median, p95, and maximum.
+- Runtime/CPU portion: 117 us minimum, median, p95, and maximum.
+- End-to-end latency: 689 us minimum, median, p95, and maximum.
+- Same-image clock read-back: 200 MHz MCLK, 100 MHz UART clock, three flash
+  wait states, required validation flags `0x1f`.
+
+Raw per-inference and clock-register evidence is retained in
+[`evidence/hardware_irq_stress_2026-10-17.json`](evidence/hardware_irq_stress_2026-10-17.json)
+and
+[`evidence/hardware_irq_clock_2026-10-17.json`](evidence/hardware_irq_clock_2026-10-17.json).
