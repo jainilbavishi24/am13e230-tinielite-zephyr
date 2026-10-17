@@ -26,6 +26,7 @@ FRAME_MAGIC = b"\x5a\xa5"
 PROTOCOL_VERSION = 2
 FRAME_INFER_REQUEST = 0x01
 FRAME_CLOCK_REQUEST = 0x02
+FRAME_NPU_STALL_REQUEST = 0x03
 FRAME_READY = 0x80
 FRAME_ACK = 0x81
 FRAME_RESULT = 0x82
@@ -39,6 +40,7 @@ CAPABILITIES_PAYLOAD = struct.Struct("<HH")
 CLOCK_STATUS_PAYLOAD = struct.Struct("<12I")
 MAX_FRAME_PAYLOAD = 1024
 CLOCK_VALIDATION_REQUIRED = 0x1F
+ZEPHYR_ETIMEDOUT = 116
 
 ERROR_NAMES = {
     1: "timeout",
@@ -333,6 +335,31 @@ def run_crc_fault_test(serial_port: Any, reader: FrameReader, ready_timeout: flo
     print("CRC fault injection: PASS (corruption rejected and server recovered)")
 
 
+def run_npu_stall_test(serial_port: Any, reader: FrameReader, ready_timeout: float) -> None:
+    ready = wait_for_frame(reader, {FRAME_READY}, ready_timeout)
+    validate_ready(ready)
+    sequence = 0xF17E
+    serial_port.write(encode_frame(FRAME_NPU_STALL_REQUEST, sequence))
+    serial_port.flush()
+    acknowledgement = wait_for_frame(
+        reader, {FRAME_ACK, FRAME_ERROR}, 3.0, sequence=sequence
+    )
+    if acknowledgement["type"] == FRAME_ERROR:
+        raise ProtocolError(describe_error(acknowledgement))
+    response = wait_for_frame(reader, {FRAME_ERROR}, 3.0, sequence=sequence)
+    if len(response["payload"]) != ERROR_PAYLOAD.size:
+        raise ProtocolError("NPU stall test returned a malformed error payload")
+    code, detail = ERROR_PAYLOAD.unpack(response["payload"])
+    if code != 6 or detail != -ZEPHYR_ETIMEDOUT:
+        raise ProtocolError(
+            f"NPU stall test returned {describe_error(response)}, expected inference timeout"
+        )
+
+    recovered = wait_for_frame(reader, {FRAME_READY}, ready_timeout)
+    validate_ready(recovered)
+    print("NPU stall recovery: PASS (timeout reported, system reset, READY restored)")
+
+
 def decode_clock_status(payload: bytes) -> dict[str, Any]:
     if len(payload) != CLOCK_STATUS_PAYLOAD.size:
         raise ProtocolError("CLOCK_STATUS frame has a malformed payload")
@@ -432,6 +459,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--repeat", type=int, default=1, help="repeat the selected set N times")
     parser.add_argument("--retries", type=int, default=2, help="transport retries per inference")
     parser.add_argument("--fault-test", action="store_true", help="verify CRC rejection before inference")
+    parser.add_argument(
+        "--npu-fault-test",
+        action="store_true",
+        help="trigger an NPU wait timeout and verify reset recovery",
+    )
     parser.add_argument("--quiet", action="store_true", help="print only summary and failures")
     parser.add_argument("--json-output", type=Path, help="write machine-readable results")
     parser.add_argument("--port", default=default_port(), help="UART path")
@@ -481,6 +513,8 @@ def main() -> int:
                 return 0 if status["valid"] else 1
             if args.fault_test:
                 run_crc_fault_test(port, reader, args.ready_timeout)
+            if args.npu_fault_test:
+                run_npu_stall_test(port, reader, args.ready_timeout)
             for position, (vector_index, vector) in enumerate(work, start=1):
                 sequence = position & 0xFFFF or 1
                 results.append(
@@ -509,6 +543,8 @@ def main() -> int:
         "passed": len(results) - failures,
         "failed": failures,
         "transport_retries": retries_used,
+        "crc_fault_test_passed": args.fault_test,
+        "npu_stall_recovery_test_passed": args.npu_fault_test,
         "accelerator_us": summarize_metric(results, "accelerator_us"),
         "runtime_us": summarize_metric(results, "runtime_us"),
         "total_us": summarize_metric(results, "total_us"),

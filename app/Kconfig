@@ -1,0 +1,13 @@
+# SPDX-License-Identifier: Apache-2.0
+
+mainmenu "AM13E230 TINIElite inference demo"
+
+source "Kconfig.zephyr"
+
+config APP_NPU_FAULT_INJECTION
+	bool "Enable the UART-triggered NPU timeout recovery test"
+	help
+	  Allow the host regression client to deliberately wait for a completion
+	  without starting TINIElite. The firmware reports the expected timeout and
+	  performs a full system reset. Disable this diagnostic interface in a
+	  deployed product.

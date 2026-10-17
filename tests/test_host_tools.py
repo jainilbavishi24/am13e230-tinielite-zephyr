@@ -103,6 +103,13 @@ class HostToolTests(unittest.TestCase):
         with self.assertRaisesRegex(SEND_TENSOR.ProtocolError, "malformed"):
             SEND_TENSOR.decode_result(bytes(SEND_TENSOR.RESULT_PAYLOAD.size - 1))
 
+    def test_zephyr_timeout_wire_value_is_explicit(self):
+        payload = SEND_TENSOR.ERROR_PAYLOAD.pack(6, -SEND_TENSOR.ZEPHYR_ETIMEDOUT)
+        frame = {"payload": payload}
+        self.assertEqual(
+            "inference-failure (detail -116)", SEND_TENSOR.describe_error(frame)
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

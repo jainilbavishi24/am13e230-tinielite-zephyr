@@ -16,7 +16,9 @@
   clear handling and completion/spurious counters.
 - [ ] Measure CPU utilization and formally compare it with the retained polling
   latency baseline.
-- [ ] Add watchdog recovery.
+- [x] Add and hardware-validate bounded NPU-stall timeout, structured error,
+  cold-system reset, restored readiness, and post-reset stress inference.
+- [ ] Add an independent hardware watchdog for whole-firmware deadlocks.
 - [x] Add repeated/stress inference tests with machine-readable results.
 - [ ] Move UART pin routing to standard Zephyr pinctrl and implement error flags.
 

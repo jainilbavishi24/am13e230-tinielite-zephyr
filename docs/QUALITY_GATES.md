@@ -14,12 +14,13 @@ passed only when reproducible evidence exists.
 | Repeated inference | PASS | 600/600 exact results, zero retries; raw JSON retained |
 | Explicit clock configuration/read-back | PASS | Staged 200 MHz PLL initialization, 100 MHz UART divisor, three flash wait states, raw register evidence |
 | True NPU interrupt completion | PASS | 600 runs, five acknowledged DONE IRQs per inference, zero spurious IRQs; protocol-v2 JSON retained |
-| Watchdog/fault recovery | PENDING | Demonstrate recovery from a deliberately stalled inference and transport fault |
+| Inference timeout/reset recovery | PASS | Deliberate NPU stall returns `-ETIMEDOUT`, cold-resets, restores `READY`, then passes 600/600 inferences |
+| Independent hardware watchdog | PENDING | Recover from a whole-firmware deadlock rather than only the bounded inference path |
 | Production UART integration | PENDING | Zephyr pinctrl plus status/error handling and interrupt or async operation |
 | Firmware CI | PASS | GitHub Actions provisions the Arm GNU toolchain and pinned west workspace, cross-builds, verifies key ELF symbols, and publishes firmware artifacts |
 | Static and Zephyr-native tests | PENDING | Static analysis and Twister coverage for protocol/state logic |
-| Independent model evaluation | PENDING | Labeled dataset, provenance, preprocessing, confusion matrix, precision/recall |
-| Comparative benchmarking | PENDING | Verified clocks, CPU baseline, NPU speedup, utilization, and power |
+| Independent model evaluation | EXTERNAL INPUT REQUIRED | Original preprocessing contract and an independent labeled dataset are unavailable |
+| Comparative benchmarking | PARTIAL / EXTERNAL INPUT REQUIRED | NPU timing and footprint are verified; equivalent CPU model artifact and power instrumentation are unavailable |
 | Upstream-quality platform port | PENDING | SoC/board/driver split and Zephyr-reviewable patches |
 
 ## Known ABI constraint
@@ -29,3 +30,9 @@ return type. The integration checks all callback bounds and logs violations,
 but cannot propagate a callback failure through that ABI. Completely removing
 this limitation requires regenerating the model/runtime interface with an error
 return or adding a compatible out-of-band fault status that the runtime checks.
+
+The repository owner has only the generated `mod.a`, generated header, and six
+fixtures—not the original model or generation pipeline. Reconstructing the
+licensed archive is neither a valid reproducibility method nor permitted by its
+license. This is an explicit artifact-boundary constraint, not unfinished
+firmware work.

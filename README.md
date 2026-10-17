@@ -24,14 +24,16 @@ square waveforms.
   golden vectors and returns a nonzero status on failure.
 - Structured device errors, sequence validation, bounded transport retries,
   protocol fault injection, stress runs, and JSON evidence output.
+- Deliberate NPU-stall injection with a bounded timeout, structured error,
+  cold-system reset, and verified post-reset inference recovery.
 
 The reorganized implementation has been erased, programmed, verified, and run
 on the LaunchPad. All six supplied vectors produced their exact golden scores,
 and a subsequent 600-inference stress run completed with no failures or
 transport retries. Under the read-back-validated 200 MHz configuration, median
-end-to-end inference time was 689 us. Each inference generated exactly five
-acknowledged NPU completion interrupts; 600 runs produced zero spurious
-interrupts. See
+end-to-end inference time in the latest recovery-enabled image was 701 us. Each
+inference generated exactly five acknowledged NPU completion interrupts; 600
+runs produced zero spurious interrupts. See
 [docs/VALIDATION.md](docs/VALIDATION.md) for the recorded evidence and caveats.
 
 ## Architecture
@@ -139,6 +141,10 @@ Run protocol fault injection and a 600-inference stress test with:
 ./scripts/test.sh --fault-test --repeat 100 --quiet \
   --json-output docs/evidence/hardware_stress.json
 ```
+
+Exercise the real NPU wait-timeout and automatic reset path before the stress
+run with `--npu-fault-test`. This diagnostic is controlled by
+`CONFIG_APP_NPU_FAULT_INJECTION` and should be disabled in deployed builds.
 
 Read back and validate the active clock tree independently of inference with:
 

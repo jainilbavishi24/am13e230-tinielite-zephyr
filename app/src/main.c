@@ -5,6 +5,7 @@
 
 #include <zephyr/kernel.h>
 #include <zephyr/sys/printk.h>
+#include <zephyr/sys/reboot.h>
 
 #include "app_clock.h"
 #include "app_npu.h"
@@ -12,6 +13,13 @@
 
 static int8_t model_input[APP_NPU_INPUT_SIZE] __aligned(16);
 static int8_t model_output[APP_NPU_OUTPUT_SIZE] __aligned(16);
+
+static void reboot_after_error(void)
+{
+	/* uart_poll_out() may return while the final byte is still shifting. */
+	k_busy_wait(10000U);
+	sys_reboot(SYS_REBOOT_COLD);
+}
 
 int main(void)
 {
@@ -48,10 +56,22 @@ int main(void)
 			}
 			continue;
 		}
+		if (request.type == APP_UART_FRAME_NPU_STALL_REQUEST) {
+			ret = app_npu_test_stall_timeout();
+			app_uart_send_error(request.sequence,
+					    ret == -ETIMEDOUT ? APP_UART_ERROR_INFERENCE
+							      : APP_UART_ERROR_INTERNAL,
+					    ret);
+			reboot_after_error();
+			continue;
+		}
 
 		ret = app_npu_run_inference(model_input, model_output, &metrics);
 		if (ret != 0) {
 			app_uart_send_error(request.sequence, APP_UART_ERROR_INFERENCE, ret);
+			if (ret == -ETIMEDOUT) {
+				reboot_after_error();
+			}
 			continue;
 		}
 

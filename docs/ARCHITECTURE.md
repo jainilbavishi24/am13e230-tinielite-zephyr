@@ -24,6 +24,14 @@
 A separate clock-status request returns the relevant raw SYSCTL/FRI registers,
 derived MCLK, configured UART clock, flash wait states, and validation flags.
 
+If an NPU stage does not signal completion within 100 ms, the firmware sends a
+structured timeout error, allows the polling UART transmitter to drain, and
+requests a cold Cortex-M system reset. A test-only request deliberately enters
+this wait without starting the accelerator; the host requires a fresh `READY`
+after reset and then reruns normal inference. The full reset is intentional
+because the binary-only model archive may retain opaque continuation state that
+a peripheral-only reset cannot safely repair.
+
 See [PROTOCOL.md](PROTOCOL.md) for the byte-level contract and recovery rules.
 
 ## Hardware map used

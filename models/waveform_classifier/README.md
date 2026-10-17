@@ -10,3 +10,10 @@ This directory contains the single model used by the demo.
 `artifacts/mod.a`, its generated header, and the golden vectors are generated
 artifacts and retain the terms in [LICENSE.txt](LICENSE.txt). The six bundled
 vectors are regression fixtures, not a statistically meaningful accuracy test.
+
+The original model, training pipeline, preprocessing implementation, and
+compiler-generation scripts are not available. Consequently this repository
+integrates and validates a binary model artifact; it does not claim model
+training, reproducible model generation, independent accuracy, or an equivalent
+CPU-only baseline. The archive is integrity-checked and used under its license,
+not reverse engineered.

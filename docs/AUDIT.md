@@ -91,6 +91,9 @@ not re-audited; its exact revision was identified and pinned.
 - Hardware-validated protocol v2 over 600 consecutive inferences: exactly five
   completion interrupts per inference, zero spurious interrupts, zero retries,
   and exact scores throughout.
+- Added a test-only deliberate NPU stall, verified the 100 ms timeout and
+  structured error, cold-reset the complete opaque runtime state, and passed
+  another 600/600 exact inferences after recovery.
 
 ## Remaining limitations
 
@@ -105,6 +108,9 @@ not re-audited; its exact revision was identified and pinned.
 - GitHub Actions firmware cross-build, linked-symbol checks, and artifact upload
   pass remotely. A digest-pinned build container remains future hardening.
 - Six golden fixtures are regression coverage, not an accuracy evaluation.
+- The original model, preprocessing/training code, and generation scripts are
+  unavailable. An equivalent CPU build, model regeneration, and defensible
+  independent accuracy study require those external inputs.
 - AM13E230 collateral is preview-era and current TI pages contain changing
   frequency information. Pin the document/SDK revision used for every claim.
 

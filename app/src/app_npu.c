@@ -65,7 +65,7 @@ int app_npu_run_inference(int8_t *input, int8_t *output, struct app_npu_metrics 
 
 		ret = tinyengine_wait_for_completion(K_MSEC(NPU_STAGE_TIMEOUT_MS));
 		if (ret != 0) {
-			return ret;
+			return ret == -EAGAIN ? -ETIMEDOUT : ret;
 		}
 		accelerator_us += k_cyc_to_us_floor32(k_cycle_get_32() - accelerator_start);
 
@@ -86,4 +86,20 @@ int app_npu_run_inference(int8_t *input, int8_t *output, struct app_npu_metrics 
 	}
 
 	return 0;
+}
+
+int app_npu_test_stall_timeout(void)
+{
+	int ret = tinyengine_prepare_inference();
+
+	if (ret != 0) {
+		return ret;
+	}
+
+	/* Deliberately do not start TINIElite: exercise the real bounded wait. */
+	ret = tinyengine_wait_for_completion(K_MSEC(NPU_STAGE_TIMEOUT_MS));
+	if (ret == -EAGAIN) {
+		return -ETIMEDOUT;
+	}
+	return ret == 0 ? -EIO : ret;
 }

@@ -7,9 +7,9 @@ Performed on 2026-10-17 in WSL Ubuntu 22.04:
 - Clean Zephyr source at `9574b65fbaa01aa0c8f418bd7a6b97beb15fcc54`
 - GNU Arm Embedded GCC 10.3.1
 - Zephyr configure, compile, and link: pass
-- Output: 24,352 bytes flash; 43,608 bytes RAM (including a conservative
+- Output: 24,604 bytes flash; 43,608 bytes RAM (including a conservative
   32 KiB main stack)
-- Python unit tests: 10/10 pass
+- Python unit tests: 11/11 pass
 - ShellCheck and Bash syntax: pass
 - Model SHA-256 verification: pass
 - ELF inspection: four TINIElite kernels, TI handler, model entry point, and NPU
@@ -166,3 +166,28 @@ Raw per-inference and clock-register evidence is retained in
 [`evidence/hardware_irq_stress_2026-10-17.json`](evidence/hardware_irq_stress_2026-10-17.json)
 and
 [`evidence/hardware_irq_clock_2026-10-17.json`](evidence/hardware_irq_clock_2026-10-17.json).
+
+## NPU timeout and reset recovery gate
+
+Status: **passed on 2026-10-17** through XDS110 from WSL.
+
+The test-only `NPU_STALL_REQUEST` entered the same semaphore wait used by a
+normal hardware stage without starting TINIElite. The board returned structured
+inference error `-ETIMEDOUT` (`-116` in Zephyr's errno ABI), drained UART,
+performed a cold system reset, rebooted, and emitted a fresh valid `READY`.
+CRC corruption/recovery was exercised in the same session. The host then ran
+600 normal inferences to prove that accelerator and opaque model-runtime state
+were clean after reset.
+
+Results:
+
+- NPU stall detection, error response, cold reset, and restored readiness: pass.
+- CRC rejection and recovery before the stall: pass.
+- Post-reset regression: 600/600 exact results, zero transport retries.
+- Hardware interrupts: 3,000 completions, zero spurious entries.
+- Current-image latency: 554 us accelerator wait, 129 us runtime/CPU, 701 us
+  end-to-end (minimum, median, p95, and maximum were identical in this run).
+
+Machine-readable evidence, including explicit pass fields for both injected
+faults, is retained in
+[`evidence/hardware_recovery_2026-10-17.json`](evidence/hardware_recovery_2026-10-17.json).

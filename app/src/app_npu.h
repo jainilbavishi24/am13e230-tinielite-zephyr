@@ -18,5 +18,6 @@ struct app_npu_metrics {
 
 int app_npu_init(void);
 int app_npu_run_inference(int8_t *input, int8_t *output, struct app_npu_metrics *metrics);
+int app_npu_test_stall_timeout(void);
 
 #endif /* APP_NPU_H_ */

@@ -199,13 +199,17 @@ int app_uart_receive_request(int8_t *buffer, uint32_t size, struct app_uart_requ
 		return -EPROTO;
 	}
 	if ((header[3] != APP_UART_FRAME_INFER_REQUEST) &&
-	    (header[3] != APP_UART_FRAME_CLOCK_REQUEST)) {
+	    (header[3] != APP_UART_FRAME_CLOCK_REQUEST) &&
+	    (!IS_ENABLED(CONFIG_APP_NPU_FAULT_INJECTION) ||
+	     (header[3] != APP_UART_FRAME_NPU_STALL_REQUEST))) {
 		app_uart_send_error(frame_sequence, APP_UART_ERROR_TYPE, -EPROTO);
 		return -EPROTO;
 	}
 	request->type = (enum app_uart_frame_type)header[3];
 	if (((request->type == APP_UART_FRAME_INFER_REQUEST) && (payload_length != size)) ||
-	    ((request->type == APP_UART_FRAME_CLOCK_REQUEST) && (payload_length != 0U))) {
+	    (((request->type == APP_UART_FRAME_CLOCK_REQUEST) ||
+	      (request->type == APP_UART_FRAME_NPU_STALL_REQUEST)) &&
+	     (payload_length != 0U))) {
 		app_uart_send_error(frame_sequence, APP_UART_ERROR_LENGTH, -EMSGSIZE);
 		return -EMSGSIZE;
 	}
@@ -225,7 +229,8 @@ int app_uart_receive_request(int8_t *buffer, uint32_t size, struct app_uart_requ
 		return -EBADMSG;
 	}
 
-	if (request->type == APP_UART_FRAME_INFER_REQUEST) {
+	if ((request->type == APP_UART_FRAME_INFER_REQUEST) ||
+	    (request->type == APP_UART_FRAME_NPU_STALL_REQUEST)) {
 		return send_frame(APP_UART_FRAME_ACK, frame_sequence, NULL, 0U);
 	}
 	return 0;

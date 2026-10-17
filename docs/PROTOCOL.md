@@ -26,6 +26,7 @@ with polynomial `0xedb88320`, initial state `0xffffffff`, and final XOR
 |---:|---|---|---|
 | `0x01` | `INFERENCE_REQUEST` | host to board | 256 signed 8-bit model inputs |
 | `0x02` | `CLOCK_REQUEST` | host to board | empty |
+| `0x03` | `NPU_STALL_REQUEST` | host to board | empty; test builds only, deliberately exercises timeout/reset recovery |
 | `0x80` | `READY` | board to host | input length and output length as two `uint16` values |
 | `0x81` | `ACK` | board to host | empty |
 | `0x82` | `RESULT` | board to host | three `int8` scores, then accelerator, runtime, total microseconds, acknowledged NPU completion interrupts, and spurious NPU interrupts as five `uint32` values |
@@ -68,3 +69,8 @@ PLL/HFCLK, expected frequency, and sufficient flash wait states.
   CRCs. It may retry a request only up to its configured retry budget.
 - A CRC fault test is available through `./scripts/test.sh --fault-test`; it
   verifies both rejection and recovery before normal inference begins.
+- When `CONFIG_APP_NPU_FAULT_INJECTION=y`, `--npu-fault-test` waits for an NPU
+  completion without starting the accelerator. The firmware returns inference
+  error `-ETIMEDOUT`, flushes it to UART, performs a cold system reset, and the
+  host requires a new valid `READY` before continuing. Disable this diagnostic
+  request in deployed configurations.
