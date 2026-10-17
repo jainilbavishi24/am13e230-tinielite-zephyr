@@ -160,9 +160,9 @@ Avoid claiming “100% model accuracy,” “production ready,” or independent
 evaluation. The present evidence supports interrupt-driven NPU completion: six
 golden regression vectors were repeated successfully over 600 inferences with
 3,000 acknowledged DONE interrupts, zero spurious interrupts, CRC fault
-recovery, and explicit/read-back-validated 200 MHz clock setup. The firmware CI
-job is defined but should only be called CI-validated after its first remote
-GitHub run passes. See
+recovery, and explicit/read-back-validated 200 MHz clock setup. GitHub Actions
+also cross-builds the firmware, checks linked NPU/IRQ symbols, and publishes
+the resulting ELF, HEX, map, and symbol files. See
 [docs/QUALITY_GATES.md](docs/QUALITY_GATES.md) for the live
 completion matrix and [docs/AUDIT.md](docs/AUDIT.md) for the assessment.
 

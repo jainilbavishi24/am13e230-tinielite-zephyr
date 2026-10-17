@@ -19,6 +19,12 @@ The environment reports non-fatal warnings for an absent standalone DTC and an
 old ccache. Install `device-tree-compiler`; update ccache or disable it to make
 the local build log clean.
 
+GitHub Actions run
+[`39005309316`](https://github.com/jainilbavishi24/am13e230-tinielite-zephyr/actions/runs/39005309316)
+also passed the host suite, clean workspace initialization, Arm firmware
+cross-build, linked NPU/IRQ symbol checks, and firmware artifact upload for
+commit `ee9293c`.
+
 ## Earlier hardware evidence
 
 The original implementation was built, programmed, verified, and exercised on

@@ -102,8 +102,8 @@ not re-audited; its exact revision was identified and pinned.
   Zephyr pinctrl, interrupts, and async APIs are not implemented.
 - The NPU memory callback ABI returns `void`, so archive memory-write errors can
   only be logged rather than propagated into the generated runtime.
-- GitHub Actions now includes a firmware cross-build and linked-symbol check,
-  but the remote job and a digest-pinned build container remain to be verified.
+- GitHub Actions firmware cross-build, linked-symbol checks, and artifact upload
+  pass remotely. A digest-pinned build container remains future hardening.
 - Six golden fixtures are regression coverage, not an accuracy evaluation.
 - AM13E230 collateral is preview-era and current TI pages contain changing
   frequency information. Pin the document/SDK revision used for every claim.

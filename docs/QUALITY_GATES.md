@@ -16,7 +16,7 @@ passed only when reproducible evidence exists.
 | True NPU interrupt completion | PASS | 600 runs, five acknowledged DONE IRQs per inference, zero spurious IRQs; protocol-v2 JSON retained |
 | Watchdog/fault recovery | PENDING | Demonstrate recovery from a deliberately stalled inference and transport fault |
 | Production UART integration | PENDING | Zephyr pinctrl plus status/error handling and interrupt or async operation |
-| Firmware CI | IMPLEMENTED / REMOTE RUN PENDING | GitHub Actions provisions the Arm GNU toolchain, pinned west workspace, cross-builds, verifies key ELF symbols, and publishes firmware artifacts |
+| Firmware CI | PASS | GitHub Actions provisions the Arm GNU toolchain and pinned west workspace, cross-builds, verifies key ELF symbols, and publishes firmware artifacts |
 | Static and Zephyr-native tests | PENDING | Static analysis and Twister coverage for protocol/state logic |
 | Independent model evaluation | PENDING | Labeled dataset, provenance, preprocessing, confusion matrix, precision/recall |
 | Comparative benchmarking | PENDING | Verified clocks, CPU baseline, NPU speedup, utilization, and power |

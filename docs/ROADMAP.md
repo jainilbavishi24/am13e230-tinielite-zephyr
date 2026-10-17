@@ -22,8 +22,10 @@
 
 ## P2 — evidence and automation
 
-- [ ] Confirm the new GitHub Actions firmware cross-build, then pin a
-  redistributable build-container digest for stronger toolchain reproducibility.
+- [x] Add and remotely validate the GitHub Actions firmware cross-build, ELF
+  symbol checks, and build-artifact publication.
+- [ ] Pin a redistributable build-container digest for stronger toolchain
+  reproducibility.
 - [ ] Add static analysis and Zephyr Twister tests for protocol/state logic.
 - [ ] Validate on an independent labeled dataset and report confusion matrix,
   per-class precision/recall, dataset provenance, and preprocessing.
