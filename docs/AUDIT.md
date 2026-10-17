@@ -88,6 +88,11 @@ not re-audited; its exact revision was identified and pinned.
   100 MHz UART bus clock, and added raw register read-back validation.
 - Added unit tests, artifact hash verification, host CI, shell checks, and
   reproducible build/flash scripts; a firmware cross-build job is now defined.
+- Added standard Zephyr pinctrl for PA0/PA1, official-SDK-aligned UART receive
+  error flags, a structured transport error, and deliberate BREAK/recovery
+  hardware validation.
+- Added sanitized Zephyr-native protocol tests, Cppcheck/format enforcement,
+  and a host stream parser that resynchronizes after a malformed candidate.
 - Hardware-validated protocol v2 over 600 consecutive inferences: exactly five
   completion interrupts per inference, zero spurious interrupts, zero retries,
   and exact scores throughout.
@@ -107,8 +112,9 @@ not re-audited; its exact revision was identified and pinned.
 - WWDT0 now covers a stopped main loop after application initialization, but
   failures during earlier boot, brownout behavior, clock-source failure, and
   repeated watchdog-reset endurance remain untested.
-- The UART driver implements polling only; error-status reporting, standard
-  Zephyr pinctrl, interrupts, and async APIs are not implemented.
+- UART pin routing now uses standard Zephyr pinctrl, and receive errors are
+  reported and cleared. Byte transfer still uses the polling API; interrupt
+  and async APIs are not implemented.
 - The NPU memory callback ABI returns `void`, so archive memory-write errors can
   only be logged rather than propagated into the generated runtime.
 - GitHub Actions firmware cross-build, linked-symbol checks, and artifact upload

@@ -14,7 +14,8 @@ square waveforms.
 - Custom Zephyr support for the preview AM13E23019 Cortex-M33 device and board.
 - Explicit TI-aligned 200 MHz PLL startup, flash wait-state setup, and
   register read-back validation.
-- A polling-mode UNICOMM UART driver and versioned, CRC32-protected protocol.
+- A Zephyr-pinctrl-integrated UNICOMM UART driver with receive-error reporting
+  and a versioned, CRC32-protected protocol.
 - TI TINIElite power/reset/privilege setup aligned with TI's AM13E2x SDK.
 - Interrupt-driven TINIElite completion with IP acknowledge, bounded waits,
   completion telemetry, and spurious-interrupt detection.
@@ -67,7 +68,7 @@ models/               One active generated model and six regression fixtures
 tools/                Python hardware regression client
 scripts/              Build, flash, WSL USB setup, and pipeline commands
 config/               TI debug-probe target configuration
-tests/                Host-side unit tests
+tests/                Host-side and Zephyr-native protocol unit tests
 docs/                 Audit, design, validation evidence, and roadmap
 ```
 
@@ -176,9 +177,10 @@ evaluation. The present evidence supports interrupt-driven NPU completion: six
 golden regression vectors were repeated successfully over 600 inferences with
 3,000 acknowledged DONE interrupts, zero spurious interrupts, CRC fault
 recovery, verified NPU-timeout and hardware-watchdog resets, and
-explicit/read-back-validated 200 MHz clock setup. GitHub Actions
-also cross-builds the firmware, checks linked NPU/IRQ symbols, and publishes
-the resulting ELF, HEX, map, and symbol files. See
+explicit/read-back-validated 200 MHz clock setup. GitHub Actions also runs host
+tests, sanitized Zephyr-native protocol tests, C formatting/static analysis,
+cross-builds the firmware, checks linked NPU/IRQ symbols, and publishes the
+resulting ELF, HEX, map, and symbol files. See
 [docs/QUALITY_GATES.md](docs/QUALITY_GATES.md) for the live
 completion matrix and [docs/AUDIT.md](docs/AUDIT.md) for the assessment.
 

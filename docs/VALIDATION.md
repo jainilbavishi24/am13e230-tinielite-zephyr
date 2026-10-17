@@ -7,9 +7,11 @@ Performed on 2026-10-17 in WSL Ubuntu 22.04:
 - Clean Zephyr source at `9574b65fbaa01aa0c8f418bd7a6b97beb15fcc54`
 - GNU Arm Embedded GCC 10.3.1
 - Zephyr configure, compile, and link: pass
-- Output: 25,100 bytes flash; 43,616 bytes RAM (including a conservative
+- Output: 25,380 bytes flash; 43,616 bytes RAM (including a conservative
   32 KiB main stack)
-- Python unit tests: 13/13 pass
+- Python unit tests: 14/14 pass
+- Zephyr `native_sim` protocol tests: 5/5 pass with ASan and UBSan
+- Cppcheck and C formatting checks: pass
 - ShellCheck and Bash syntax: pass
 - Model SHA-256 verification: pass
 - ELF inspection: four TINIElite kernels, TI handler, model entry point, and NPU
@@ -18,6 +20,44 @@ Performed on 2026-10-17 in WSL Ubuntu 22.04:
 The environment reports non-fatal warnings for an absent standalone DTC and an
 old ccache. Install `device-tree-compiler`; update ccache or disable it to make
 the local build log clean.
+
+## UART pinctrl, error handling, and parser recovery gate
+
+Status: **passed on 2026-10-17** through XDS110 from WSL.
+
+UART register definitions and PA0/PA1 function selection were checked against
+TI AM13E2X SDK 26.01.00.03. Pin routing now uses the Zephyr pinctrl subsystem
+instead of private UART devicetree properties. The driver maps framing, parity,
+break, overrun, and noise status to Zephyr UART error flags and clears the
+latched hardware status.
+
+A deliberate UART BREAK returned structured transport error code 8 with
+Zephyr detail `-EIO` (`-5`), followed by a fresh valid `READY`. The current
+image then passed CRC fault injection, 60/60 exact inferences with zero
+retries, clock read-back, five NPU interrupts per inference, and zero spurious
+interrupts.
+
+An initial host attempt exposed a partial frame at serial-port reopen: the
+first magic byte of a later `READY` occupied the missing final CRC byte. A raw
+capture confirmed that subsequent firmware frames were complete. The host
+reader was changed to retain a sliding buffer and resynchronize after an
+invalid candidate; a regression test models the exact byte boundary. Ten
+consecutive reopen/CRC-fault/recovery runs then passed, covering another 60/60
+inferences with zero retries.
+
+Summary evidence is retained in
+[`evidence/hardware_uart_pinctrl_2026-10-17.json`](evidence/hardware_uart_pinctrl_2026-10-17.json).
+
+## Polling-to-interrupt occupancy comparison
+
+The validated polling baseline spent 510 us of its 668 us median inference
+actively waiting for NPU stages: at least 76.3% of inference wall time kept the
+main thread runnable. The current interrupt image blocks its main thread on a
+semaphore for 554 us of 701 us (79.0%), leaving an upper bound of 147 us, or
+21.0%, for non-wait main-thread work. End-to-end latency increased by 33 us
+(4.9%). These are defensible main-thread occupancy bounds across two validated
+firmware revisions, not a measurement of whole-system CPU utilization; exact
+ISR/kernel load and power require trace or external instrumentation.
 
 GitHub Actions run
 [`39006672584`](https://github.com/jainilbavishi24/am13e230-tinielite-zephyr/actions/runs/39006672584)

@@ -3,6 +3,7 @@
 /dts-v1/;
 
 #include <ti/am13e23019.dtsi>
+#include "lp_am13e230-pinctrl.dtsi"
 
 / {
 	model = "TI LP-AM13E230/AM13E23019";
@@ -29,5 +30,7 @@
 };
 
 &uart1 {
+	pinctrl-0 = <&uart1_tx_pa0 &uart1_rx_pa1>;
+	pinctrl-names = "default";
 	status = "okay";
 };

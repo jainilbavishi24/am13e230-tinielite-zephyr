@@ -7,40 +7,14 @@
 
 #include "app_clock.h"
 #include "app_npu.h"
+#include "app_protocol.h"
 #include "app_watchdog.h"
 
-#define APP_UART_FRAME_MAGIC_0    0x5AU
-#define APP_UART_FRAME_MAGIC_1    0xA5U
-#define APP_UART_PROTOCOL_VERSION 2U
-#define APP_UART_RX_TIMEOUT_MS    1000U
-
-enum app_uart_frame_type {
-	APP_UART_FRAME_INFER_REQUEST = 0x01,
-	APP_UART_FRAME_CLOCK_REQUEST = 0x02,
-	APP_UART_FRAME_NPU_STALL_REQUEST = 0x03,
-	APP_UART_FRAME_WATCHDOG_STALL_REQUEST = 0x04,
-	APP_UART_FRAME_WATCHDOG_STATUS_REQUEST = 0x05,
-	APP_UART_FRAME_READY = 0x80,
-	APP_UART_FRAME_ACK = 0x81,
-	APP_UART_FRAME_RESULT = 0x82,
-	APP_UART_FRAME_CLOCK_STATUS = 0x83,
-	APP_UART_FRAME_WATCHDOG_STATUS = 0x84,
-	APP_UART_FRAME_ERROR = 0xFF,
-};
+#define APP_UART_RX_TIMEOUT_MS 1000U
 
 struct app_uart_request {
 	enum app_uart_frame_type type;
 	uint16_t sequence;
-};
-
-enum app_uart_error_code {
-	APP_UART_ERROR_TIMEOUT = 1,
-	APP_UART_ERROR_VERSION = 2,
-	APP_UART_ERROR_TYPE = 3,
-	APP_UART_ERROR_LENGTH = 4,
-	APP_UART_ERROR_CRC = 5,
-	APP_UART_ERROR_INFERENCE = 6,
-	APP_UART_ERROR_INTERNAL = 7,
 };
 
 int app_uart_init(void);

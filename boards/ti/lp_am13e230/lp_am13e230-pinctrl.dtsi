@@ -1,0 +1,16 @@
+/* SPDX-License-Identifier: Apache-2.0 */
+
+#include <zephyr/dt-bindings/pinctrl/am13e230x-pinctrl.h>
+
+&pinctrl {
+	uart1_tx_pa0: uart1_tx_pa0 {
+		pinmux = <AM13E230_PIN_PA0 AM13E230_PIN_FUNCTION_9>;
+		bias-disable;
+	};
+
+	uart1_rx_pa1: uart1_rx_pa1 {
+		pinmux = <AM13E230_PIN_PA1 AM13E230_PIN_FUNCTION_9>;
+		bias-disable;
+		input-enable;
+	};
+};

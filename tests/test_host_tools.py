@@ -61,6 +61,26 @@ class HostToolTests(unittest.TestCase):
         self.assertEqual(SEND_TENSOR.FRAME_READY, frame["type"])
         self.assertEqual(b"\x00\x01\x03\x00", frame["payload"])
 
+    def test_frame_reader_resynchronizes_after_crc_byte_loss(self):
+        class FakeSerial:
+            def __init__(self, data):
+                self.data = bytearray(data)
+
+            def read(self, size):
+                result = self.data[:size]
+                del self.data[:size]
+                return bytes(result)
+
+        ready = SEND_TENSOR.encode_frame(
+            SEND_TENSOR.FRAME_READY, 0, b"\x00\x01\x03\x00"
+        )
+        # Model a partial frame whose missing CRC byte is replaced by the first
+        # magic byte of the following valid frame.
+        reader = SEND_TENSOR.FrameReader(FakeSerial(ready[:-1] + ready))
+        frame = reader.read_frame(0.1)
+        self.assertEqual(SEND_TENSOR.FRAME_READY, frame["type"])
+        self.assertEqual(b"\x00\x01\x03\x00", frame["payload"])
+
     def test_percentile_is_deterministic(self):
         self.assertEqual(1, SEND_TENSOR.percentile([1], 0.95))
         self.assertEqual(5, SEND_TENSOR.percentile([1, 2, 3, 4, 5], 0.95))

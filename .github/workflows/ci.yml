@@ -38,7 +38,8 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install --no-install-recommends -y \
-            cmake device-tree-compiler gcc-arm-none-eabi gperf ninja-build
+            clang-format cmake cppcheck device-tree-compiler gcc-arm-none-eabi \
+            gperf ninja-build
       - name: Initialize pinned west workspace
         run: |
           python -m pip install west
@@ -48,6 +49,16 @@ jobs:
         run: |
           python -m pip install -r zephyr/scripts/requirements.txt
           python -m pip install -r am13e230-tinielite-zephyr/requirements.txt
+      - name: Run Zephyr-native protocol tests
+        env:
+          ZEPHYR_BASE: ${{ github.workspace }}/zephyr
+          ZEPHYR_TOOLCHAIN_VARIANT: host
+        run: >-
+          west twister -T am13e230-tinielite-zephyr/tests/protocol -p native_sim
+          --inline-logs --enable-asan --enable-ubsan
+      - name: Run C format and static analysis checks
+        working-directory: am13e230-tinielite-zephyr
+        run: ./scripts/static_check.sh
       - name: Cross-compile firmware
         working-directory: am13e230-tinielite-zephyr
         run: ./scripts/build.sh
@@ -57,8 +68,10 @@ jobs:
           arm-none-eabi-nm build/zephyr/zephyr.elf > build/zephyr/symbols.txt
           grep -q 'tvmgen_default_ti_npu_convolveNHWC_0' build/zephyr/symbols.txt
           grep -q 'TI_NPU_NNC_IRQHandler' build/zephyr/symbols.txt
+          grep -q 'app_protocol_frame_crc32' build/zephyr/symbols.txt
           grep -q 'tinyengine_wait_for_completion' build/zephyr/symbols.txt
           grep -q 'app_watchdog_init' build/zephyr/symbols.txt
+          grep -q 'pinctrl_configure_pins' build/zephyr/symbols.txt
       - uses: actions/upload-artifact@v4
         with:
           name: am13e230-firmware

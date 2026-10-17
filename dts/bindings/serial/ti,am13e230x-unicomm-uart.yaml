@@ -4,7 +4,7 @@ description: TI AM13E230x UNICOMM UART
 
 compatible: "ti,am13e230x-unicomm-uart"
 
-include: [uart-controller.yaml, base.yaml]
+include: [uart-controller.yaml, pinctrl-device.yaml]
 
 properties:
   reg:
@@ -18,13 +18,3 @@ properties:
 
   current-speed:
     required: true
-
-  ti,tx-pincm:
-    type: int
-    required: true
-    description: PINCM register value for the board's UART transmit pin
-
-  ti,rx-pincm:
-    type: int
-    required: true
-    description: PINCM register value for the board's UART receive pin

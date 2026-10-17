@@ -1,0 +1,26 @@
+# SPDX-License-Identifier: Apache-2.0
+
+description: TI AM13E230x pin controller
+
+compatible: "ti,am13e230x-pinctrl"
+
+include: base.yaml
+
+properties:
+  reg:
+    required: true
+
+child-binding:
+  include:
+    - name: pincfg-node.yaml
+      property-allowlist:
+        - bias-disable
+        - bias-pull-down
+        - bias-pull-up
+        - input-enable
+
+  properties:
+    pinmux:
+      type: array
+      required: true
+      description: PINCM index followed by the peripheral function number

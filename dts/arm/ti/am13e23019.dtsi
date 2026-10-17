@@ -53,6 +53,12 @@
 			status = "okay";
 		};
 
+		pinctrl: pin-controller@400cc000 {
+			compatible = "ti,am13e230x-pinctrl";
+			reg = <0x400cc000 0x1b0>;
+			status = "okay";
+		};
+
 		flash-controller@40042000 {
 			compatible = "ti,am13e230x-flash-controller";
 			reg = <0x40042000 0x1000>;
@@ -67,13 +73,10 @@
 		uart1: serial@40601000 {
 			compatible = "ti,am13e230x-unicomm-uart";
 			reg = <0x40601000 0x1000>,
-			      <0x40632000 0x2000>,
-			      <0x400cc000 0x8>;
-			reg-names = "uart", "unicomm", "pinmux";
+			      <0x40632000 0x2000>;
+			reg-names = "uart", "unicomm";
 			clocks = <&semimclk>;
 			current-speed = <115200>;
-			ti,tx-pincm = <0x00000089>;
-			ti,rx-pincm = <0x00040089>;
 			status = "disabled";
 		};
 

@@ -1,0 +1,38 @@
+{
+  "timestamp_utc": "2026-10-17T16:05:50.149812+00:00",
+  "protocol_version": 2,
+  "firmware": {
+    "standard_zephyr_pinctrl": true,
+    "uart_receive_error_reporting": true
+  },
+  "clock_status": {
+    "derived_mclk_hz": 200000000,
+    "uart_clock_hz": 100000000,
+    "flash_wait_states": 3,
+    "validation_flags": 31,
+    "valid": true
+  },
+  "inference_regression": {
+    "total": 60,
+    "passed": 60,
+    "transport_retries": 0,
+    "crc_fault_test_passed": true,
+    "accelerator_us_median": 554,
+    "runtime_us_median": 129,
+    "total_us_median": 701,
+    "npu_interrupts_per_inference": 5,
+    "npu_spurious_interrupts": 0
+  },
+  "uart_break_injection": {
+    "structured_error_code": 8,
+    "detail": -5,
+    "fresh_ready_after_error": true,
+    "passed": true
+  },
+  "reopen_fault_recovery_runs": {
+    "runs": 10,
+    "crc_fault_tests_passed": 10,
+    "inferences_passed": 60,
+    "transport_retries": 0
+  }
+}

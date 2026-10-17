@@ -55,6 +55,7 @@ ERROR_NAMES = {
     5: "crc-mismatch",
     6: "inference-failure",
     7: "internal-error",
+    8: "UART-transport-error",
 }
 
 
@@ -161,31 +162,65 @@ class FrameReader:
 
     def __init__(self, serial_port: Any):
         self.serial_port = serial_port
+        self.buffer = bytearray()
 
-    def _read_exact(self, size: int, deadline: float) -> bytes:
-        data = bytearray()
-        while len(data) < size and time.monotonic() < deadline:
-            chunk = self.serial_port.read(size - len(data))
-            if chunk:
-                data.extend(chunk)
-        if len(data) != size:
-            raise TimeoutError(f"received {len(data)} of {size} expected bytes")
-        return bytes(data)
+    def _read_more(self, deadline: float) -> bool:
+        if time.monotonic() >= deadline:
+            return False
+        chunk = self.serial_port.read(256)
+        if chunk:
+            self.buffer.extend(chunk)
+            return True
+        return False
 
     def read_frame(self, timeout: float) -> dict[str, Any]:
         deadline = time.monotonic() + timeout
-        first_magic_seen = False
+        last_protocol_error: ProtocolError | None = None
+
         while time.monotonic() < deadline:
-            byte = self._read_exact(1, deadline)[0]
-            if first_magic_seen and byte == FRAME_MAGIC[1]:
-                header_tail = self._read_exact(FRAME_HEADER.size - 2, deadline)
-                header = FRAME_MAGIC + header_tail
-                _, _, _, _, length = FRAME_HEADER.unpack(header)
-                if length > MAX_FRAME_PAYLOAD:
-                    raise ProtocolError(f"payload length {length} exceeds protocol maximum")
-                body = self._read_exact(length + FRAME_CRC.size, deadline)
-                return decode_frame(header + body)
-            first_magic_seen = byte == FRAME_MAGIC[0]
+            magic_index = self.buffer.find(FRAME_MAGIC)
+            if magic_index < 0:
+                if self.buffer[-1:] == FRAME_MAGIC[:1]:
+                    del self.buffer[:-1]
+                else:
+                    self.buffer.clear()
+                self._read_more(deadline)
+                continue
+
+            if magic_index > 0:
+                del self.buffer[:magic_index]
+            if len(self.buffer) < FRAME_HEADER.size:
+                self._read_more(deadline)
+                continue
+
+            _, _, _, _, length = FRAME_HEADER.unpack_from(self.buffer)
+            if length > MAX_FRAME_PAYLOAD:
+                last_protocol_error = ProtocolError(
+                    f"payload length {length} exceeds protocol maximum"
+                )
+                del self.buffer[0]
+                continue
+
+            frame_size = FRAME_HEADER.size + length + FRAME_CRC.size
+            if len(self.buffer) < frame_size:
+                self._read_more(deadline)
+                continue
+
+            candidate = bytes(self.buffer[:frame_size])
+            try:
+                frame = decode_frame(candidate)
+            except ProtocolError as error:
+                # Slide one byte instead of dropping the whole candidate. The
+                # final byte may be the first magic byte of the next frame.
+                last_protocol_error = error
+                del self.buffer[0]
+                continue
+
+            del self.buffer[:frame_size]
+            return frame
+
+        if last_protocol_error is not None:
+            raise last_protocol_error
         raise TimeoutError("timed out waiting for a framed response")
 
 

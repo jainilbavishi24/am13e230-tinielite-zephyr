@@ -49,37 +49,20 @@ static void encode_le32(uint8_t *destination, uint32_t value)
 	destination[3] = (uint8_t)(value >> 24);
 }
 
-static uint32_t crc32_update(uint32_t crc, uint8_t value)
-{
-	crc ^= value;
-	for (uint32_t bit = 0U; bit < 8U; ++bit) {
-		crc = (crc >> 1) ^ ((crc & 1U) != 0U ? 0xEDB88320U : 0U);
-	}
-	return crc;
-}
-
-static uint32_t frame_crc32(const uint8_t *header, const uint8_t *payload, uint16_t length)
-{
-	uint32_t crc = UINT32_MAX;
-
-	for (uint32_t i = 2U; i < FRAME_HEADER_SIZE; ++i) {
-		crc = crc32_update(crc, header[i]);
-	}
-	for (uint32_t i = 0U; i < length; ++i) {
-		crc = crc32_update(crc, payload[i]);
-	}
-	return ~crc;
-}
-
 static int read_byte_until(uint8_t *value, uint32_t start, uint32_t timeout_ms)
 {
-	while (uart_poll_in(uart_dev, value) != 0) {
+	for (;;) {
+		if (uart_err_check(uart_dev) != 0) {
+			return -EIO;
+		}
+		if (uart_poll_in(uart_dev, value) == 0) {
+			return 0;
+		}
 		if ((k_uptime_get_32() - start) >= timeout_ms) {
 			return -ETIMEDOUT;
 		}
 		k_busy_wait(50);
 	}
-	return 0;
 }
 
 static int read_exact(uint8_t *data, uint32_t size, uint32_t start, uint32_t timeout_ms)
@@ -137,7 +120,7 @@ static int send_frame(enum app_uart_frame_type type, uint16_t sequence, const ui
 
 	encode_le16(&header[4], sequence);
 	encode_le16(&header[6], length);
-	crc = frame_crc32(header, payload, length);
+	crc = app_protocol_frame_crc32(header, payload, length);
 	encode_le32(encoded_crc, crc);
 
 	write_bytes(header, sizeof(header));
@@ -171,6 +154,7 @@ int app_uart_receive_request(int8_t *buffer, uint32_t size, struct app_uart_requ
 	uint16_t payload_length;
 	uint16_t frame_sequence = 0U;
 	uint32_t start;
+	enum app_uart_error_code validation_error;
 	int ret;
 
 	if ((buffer == NULL) || (request == NULL) || (size == 0U) ||
@@ -180,58 +164,51 @@ int app_uart_receive_request(int8_t *buffer, uint32_t size, struct app_uart_requ
 
 	while (uart_poll_in(uart_dev, &stale_byte) == 0) {
 	}
+	(void)uart_err_check(uart_dev);
 	send_ready();
 	start = k_uptime_get_32();
 
 	ret = read_magic(start);
 	if (ret != 0) {
+		if (ret == -EIO) {
+			app_uart_send_error(0U, APP_UART_ERROR_TRANSPORT, ret);
+		}
 		return ret;
 	}
 	ret = read_exact(&header[2], FRAME_HEADER_SIZE - 2U, start, APP_UART_RX_TIMEOUT_MS);
 	if (ret != 0) {
-		app_uart_send_error(0U, APP_UART_ERROR_TIMEOUT, ret);
+		app_uart_send_error(
+			0U, ret == -EIO ? APP_UART_ERROR_TRANSPORT : APP_UART_ERROR_TIMEOUT, ret);
 		return ret;
 	}
 
 	frame_sequence = decode_le16(&header[4]);
 	request->sequence = frame_sequence;
 	payload_length = decode_le16(&header[6]);
-	if (header[2] != APP_UART_PROTOCOL_VERSION) {
-		app_uart_send_error(frame_sequence, APP_UART_ERROR_VERSION, -EPROTO);
-		return -EPROTO;
-	}
-	if ((header[3] != APP_UART_FRAME_INFER_REQUEST) &&
-	    (header[3] != APP_UART_FRAME_CLOCK_REQUEST) &&
-	    (header[3] != APP_UART_FRAME_WATCHDOG_STATUS_REQUEST) &&
-	    (!IS_ENABLED(CONFIG_APP_NPU_FAULT_INJECTION) ||
-	     (header[3] != APP_UART_FRAME_NPU_STALL_REQUEST)) &&
-	    (!IS_ENABLED(CONFIG_APP_WATCHDOG_FAULT_INJECTION) ||
-	     (header[3] != APP_UART_FRAME_WATCHDOG_STALL_REQUEST))) {
-		app_uart_send_error(frame_sequence, APP_UART_ERROR_TYPE, -EPROTO);
-		return -EPROTO;
+	validation_error =
+		app_protocol_validate_request(header[2], header[3], payload_length, (uint16_t)size,
+					      IS_ENABLED(CONFIG_APP_NPU_FAULT_INJECTION),
+					      IS_ENABLED(CONFIG_APP_WATCHDOG_FAULT_INJECTION));
+	if (validation_error != APP_UART_ERROR_NONE) {
+		ret = validation_error == APP_UART_ERROR_LENGTH ? -EMSGSIZE : -EPROTO;
+		app_uart_send_error(frame_sequence, validation_error, ret);
+		return ret;
 	}
 	request->type = (enum app_uart_frame_type)header[3];
-	if (((request->type == APP_UART_FRAME_INFER_REQUEST) && (payload_length != size)) ||
-	    (((request->type == APP_UART_FRAME_CLOCK_REQUEST) ||
-	      (request->type == APP_UART_FRAME_NPU_STALL_REQUEST) ||
-	      (request->type == APP_UART_FRAME_WATCHDOG_STALL_REQUEST) ||
-	      (request->type == APP_UART_FRAME_WATCHDOG_STATUS_REQUEST)) &&
-	     (payload_length != 0U))) {
-		app_uart_send_error(frame_sequence, APP_UART_ERROR_LENGTH, -EMSGSIZE);
-		return -EMSGSIZE;
-	}
 
 	ret = read_exact((uint8_t *)buffer, payload_length, start, APP_UART_RX_TIMEOUT_MS);
 	if (ret == 0) {
 		ret = read_exact(received_crc, sizeof(received_crc), start, APP_UART_RX_TIMEOUT_MS);
 	}
 	if (ret != 0) {
-		app_uart_send_error(frame_sequence, APP_UART_ERROR_TIMEOUT, ret);
+		app_uart_send_error(frame_sequence,
+				    ret == -EIO ? APP_UART_ERROR_TRANSPORT : APP_UART_ERROR_TIMEOUT,
+				    ret);
 		return ret;
 	}
 
 	if (decode_le32(received_crc) !=
-	    frame_crc32(header, (const uint8_t *)buffer, payload_length)) {
+	    app_protocol_frame_crc32(header, (const uint8_t *)buffer, payload_length)) {
 		app_uart_send_error(frame_sequence, APP_UART_ERROR_CRC, -EBADMSG);
 		return -EBADMSG;
 	}

@@ -14,14 +14,16 @@
 - [x] Add bounded retry/resynchronization behavior and structured device errors.
 - [x] Hardware-validate TINIElite IRQ 41 completion, including IP mask/status/
   clear handling and completion/spurious counters.
-- [ ] Measure CPU utilization and formally compare it with the retained polling
-  latency baseline.
+- [x] Compare the interrupt image with the retained polling baseline and record
+  a formal main-thread occupancy bound; exact whole-system utilization still
+  requires trace or power instrumentation.
 - [x] Add and hardware-validate bounded NPU-stall timeout, structured error,
   cold-system reset, restored readiness, and post-reset stress inference.
 - [x] Add and hardware-validate an independent WWDT0 watchdog for
   whole-firmware deadlocks, including reset-cause read-back.
 - [x] Add repeated/stress inference tests with machine-readable results.
-- [ ] Move UART pin routing to standard Zephyr pinctrl and implement error flags.
+- [x] Move UART pin routing to standard Zephyr pinctrl and implement receive
+  error flags with deliberate hardware BREAK/recovery validation.
 
 ## P2 — evidence and automation
 
@@ -29,7 +31,8 @@
   symbol checks, and build-artifact publication.
 - [ ] Pin a redistributable build-container digest for stronger toolchain
   reproducibility.
-- [ ] Add static analysis and Zephyr Twister tests for protocol/state logic.
+- [x] Add Cppcheck/format enforcement and sanitized Zephyr Twister tests for
+  protocol validation and CRC logic.
 - [ ] Validate on an independent labeled dataset and report confusion matrix,
   per-class precision/recall, dataset provenance, and preprocessing.
 - [ ] Benchmark warm-up, distribution, jitter, CPU-only baseline, NPU utilization,

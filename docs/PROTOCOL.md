@@ -61,6 +61,7 @@ PLL/HFCLK, expected frequency, and sufficient flash wait states.
 | 5 | CRC mismatch |
 | 6 | Inference failure |
 | 7 | Internal error |
+| 8 | UART transport error (overrun, parity, framing, break, or noise) |
 
 ## Recovery rules
 

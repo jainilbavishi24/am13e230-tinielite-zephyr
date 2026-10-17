@@ -8,6 +8,7 @@ target_sources(app PRIVATE
   src/main.c
   src/app_clock.c
   src/app_npu.c
+  src/app_protocol.c
   src/app_uart.c
   src/app_watchdog.c
 )
