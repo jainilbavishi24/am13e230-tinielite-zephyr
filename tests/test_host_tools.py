@@ -1,6 +1,6 @@
 import importlib.util
-from pathlib import Path
 import unittest
+from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 SPEC = importlib.util.spec_from_file_location("send_tensor", ROOT / "tools" / "send_tensor.py")
@@ -13,13 +13,16 @@ class HostToolTests(unittest.TestCase):
     def test_parses_six_balanced_vectors(self):
         vectors = SEND_TENSOR.parse_vectors(SEND_TENSOR.MODEL_DIR)
         self.assertEqual(6, len(vectors))
-        self.assertEqual(["sawtooth", "sawtooth", "sine", "sine", "square", "square"],
-                         [item["class"] for item in vectors])
+        self.assertEqual(
+            ["sawtooth", "sawtooth", "sine", "sine", "square", "square"],
+            [item["class"] for item in vectors],
+        )
         self.assertTrue(all(len(item["input"]) == 256 for item in vectors))
 
     def test_normalization_matches_generated_header(self):
-        self.assertEqual((-70.02075, 187.0, 6),
-                         SEND_TENSOR.parse_normalization(SEND_TENSOR.MODEL_DIR))
+        self.assertEqual(
+            (-70.02075, 187.0, 6), SEND_TENSOR.parse_normalization(SEND_TENSOR.MODEL_DIR)
+        )
 
     def test_quantization_clamps_and_truncates(self):
         self.assertEqual(-128, SEND_TENSOR.quantize(-1000.0, -70.02075, 187.0, 6))
@@ -71,9 +74,7 @@ class HostToolTests(unittest.TestCase):
                 del self.data[:size]
                 return bytes(result)
 
-        ready = SEND_TENSOR.encode_frame(
-            SEND_TENSOR.FRAME_READY, 0, b"\x00\x01\x03\x00"
-        )
+        ready = SEND_TENSOR.encode_frame(SEND_TENSOR.FRAME_READY, 0, b"\x00\x01\x03\x00")
         # Model a partial frame whose missing CRC byte is replaced by the first
         # magic byte of the following valid frame.
         reader = SEND_TENSOR.FrameReader(FakeSerial(ready[:-1] + ready))
@@ -126,9 +127,11 @@ class HostToolTests(unittest.TestCase):
     def test_zephyr_timeout_wire_value_is_explicit(self):
         payload = SEND_TENSOR.ERROR_PAYLOAD.pack(6, -SEND_TENSOR.ZEPHYR_ETIMEDOUT)
         frame = {"payload": payload}
-        self.assertEqual(
-            "inference-failure (detail -116)", SEND_TENSOR.describe_error(frame)
-        )
+        self.assertEqual("inference-failure (detail -116)", SEND_TENSOR.describe_error(frame))
+
+    def test_error_decode_rejects_malformed_payload(self):
+        with self.assertRaisesRegex(SEND_TENSOR.ProtocolError, "malformed"):
+            SEND_TENSOR.decode_error(bytes(SEND_TENSOR.ERROR_PAYLOAD.size - 1))
 
     def test_watchdog_status_decode(self):
         payload = SEND_TENSOR.WATCHDOG_STATUS_PAYLOAD.pack(0x0E, 4000, 1)
@@ -140,6 +143,11 @@ class HostToolTests(unittest.TestCase):
     def test_watchdog_status_rejects_malformed_payload(self):
         with self.assertRaisesRegex(SEND_TENSOR.ProtocolError, "malformed"):
             SEND_TENSOR.decode_watchdog_status(bytes(11))
+
+    def test_watchdog_status_rejects_invalid_running_flag(self):
+        payload = SEND_TENSOR.WATCHDOG_STATUS_PAYLOAD.pack(0x0E, 4000, 2)
+        with self.assertRaisesRegex(SEND_TENSOR.ProtocolError, "running flag"):
+            SEND_TENSOR.decode_watchdog_status(payload)
 
 
 if __name__ == "__main__":

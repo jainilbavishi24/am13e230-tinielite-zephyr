@@ -2,6 +2,7 @@
 
 #define DT_DRV_COMPAT ti_am13e230x_unicomm_uart
 
+#include <errno.h>
 #include <stdint.h>
 
 #include <zephyr/device.h>
@@ -65,30 +66,38 @@ static void short_delay(void)
 	}
 }
 
-static void configure_baud(const struct uart_am13e230x_config *config)
+static int configure_baud(const struct uart_am13e230x_config *config)
 {
 	uint32_t baud_rate = config->baud_rate;
 	uint32_t ctl0 = sys_read32(config->uart_base + UART_CTL0_OFFSET);
-	uint32_t divisor;
+	uint64_t divisor;
+
+	if (baud_rate == 0U) {
+		return -EINVAL;
+	}
 
 	ctl0 &= ~UART_CTL0_HSE_MASK;
-	if ((baud_rate * 8U) > config->clock_freq) {
+	if (((uint64_t)baud_rate * 8U) > config->clock_freq) {
 		ctl0 |= UART_CTL0_HSE_OVS3;
-		divisor = (config->clock_freq * 64U) / (baud_rate * 3U);
-	} else if ((baud_rate * 16U) > config->clock_freq) {
+		divisor = ((uint64_t)config->clock_freq * 64U) / ((uint64_t)baud_rate * 3U);
+	} else if (((uint64_t)baud_rate * 16U) > config->clock_freq) {
 		ctl0 |= UART_CTL0_HSE_OVS8;
 		baud_rate /= 2U;
-		divisor = (((config->clock_freq * 8U) / baud_rate) + 1U) / 2U;
+		divisor = ((((uint64_t)config->clock_freq * 8U) / baud_rate) + 1U) / 2U;
 	} else {
-		divisor = (((config->clock_freq * 8U) / baud_rate) + 1U) / 2U;
+		divisor = ((((uint64_t)config->clock_freq * 8U) / baud_rate) + 1U) / 2U;
+	}
+	if ((divisor == 0U) || ((divisor >> 6) > UINT16_MAX)) {
+		return -EINVAL;
 	}
 
 	sys_write32(ctl0, config->uart_base + UART_CTL0_OFFSET);
-	sys_write32((divisor >> 6) & 0xFFFFU, config->uart_base + UART_IBRD_OFFSET);
-	sys_write32(divisor & 0x3FU, config->uart_base + UART_FBRD_OFFSET);
+	sys_write32((uint32_t)(divisor >> 6), config->uart_base + UART_IBRD_OFFSET);
+	sys_write32((uint32_t)divisor & 0x3FU, config->uart_base + UART_FBRD_OFFSET);
 	/* A write to LCRH latches the new integer/fractional divisors. */
 	sys_write32(sys_read32(config->uart_base + UART_LCRH_OFFSET),
 		    config->uart_base + UART_LCRH_OFFSET);
+	return 0;
 }
 
 static int uart_am13e230x_poll_in(const struct device *dev, unsigned char *value)
@@ -166,7 +175,10 @@ static int uart_am13e230x_init(const struct device *dev)
 	sys_write32(UART_LCRH_8N1, config->uart_base + UART_LCRH_OFFSET);
 	sys_write32(UART_CLKSEL_BUSCLK, config->uart_base + UART_CLKSEL_OFFSET);
 	sys_write32(UART_CLKDIV_DIV1, config->uart_base + UART_CLKDIV_OFFSET);
-	configure_baud(config);
+	ret = configure_baud(config);
+	if (ret != 0) {
+		return ret;
+	}
 
 	ctl0 = sys_read32(config->uart_base + UART_CTL0_OFFSET) | UART_CTL0_ENABLE;
 	sys_write32(ctl0, config->uart_base + UART_CTL0_OFFSET);

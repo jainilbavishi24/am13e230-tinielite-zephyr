@@ -5,15 +5,15 @@ from __future__ import annotations
 
 import argparse
 import binascii
-from datetime import datetime, timezone
 import glob
 import json
 import os
-from pathlib import Path
 import re
 import struct
 import sys
 import time
+from datetime import datetime, timezone
+from pathlib import Path
 from typing import Any
 
 BAUD_RATE = 115200
@@ -67,7 +67,7 @@ def default_port() -> str:
     configured = os.environ.get("TINI_UART_PORT")
     if configured:
         return configured
-    candidates = glob.glob("/dev/serial/by-id/*") + glob.glob("/dev/ttyACM*")
+    candidates = sorted(glob.glob("/dev/serial/by-id/*")) + sorted(glob.glob("/dev/ttyACM*"))
     return candidates[0] if candidates else "/dev/ttyACM0"
 
 
@@ -126,9 +126,7 @@ def encode_frame(frame_type: int, sequence: int, payload: bytes = b"") -> bytes:
         raise ValueError("Sequence must fit in uint16")
     if len(payload) > MAX_FRAME_PAYLOAD:
         raise ValueError("Frame payload is too large")
-    header = FRAME_HEADER.pack(
-        FRAME_MAGIC, PROTOCOL_VERSION, frame_type, sequence, len(payload)
-    )
+    header = FRAME_HEADER.pack(FRAME_MAGIC, PROTOCOL_VERSION, frame_type, sequence, len(payload))
     crc = binascii.crc32(header[2:] + payload) & 0xFFFFFFFF
     return header + payload + FRAME_CRC.pack(crc)
 
@@ -249,6 +247,12 @@ def describe_error(frame: dict[str, Any]) -> str:
     return f"{ERROR_NAMES.get(code, f'unknown-{code}')} (detail {detail})"
 
 
+def decode_error(payload: bytes) -> tuple[int, int]:
+    if len(payload) != ERROR_PAYLOAD.size:
+        raise ProtocolError("ERROR frame has a malformed payload")
+    return ERROR_PAYLOAD.unpack(payload)
+
+
 def validate_ready(frame: dict[str, Any]) -> None:
     if len(frame["payload"]) != CAPABILITIES_PAYLOAD.size:
         raise ProtocolError("READY frame has a malformed capability payload")
@@ -300,7 +304,9 @@ def run_vector(
     retries: int,
     quiet: bool,
 ) -> dict[str, Any]:
-    request = encode_frame(FRAME_INFER_REQUEST, sequence, make_payload(vector["input"], normalization))
+    request = encode_frame(
+        FRAME_INFER_REQUEST, sequence, make_payload(vector["input"], normalization)
+    )
     last_error = "no response"
 
     for attempt in range(retries + 1):
@@ -316,9 +322,7 @@ def run_vector(
             if acknowledgement["type"] == FRAME_ERROR:
                 raise ProtocolError(describe_error(acknowledgement))
 
-            response = wait_for_frame(
-                reader, {FRAME_RESULT, FRAME_ERROR}, 15.0, sequence=sequence
-            )
+            response = wait_for_frame(reader, {FRAME_RESULT, FRAME_ERROR}, 15.0, sequence=sequence)
             if response["type"] == FRAME_ERROR:
                 raise ProtocolError(describe_error(response))
             decoded_result = decode_result(response["payload"])
@@ -369,9 +373,11 @@ def run_crc_fault_test(serial_port: Any, reader: FrameReader, ready_timeout: flo
     serial_port.write(damaged)
     serial_port.flush()
     response = wait_for_frame(reader, {FRAME_ERROR}, 3.0, sequence=sequence)
-    code, _ = ERROR_PAYLOAD.unpack(response["payload"])
+    code, _ = decode_error(response["payload"])
     if code != 5:
-        raise ProtocolError(f"fault injection returned {describe_error(response)}, expected crc-mismatch")
+        raise ProtocolError(
+            f"fault injection returned {describe_error(response)}, expected crc-mismatch"
+        )
     print("CRC fault injection: PASS (corruption rejected and server recovered)")
 
 
@@ -381,15 +387,11 @@ def run_npu_stall_test(serial_port: Any, reader: FrameReader, ready_timeout: flo
     sequence = 0xF17E
     serial_port.write(encode_frame(FRAME_NPU_STALL_REQUEST, sequence))
     serial_port.flush()
-    acknowledgement = wait_for_frame(
-        reader, {FRAME_ACK, FRAME_ERROR}, 3.0, sequence=sequence
-    )
+    acknowledgement = wait_for_frame(reader, {FRAME_ACK, FRAME_ERROR}, 3.0, sequence=sequence)
     if acknowledgement["type"] == FRAME_ERROR:
         raise ProtocolError(describe_error(acknowledgement))
     response = wait_for_frame(reader, {FRAME_ERROR}, 3.0, sequence=sequence)
-    if len(response["payload"]) != ERROR_PAYLOAD.size:
-        raise ProtocolError("NPU stall test returned a malformed error payload")
-    code, detail = ERROR_PAYLOAD.unpack(response["payload"])
+    code, detail = decode_error(response["payload"])
     if code != 6 or detail != -ZEPHYR_ETIMEDOUT:
         raise ProtocolError(
             f"NPU stall test returned {describe_error(response)}, expected inference timeout"
@@ -404,6 +406,8 @@ def decode_watchdog_status(payload: bytes) -> dict[str, int | bool]:
     if len(payload) != WATCHDOG_STATUS_PAYLOAD.size:
         raise ProtocolError("WATCHDOG_STATUS frame has a malformed payload")
     reset_cause, timeout_ms, running = WATCHDOG_STATUS_PAYLOAD.unpack(payload)
+    if running not in (0, 1):
+        raise ProtocolError(f"WATCHDOG_STATUS has invalid running flag {running}")
     return {
         "reset_cause": reset_cause,
         "timeout_ms": timeout_ms,
@@ -416,9 +420,7 @@ def request_watchdog_status(
 ) -> dict[str, int | bool]:
     serial_port.write(encode_frame(FRAME_WATCHDOG_STATUS_REQUEST, sequence))
     serial_port.flush()
-    response = wait_for_frame(
-        reader, {FRAME_WATCHDOG_STATUS, FRAME_ERROR}, 3.0, sequence=sequence
-    )
+    response = wait_for_frame(reader, {FRAME_WATCHDOG_STATUS, FRAME_ERROR}, 3.0, sequence=sequence)
     if response["type"] == FRAME_ERROR:
         raise ProtocolError(describe_error(response))
     return decode_watchdog_status(response["payload"])
@@ -432,9 +434,7 @@ def run_watchdog_stall_test(
     sequence = 0xD06D
     serial_port.write(encode_frame(FRAME_WATCHDOG_STALL_REQUEST, sequence))
     serial_port.flush()
-    acknowledgement = wait_for_frame(
-        reader, {FRAME_ACK, FRAME_ERROR}, 3.0, sequence=sequence
-    )
+    acknowledgement = wait_for_frame(reader, {FRAME_ACK, FRAME_ERROR}, 3.0, sequence=sequence)
     if acknowledgement["type"] == FRAME_ERROR:
         raise ProtocolError(describe_error(acknowledgement))
 
@@ -442,9 +442,7 @@ def run_watchdog_stall_test(
     validate_ready(recovered)
     status = request_watchdog_status(serial_port, reader, sequence + 1)
     if status["reset_cause"] != WWDT0_RESET_CAUSE:
-        raise ProtocolError(
-            f"reset cause is 0x{status['reset_cause']:02x}, expected WWDT0 (0x0e)"
-        )
+        raise ProtocolError(f"reset cause is 0x{status['reset_cause']:02x}, expected WWDT0 (0x0e)")
     if not status["running"]:
         raise ProtocolError("WWDT0 did not restart after watchdog recovery")
     print(
@@ -477,9 +475,7 @@ def decode_clock_status(payload: bytes) -> dict[str, Any]:
         status["validation_flags"] & CLOCK_VALIDATION_REQUIRED
     ) == CLOCK_VALIDATION_REQUIRED
     status["flash_wait_states"] = (
-        0
-        if status["flash_control"] & 1
-        else (status["flash_control"] >> 8) & 0xF
+        0 if status["flash_control"] & 1 else (status["flash_control"] >> 8) & 0xF
     )
     return status
 
@@ -492,9 +488,7 @@ def request_clock_status(
     sequence = 1
     serial_port.write(encode_frame(FRAME_CLOCK_REQUEST, sequence))
     serial_port.flush()
-    response = wait_for_frame(
-        reader, {FRAME_CLOCK_STATUS, FRAME_ERROR}, 3.0, sequence=sequence
-    )
+    response = wait_for_frame(reader, {FRAME_CLOCK_STATUS, FRAME_ERROR}, 3.0, sequence=sequence)
     if response["type"] == FRAME_ERROR:
         raise ProtocolError(describe_error(response))
     return decode_clock_status(response["payload"])
@@ -503,10 +497,7 @@ def request_clock_status(
 def print_clock_status(status: dict[str, Any]) -> None:
     verdict = "PASS" if status["valid"] else "FAIL"
     print(f"Clock validation: {verdict}")
-    print(
-        f"MCLK: derived={status['derived_mclk_hz']} Hz, "
-        f"expected={status['expected_mclk_hz']} Hz"
-    )
+    print(f"MCLK: derived={status['derived_mclk_hz']} Hz, expected={status['expected_mclk_hz']} Hz")
     print(f"UART configured clock: {status['uart_clock_hz']} Hz")
     print(f"Flash wait states: {status['flash_wait_states']}")
     for name in (
@@ -552,7 +543,9 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--repeat", type=int, default=1, help="repeat the selected set N times")
     parser.add_argument("--retries", type=int, default=2, help="transport retries per inference")
-    parser.add_argument("--fault-test", action="store_true", help="verify CRC rejection before inference")
+    parser.add_argument(
+        "--fault-test", action="store_true", help="verify CRC rejection before inference"
+    )
     parser.add_argument(
         "--npu-fault-test",
         action="store_true",
@@ -566,7 +559,9 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--quiet", action="store_true", help="print only summary and failures")
     parser.add_argument("--json-output", type=Path, help="write machine-readable results")
     parser.add_argument("--port", default=default_port(), help="UART path")
-    parser.add_argument("--ready-timeout", type=float, default=15.0, help="seconds to wait for READY")
+    parser.add_argument(
+        "--ready-timeout", type=float, default=15.0, help="seconds to wait for READY"
+    )
     return parser.parse_args()
 
 
@@ -577,13 +572,19 @@ def main() -> int:
         print(f"error: index must be between 0 and {len(vectors) - 1}", file=sys.stderr)
         return 2
     if args.repeat < 1 or args.retries < 0 or args.ready_timeout <= 0:
-        print("error: repeat must be positive, retries nonnegative, and timeout positive", file=sys.stderr)
+        print(
+            "error: repeat must be positive, retries nonnegative, and timeout positive",
+            file=sys.stderr,
+        )
         return 2
 
     try:
         import serial
     except ImportError:
-        print("error: install dependencies with: python -m pip install -r requirements.txt", file=sys.stderr)
+        print(
+            "error: install dependencies with: python -m pip install -r requirements.txt",
+            file=sys.stderr,
+        )
         return 2
 
     selected = list(enumerate(vectors)) if args.all else [(args.index, vectors[args.index])]
@@ -616,9 +617,7 @@ def main() -> int:
             if args.npu_fault_test:
                 run_npu_stall_test(port, reader, args.ready_timeout)
             if args.watchdog_fault_test:
-                watchdog_status = run_watchdog_stall_test(
-                    port, reader, args.ready_timeout
-                )
+                watchdog_status = run_watchdog_stall_test(port, reader, args.ready_timeout)
             for position, (vector_index, vector) in enumerate(work, start=1):
                 sequence = position & 0xFFFF or 1
                 results.append(
@@ -673,10 +672,7 @@ def main() -> int:
     )
     spurious_metric = summary["npu_spurious_interrupts"]
     spurious_total = sum(item["npu_spurious_interrupts"] for item in results)
-    print(
-        f"npu_spurious_interrupts: total={spurious_total}, "
-        f"max={spurious_metric['max']}"
-    )
+    print(f"npu_spurious_interrupts: total={spurious_total}, max={spurious_metric['max']}")
 
     if args.json_output:
         report = {"summary": summary, "results": results}
