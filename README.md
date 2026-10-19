@@ -3,15 +3,25 @@
 [![CI](https://github.com/jainilbavishi24/am13e230-tinielite-zephyr/actions/workflows/ci.yml/badge.svg)](https://github.com/jainilbavishi24/am13e230-tinielite-zephyr/actions/workflows/ci.yml)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-blue.svg)](LICENSE)
 
-An out-of-tree Zephyr platform port and hardware-accelerated inference
-application for the Texas Instruments LP-AM13E230 LaunchPad. The project runs
-a generated TVM/TI waveform classifier on the AM13E230 TINIElite NPU and
-provides a reproducible WSL-native build, flash, test, and evidence workflow.
+This project turns a Texas Instruments LP-AM13E230 LaunchPad into a small
+edge-AI waveform classifier. Given 256 samples from a waveform, it performs
+inference on the physical microcontroller and scores the signal as one of
+three classes: **sawtooth, sine, or square**.
 
-The application accepts a 256-element feature tensor over UART and returns
-three signed class scores for sawtooth, sine, and square waveforms. NPU stages
-complete through hardware interrupts; protocol, clock, timeout, and watchdog
-behavior are validated on the physical board.
+A Python client reads the sample vector, applies the normalization and
+8-bit quantization required by the model, and sends the resulting tensor to
+the board over USB UART. Zephyr firmware runs the TVM-generated neural network,
+offloads its supported convolution and pooling stages to the AM13E230
+TINIElite NPU, and returns the three class scores together with timing and NPU
+interrupt diagnostics. The inference itself runs locally on the board; no
+cloud service is involved.
+
+Because the preview AM13E230 platform is not supported by the pinned upstream
+Zephyr release, this repository also supplies the board, SoC, devicetree,
+pinctrl, UART, clock, watchdog, and NPU integration needed to run the
+application. These components are kept outside the upstream Zephyr source tree
+(an *out-of-tree port*) so the project can be built reproducibly without
+patching Zephyr itself.
 
 ## Highlights
 
