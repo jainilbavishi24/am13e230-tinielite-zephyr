@@ -34,9 +34,12 @@ typedef struct pinctrl_soc_pin {
 #define Z_PINCTRL_STATE_PIN_INIT(node_id, prop, idx)                                               \
 	AM13E230_DT_PIN(DT_PROP_BY_IDX(node_id, prop, idx))
 
+/* Clang 14 and 18 disagree on this generated initializer. */
+/* clang-format off */
 #define Z_PINCTRL_STATE_PINS_INIT(node_id, prop)                                                   \
 	{                                                                                          \
 		DT_FOREACH_PROP_ELEM(node_id, prop, Z_PINCTRL_STATE_PIN_INIT)                      \
 	}
+/* clang-format on */
 
 #endif /* ZEPHYR_SOC_TI_AM13X_PINCTRL_SOC_H_ */
