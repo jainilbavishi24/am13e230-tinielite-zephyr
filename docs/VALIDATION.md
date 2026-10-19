@@ -2,24 +2,28 @@
 
 ## Clean repository checks
 
-Performed on 2026-10-17 in WSL Ubuntu 22.04:
+Performed on 2026-10-19 in WSL Ubuntu 22.04:
 
 - Clean Zephyr source at `9574b65fbaa01aa0c8f418bd7a6b97beb15fcc54`
 - GNU Arm Embedded GCC 10.3.1
 - Zephyr configure, compile, and link: pass
-- Output: 25,380 bytes flash; 43,616 bytes RAM (including a conservative
+- Device Tree Compiler 1.6.1 detected during configuration
+- Output: 25,492 bytes flash; 43,616 bytes RAM (including a conservative
   32 KiB main stack)
-- Python unit tests: 14/14 pass
+- Python unit tests: 16/16 pass
 - Zephyr `native_sim` protocol tests: 5/5 pass with ASan and UBSan
-- Cppcheck and C formatting checks: pass
+- Cppcheck, ClangFormat, Ruff, and Python formatting checks: pass
 - ShellCheck and Bash syntax: pass
 - Model SHA-256 verification: pass
 - ELF inspection: four TINIElite kernels, TI handler, model entry point, and NPU
   memory callbacks present
+- TI DSLite erase/program/verify of the current image: pass
+- Physical-board smoke regression: 6/6 exact vectors, zero transport retries,
+  five NPU completion interrupts per inference, and zero spurious interrupts
 
-The environment reports non-fatal warnings for an absent standalone DTC and an
-old ccache. Install `device-tree-compiler`; update ccache or disable it to make
-the local build log clean.
+The installed ccache 4.5.1 is older than the optional version accepted by this
+Zephyr revision, so the build proceeds without compiler caching. This does not
+affect the firmware or reproducibility.
 
 ## UART pinctrl, error handling, and parser recovery gate
 

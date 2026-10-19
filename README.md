@@ -1,107 +1,162 @@
-# AM13E230 TINIElite inference on Zephyr
+# AM13E230 TINIElite Edge AI on Zephyr
 
-An out-of-tree Zephyr board, SoC, UART driver, TINIElite adapter, and hardware
-inference demo for the Texas Instruments LP-AM13E230 LaunchPad. A generated
-TVM/TI model classifies 256-element feature tensors as sawtooth, sine, or
-square waveforms.
+[![CI](https://github.com/jainilbavishi24/am13e230-tinielite-zephyr/actions/workflows/ci.yml/badge.svg)](https://github.com/jainilbavishi24/am13e230-tinielite-zephyr/actions/workflows/ci.yml)
+[![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-blue.svg)](LICENSE)
 
-> Project status: hardware-validated engineering prototype under systematic
-> hardening. It is suitable for a portfolio or resume when described with the
-> limitations below; it is not yet a production inference platform.
+An out-of-tree Zephyr platform port and hardware-accelerated inference
+application for the Texas Instruments LP-AM13E230 LaunchPad. The project runs
+a generated TVM/TI waveform classifier on the AM13E230 TINIElite NPU and
+provides a reproducible WSL-native build, flash, test, and evidence workflow.
 
-## What is demonstrated
+The application accepts a 256-element feature tensor over UART and returns
+three signed class scores for sawtooth, sine, and square waveforms. NPU stages
+complete through hardware interrupts; protocol, clock, timeout, and watchdog
+behavior are validated on the physical board.
 
-- Custom Zephyr support for the preview AM13E23019 Cortex-M33 device and board.
-- Explicit TI-aligned 200 MHz PLL startup, flash wait-state setup, and
+## Highlights
+
+- Out-of-tree Zephyr board, SoC, devicetree, pinctrl, UART, and TINIElite
+  support—without patching the upstream Zephyr tree.
+- TI-aligned 200 MHz clock startup with three flash wait states and live
   register read-back validation.
-- A Zephyr-pinctrl-integrated UNICOMM UART driver with receive-error reporting
-  and a versioned, CRC32-protected protocol.
-- TI TINIElite power/reset/privilege setup aligned with TI's AM13E2x SDK.
-- Interrupt-driven TINIElite completion with IP acknowledge, bounded waits,
-  completion telemetry, and spurious-interrupt detection.
-- A linked accelerator model containing four TINIElite hardware kernels.
-- Native WSL build, native Linux UniFlash/DSLite programming, and UART testing.
-- Host regression tooling that checks exact outputs for all six supplied
-  golden vectors and returns a nonzero status on failure.
-- Structured device errors, sequence validation, bounded transport retries,
-  protocol fault injection, stress runs, and JSON evidence output.
-- Deliberate NPU-stall injection with a bounded timeout, structured error,
-  cold-system reset, and verified post-reset inference recovery.
-- An independent 4-second hardware watchdog fed only by main-loop progress,
-  with deliberate deadlock injection and reset-cause verification.
+- Interrupt-driven NPU completion on IRQ 41 with bounded waits, acknowledged
+  completion counters, and spurious-interrupt detection.
+- Versioned UART protocol with sequence numbers, explicit lengths, CRC-32,
+  structured errors, resynchronization, and bounded host retries.
+- Recovery from malformed frames, NPU stalls, and whole-firmware deadlocks.
+- Independent four-second WWDT0 hardware watchdog with reset-cause validation.
+- Reproducible host tests, sanitized Zephyr-native tests, static analysis,
+  cross-compilation, ELF symbol checks, and downloadable CI artifacts.
 
-The reorganized implementation has been erased, programmed, verified, and run
-on the LaunchPad. All six supplied vectors produced their exact golden scores,
-and a subsequent 600-inference stress run completed with no failures or
-transport retries. Under the read-back-validated 200 MHz configuration, median
-end-to-end inference time in the latest recovery-enabled image was 701 us. Each
-inference generated exactly five acknowledged NPU completion interrupts; 600
-runs produced zero spurious interrupts. See
-[docs/VALIDATION.md](docs/VALIDATION.md) for the recorded evidence and caveats.
+## Verified hardware results
 
-## Architecture
+| Measurement | Result |
+|---|---:|
+| Golden fixtures | 6/6 exact score vectors |
+| Stress regression | 600/600 inferences, zero retries |
+| NPU completion | 5 IRQs per inference; 3,000 total |
+| Spurious NPU interrupts | 0 |
+| Accelerator wait | 554 µs median |
+| Runtime/CPU portion | 129 µs median in the recovery-enabled image |
+| End-to-end inference | 701 µs median in the recovery-enabled image |
+| Active clocks | 200 MHz MCLK; 100 MHz UART source |
+| Firmware footprint | 25,492 B flash; 43,616 B RAM |
 
-```text
-Python host ──versioned CRC32 frame──> Zephyr application
-                                             │
-                              generated TVM/TI runtime
-                                  │                 │
-                             TINIElite NPU       CPU stages
-                                  └────────┬────────┘
-                                           │
-Python host <──framed scores + timing──── UART
+These numbers are board measurements, not simulated estimates. Full commands,
+raw register values, historical corrections, and JSON evidence are in
+[docs/VALIDATION.md](docs/VALIDATION.md).
+
+## System architecture
+
+```mermaid
+flowchart LR
+    Host[Python regression client] -->|quantized tensor| Protocol[UART protocol v2<br/>sequence + length + CRC-32]
+    Protocol --> App[Zephyr inference server]
+    App --> Runtime[Generated TVM/TI runtime]
+    Runtime --> CPU[CPU graph stages]
+    Runtime --> NPU[TINIElite NPU kernels]
+    NPU -->|DONE IRQ 41| Driver[Zephyr TINIElite driver]
+    Driver -->|semaphore| Runtime
+    Runtime --> App
+    App -->|scores + timing + IRQ counters| Protocol
+    Protocol --> Host
+    Watchdog[WWDT0 hardware watchdog] -. supervises .-> App
+    Clock[SYSCTL / PLL / flash setup] -. supplies validated clocks .-> App
 ```
 
-See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for memory maps and execution
-details. The byte-level wire contract is in
-[docs/PROTOCOL.md](docs/PROTOCOL.md).
+```mermaid
+sequenceDiagram
+    participant H as Host client
+    participant A as Zephyr application
+    participant R as Generated runtime
+    participant N as TINIElite NPU
 
-## Repository layout
-
-```text
-app/                 Zephyr inference server application
-boards/              LP-AM13E230 board definition
-soc/                  AM13E23019 SoC definition
-dts/                  SoC nodes and custom bindings
-drivers/              TINIElite adapter and UNICOMM UART driver
-models/               One active generated model and six regression fixtures
-tools/                Python hardware regression client
-scripts/              Build, flash, WSL USB setup, and pipeline commands
-config/               TI debug-probe target configuration
-tests/                Host-side and Zephyr-native protocol unit tests
-docs/                 Audit, design, validation evidence, and roadmap
+    A->>H: READY(input=256, output=3)
+    H->>A: INFERENCE_REQUEST(sequence, tensor, CRC)
+    A->>H: ACK(sequence)
+    A->>R: tvmgen_default_run()
+    loop Each accelerated graph stage
+        R->>N: Load parameters and start
+        N-->>A: DONE interrupt
+        A->>R: Continue generated runtime
+    end
+    A->>H: RESULT(scores, timing, IRQ counters, CRC)
 ```
 
-## Fresh workspace setup
+The server intentionally processes one request at a time. This keeps the
+opaque generated-runtime state, timing, error recovery, and watchdog feeding
+deterministic. See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) and
+[docs/PROTOCOL.md](docs/PROTOCOL.md) for implementation details.
 
-The manifest pins Zephyr to commit
-`9574b65fbaa01aa0c8f418bd7a6b97beb15fcc54` and fetches only the required CMSIS
-modules.
+## Repository structure
+
+| Path | Purpose |
+|---|---|
+| `app/` | Inference server, clock telemetry, protocol, and watchdog control |
+| `boards/` | LP-AM13E230 out-of-tree board definition |
+| `soc/` | AM13E230 SoC startup and pinctrl interface |
+| `dts/` | SoC description and custom devicetree bindings |
+| `drivers/` | UNICOMM UART, pinctrl, and TINIElite drivers |
+| `models/` | Generated model archive, header, license, hashes, and six fixtures |
+| `tools/` | Python protocol and hardware-regression client |
+| `scripts/` | Build, flash, test, static-check, and WSL USB helpers |
+| `tests/` | Host unit tests and Zephyr `native_sim` ztests |
+| `docs/` | Architecture, protocol, audit, roadmap, and hardware evidence |
+| `config/` | TI XDS110/DSLite target configuration |
+
+## Prerequisites
+
+The validated environment is Ubuntu 22.04 under WSL 2 with GNU Arm Embedded
+GCC 10.3.1 and TI UniFlash 9.7. Install the Linux build dependencies with:
 
 ```bash
-mkdir am13e230-workspace && cd am13e230-workspace
-git clone <YOUR_REPOSITORY_URL> am13e230-tinielite-zephyr
-python3 -m venv .venv
-. .venv/bin/activate
-pip install west
-west init -l am13e230-tinielite-zephyr
-west update
-pip install -r zephyr/scripts/requirements.txt
-pip install -r am13e230-tinielite-zephyr/requirements.txt
+sudo apt-get update
+sudo apt-get install --no-install-recommends -y \
+  clang-format cmake cppcheck device-tree-compiler gcc-arm-none-eabi \
+  gcc-multilib gperf ninja-build python3-venv shellcheck
 ```
 
-Use a fresh west workspace. A downstream Zephyr tree that already defines an
-`lp_am13e230` board will conflict with this repository's out-of-tree board of
-the same name.
+TI UniFlash is required only for physical-board programming. The scripts use
+`~/ti/uniflash_9.7.0` by default; set `TI_UNIFLASH_ROOT` when it is installed
+elsewhere.
 
-Install CMake, Ninja, Device Tree Compiler, and an Arm GNU Embedded toolchain.
-The validated local build used GCC 10.3.1. If `west` is not on `PATH`, set
-`WEST_BIN=/absolute/path/to/west`.
+## Create a clean west workspace
 
-## WSL hardware access
+The manifest pins Zephyr and the required CMSIS modules. Start from a directory
+that does not contain an older in-tree `lp_am13e230` port:
 
-In an elevated Windows PowerShell, bind and attach the XDS110 device using its
-actual BUSID (do not type angle brackets):
+```bash
+mkdir am13e230-workspace
+cd am13e230-workspace
+git clone https://github.com/jainilbavishi24/am13e230-tinielite-zephyr.git
+
+python3 -m venv .venv
+. .venv/bin/activate
+python -m pip install west
+
+west init -l am13e230-tinielite-zephyr
+west update
+python -m pip install -r zephyr/scripts/requirements.txt
+python -m pip install -r am13e230-tinielite-zephyr/requirements.txt
+python -m pip install -r am13e230-tinielite-zephyr/requirements-dev.txt
+```
+
+The pinned upstream revisions are recorded in [west.yml](west.yml).
+
+## Build
+
+```bash
+cd am13e230-tinielite-zephyr
+./scripts/build.sh
+```
+
+The output image is `build/zephyr/zephyr.hex`. Set `WEST_BIN` if `west` is not
+available on `PATH`.
+
+## Attach the XDS110 to WSL
+
+Install `usbipd-win` on Windows, then use an elevated PowerShell. Find the
+current XDS110 BUSID first because it may change after reconnecting:
 
 ```powershell
 & "C:\Program Files\usbipd-win\usbipd.exe" list
@@ -109,84 +164,104 @@ actual BUSID (do not type angle brackets):
 & "C:\Program Files\usbipd-win\usbipd.exe" attach --wsl --busid 4-3
 ```
 
-Then in WSL:
+Replace `4-3` with the BUSID shown for `0451:bef3`. Then configure restricted
+device access in WSL:
 
 ```bash
 ./scripts/setup_xds110_wsl.sh
 ```
 
-The Linux release of TI UniFlash is required for native WSL flashing. By
-default the scripts expect it at `~/ti/uniflash_9.7.0`; override this with
-`TI_UNIFLASH_ROOT`.
+Restart the WSL shell after the first setup so `dialout` group membership is
+active.
 
-## Build, flash, and validate
+## Flash and run
 
 ```bash
-./scripts/build.sh
 ./scripts/flash.sh
 ./scripts/test.sh
 ```
 
-Or run all three:
+Or build, flash, and run all six fixtures in one command:
 
 ```bash
 ./scripts/pipeline.sh
 ```
 
-If the test reports that `READY` was not received, press the LaunchPad RESET
-button once. The host now times out with this instruction instead of waiting
-forever. `scripts/test.sh` keeps one serial connection open and runs all six
-vectors sequentially.
+Press the LaunchPad RESET button once after flashing if the client reports
+that it did not receive `READY`.
 
-Run protocol fault injection and a 600-inference stress test with:
+## Validation commands
+
+Run CRC fault injection followed by 600 inferences:
 
 ```bash
 ./scripts/test.sh --fault-test --repeat 100 --quiet \
   --json-output docs/evidence/hardware_stress.json
 ```
 
-Exercise the real NPU wait-timeout and automatic reset path before the stress
-run with `--npu-fault-test`. This diagnostic is controlled by
-`CONFIG_APP_NPU_FAULT_INJECTION` and should be disabled in deployed builds.
-
-Exercise independent recovery from a whole-firmware stall with
-`--watchdog-fault-test`. The host requires a fresh `READY`, reads the latched
-reset cause, and accepts only the AM13E230 WWDT0 cause (`0x0e`) with the
-watchdog running again. This diagnostic is controlled by
-`CONFIG_APP_WATCHDOG_FAULT_INJECTION` and should be disabled in deployed
-builds.
-
-Read back and validate the active clock tree independently of inference with:
+Validate clock configuration and raw register state:
 
 ```bash
 ./scripts/test.sh --clock-status \
   --json-output docs/evidence/hardware_clock.json
 ```
 
-## Honest project claims
+The client also supports `--npu-fault-test` and `--watchdog-fault-test` for
+deliberate reset-recovery tests. These commands require firmware built with the
+corresponding diagnostic Kconfig options; disable fault injection in deployed
+configurations.
 
-Good resume wording:
+## Software quality checks
 
-> Built out-of-tree Zephyr support and a WSL-native build/flash/test workflow
-> for TI's preview AM13E230 Cortex-M33 MCU; integrated a TVM-generated hybrid
-> TINIElite NPU model and verified accelerator symbols and on-board inference
-> over a custom UART regression protocol.
+```bash
+ruff check tools tests
+ruff format --check tools tests
+python -m unittest discover -s tests -v
+./scripts/static_check.sh
+shellcheck scripts/*.sh
+```
 
-Avoid claiming “100% model accuracy,” “production ready,” or independent model
-evaluation. The present evidence supports interrupt-driven NPU completion: six
-golden regression vectors were repeated successfully over 600 inferences with
-3,000 acknowledged DONE interrupts, zero spurious interrupts, CRC fault
-recovery, verified NPU-timeout and hardware-watchdog resets, and
-explicit/read-back-validated 200 MHz clock setup. GitHub Actions also runs host
-tests, sanitized Zephyr-native protocol tests, C formatting/static analysis,
-cross-builds the firmware, checks linked NPU/IRQ symbols, and publishes the
-resulting ELF, HEX, map, and symbol files. See
-[docs/QUALITY_GATES.md](docs/QUALITY_GATES.md) for the live
-completion matrix and [docs/AUDIT.md](docs/AUDIT.md) for the assessment.
+CI additionally runs the protocol ztests on Zephyr `native_sim` with
+AddressSanitizer and UndefinedBehaviorSanitizer, cross-builds the firmware in a
+clean pinned workspace, verifies critical ELF symbols, validates model hashes,
+and publishes the ELF, HEX, map, and symbol files.
 
-## Licensing
+## Project boundaries
 
-Project-authored source is Apache-2.0. Generated model artifacts and fixtures
-retain their separate terms in
+This repository demonstrates embedded platform bring-up and on-device NPU
+inference. It does not contain the original training pipeline, source model,
+independent evaluation dataset, or model-generation toolchain; the available
+model input is the licensed generated `mod.a`, its header, and six regression
+fixtures. Consequently:
+
+- The six fixtures establish deterministic regression behavior, not general
+  model accuracy.
+- A CPU-equivalent model benchmark and model regeneration require the missing
+  source model and generation pipeline.
+- Whole-system power and exact CPU-utilization measurements require external
+  instrumentation or trace hardware.
+- UART data transfer currently uses Zephyr's polling API; pinctrl and receive
+  error reporting are implemented, while interrupt/async transfer is future
+  work.
+- The port is maintained out of tree and has not been submitted upstream.
+
+The live completion matrix is in
+[docs/QUALITY_GATES.md](docs/QUALITY_GATES.md), and planned work is tracked in
+[docs/ROADMAP.md](docs/ROADMAP.md).
+
+## Documentation
+
+- [Architecture](docs/ARCHITECTURE.md)
+- [UART protocol](docs/PROTOCOL.md)
+- [Hardware validation](docs/VALIDATION.md)
+- [Engineering quality gates](docs/QUALITY_GATES.md)
+- [Critical audit](docs/AUDIT.md)
+- [Roadmap](docs/ROADMAP.md)
+- [Contributing](CONTRIBUTING.md)
+
+## License
+
+Project-authored source is licensed under Apache-2.0. Generated model artifacts
+and fixtures retain their separate terms in
 [models/waveform_classifier/LICENSE.txt](models/waveform_classifier/LICENSE.txt).
-Review [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) before publishing a fork.
+See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) before redistribution.

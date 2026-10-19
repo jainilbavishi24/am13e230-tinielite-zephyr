@@ -18,7 +18,7 @@ passed only when reproducible evidence exists.
 | Independent hardware watchdog | PASS | Deliberate feed starvation causes WWDT0 BOOTRST; reset cause `0x0e`, restarted watchdog, and 600/600 post-reset inferences verified |
 | Production UART integration | PARTIAL | Standard Zephyr pinctrl and receive-error reporting are hardware-validated; interrupt/async data transfer remains pending |
 | Firmware CI | PASS | GitHub Actions provisions the Arm GNU toolchain and pinned west workspace, cross-builds, verifies key ELF symbols, and publishes firmware artifacts |
-| Static and Zephyr-native tests | PASS | Cppcheck and formatting pass; five protocol ztests pass on `native_sim` with ASan and UBSan; 14 host tests pass |
+| Static and Zephyr-native tests | PASS | Cppcheck, ClangFormat, Ruff, and Python formatting pass; five protocol ztests pass on `native_sim` with ASan and UBSan; 16 host tests pass |
 | Independent model evaluation | EXTERNAL INPUT REQUIRED | Original preprocessing contract and an independent labeled dataset are unavailable |
 | Comparative benchmarking | PARTIAL / EXTERNAL INPUT REQUIRED | Polling/IRQ main-thread occupancy bounds, NPU timing, and footprint are recorded; an equivalent CPU model artifact and power instrumentation are unavailable |
 | Upstream-quality platform port | PENDING | SoC/board/driver split and Zephyr-reviewable patches |

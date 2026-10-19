@@ -4,7 +4,7 @@ Audit date: 2026-10-17
 
 ## Verdict
 
-This is a legitimate, resume-worthy hardware/firmware bring-up project. The
+This is a hardware-validated firmware and platform bring-up project. The
 ELF links generated `tvmgen_default_ti_npu_convolveNHWC_*` and
 `tvmgen_default_ti_npu_avgPoolNHWC_3` kernels, the firmware has run on the
 LaunchPad, and native WSL flashing and UART inference have been demonstrated.
@@ -24,6 +24,31 @@ model headers/archive/symbols, all six golden vectors, WSL scripts, host Python
 tools, flash configuration, build output/map/symbols, backups, dumps, and the
 knowledge-transfer document. Upstream Zephyr's millions of vendored lines were
 not re-audited; its exact revision was identified and pinned.
+
+## Current code-quality review
+
+The project-owned C, Python, shell, CMake, Kconfig, devicetree, workflow, and
+documentation files were reviewed again on 2026-10-19. The review and automated
+gates found no unresolved critical correctness defect in the exercised path.
+The following maintainability and robustness issues were corrected:
+
+- Moved the external UART and pinctrl sources into Zephyr's standard driver
+  libraries with `zephyr_library_amend()` instead of producing parallel module
+  libraries.
+- Made UART divisor arithmetic overflow-safe and reject zero or unrepresentable
+  baud configurations.
+- Made host diagnostic parsing reject malformed error payloads and invalid
+  watchdog running flags.
+- Made automatic serial-port selection deterministic.
+- Added pinned Ruff linting and formatting to the local and GitHub Actions
+  quality gates.
+- Installed and verified Device Tree Compiler 1.6.1, removing the missing-DTC
+  configuration warning.
+
+The reviewed image was rebuilt, programmed, verified, and passed all six
+hardware fixtures with zero transport retries after these changes. Remaining
+items are recorded below as explicit platform or artifact limitations rather
+than hidden code-quality claims.
 
 ## Confirmed correct
 
@@ -128,11 +153,3 @@ not re-audited; its exact revision was identified and pinned.
 
 The live completion matrix and acceptance criteria are maintained in
 [`QUALITY_GATES.md`](QUALITY_GATES.md).
-
-## Resume assessment
-
-Strong project themes are low-level MCU bring-up, Zephyr porting, devicetree,
-MMIO driver development, NPU/runtime integration, embedded protocol design,
-WSL USB/debug-probe operation, and measurement. Present it as a validated
-prototype and explain the remaining limitations; that honesty improves the
-project rather than weakening it.
