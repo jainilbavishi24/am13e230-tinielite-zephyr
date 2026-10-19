@@ -4,7 +4,7 @@
 
 - [x] Explicitly initialize and read back the 200 MHz MCLK, 100 MHz UART bus
   clock, PLL state, and flash wait states.
-- [ ] Install Device Tree Compiler and remove avoidable build warnings.
+- [x] Install Device Tree Compiler and remove avoidable build warnings.
 - [x] Confirm that the model and golden data may be published by their owner.
 
 ## P1 — correctness and reliability
