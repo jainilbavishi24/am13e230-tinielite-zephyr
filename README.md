@@ -261,6 +261,7 @@ The live completion matrix is in
 
 ## Documentation
 
+- [Complete project explanation and interview study PDFs](explanation/README.md)
 - [Architecture](docs/ARCHITECTURE.md)
 - [UART protocol](docs/PROTOCOL.md)
 - [Hardware validation](docs/VALIDATION.md)

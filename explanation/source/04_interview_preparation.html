@@ -1,0 +1,371 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>AM13E230 TINIElite — Interview Preparation</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<section class="title-page">
+  <div class="title-kicker">Interview study guide · Volume 4</div>
+  <div class="rule"></div>
+  <h1>Interview Preparation<br>and Question Bank</h1>
+  <p class="subtitle">Concise explanations, difficult follow-ups, whiteboard flows, STAR stories, résumé wording, and a defensible fact sheet.</p>
+  <div class="meta">AM13E230 TINIElite Edge AI · Jainil Bavishi · 23 October 2026</div>
+</section>
+
+<section class="toc">
+  <h2>Contents</h2>
+  <ol>
+    <li><a href="#strategy">How to prepare</a></li>
+    <li><a href="#openers">Opening explanations</a></li>
+    <li><a href="#whiteboard">Whiteboard walkthroughs</a></li>
+    <li><a href="#questions">Technical question bank</a></li>
+    <li><a href="#hard">Hard challenges and honest answers</a></li>
+    <li><a href="#star">STAR stories</a></li>
+    <li><a href="#resume">Résumé wording and ownership</a></li>
+    <li><a href="#demo">Live demonstration plan</a></li>
+    <li><a href="#facts">Final fact sheet</a></li>
+  </ol>
+</section>
+
+<h2 id="strategy">1. How to prepare</h2>
+
+<ol>
+  <li><strong>Master Volume 1:</strong> explain the project without jargon.</li>
+  <li><strong>Draw the data path:</strong> host → protocol → Zephyr → generated runtime → NPU interrupt → result.</li>
+  <li><strong>Own five deep stories:</strong> clock mismatch, NPU IRQ, protocol recovery, watchdog, WSL migration.</li>
+  <li><strong>Know boundaries:</strong> supplied model versus your integration work; regression versus accuracy.</li>
+  <li><strong>Practice numbers last:</strong> understand what each metric measures before memorizing it.</li>
+</ol>
+
+<div class="callout warn">
+  <span class="label">Interview rule</span><br>
+  Never bluff about binary model internals or hardware behavior you did not measure. A precise boundary—followed by how you verified the available interface—is a stronger engineering answer than an invented detail.
+</div>
+
+<h2 id="openers">2. Opening explanations</h2>
+
+<h3>2.1 Ten-second answer</h3>
+
+<p>“It is a Zephyr-based edge-AI system that runs a supplied waveform-classification model on TI's AM13E230 TINIElite NPU, with custom platform drivers, a robust UART protocol, fault recovery, WSL tooling, and hardware-backed validation.”</p>
+
+<h3>2.2 Sixty-second answer</h3>
+
+<p>“The board was a preview TI microcontroller with a Cortex-M33 and TINIElite NPU, but the pinned Zephyr release did not support it. I built an out-of-tree board/SoC integration, configured the real 200 MHz clock, and implemented pinctrl, a polling UNICOMM UART driver, and the NPU adapter required by a supplied TVM-generated model archive. A Python client quantizes 256 waveform samples and sends them using a versioned CRC-32 UART protocol. The generated runtime executes a hybrid graph; the NPU raises IRQ 41 after hardware stages, a minimal ISR signals a semaphore, and the application continues the runtime in thread context with a timeout. I added cold-reset recovery, an independent hardware watchdog, WSL-native build/flash/test, and CI. Hardware stress testing completed 600 exact fixture inferences with 3,000 acknowledged NPU interrupts, zero spurious interrupts, and zero retries. I integrated the model; I did not train it, and the six fixtures are not a general accuracy claim.”</p>
+
+<h3>2.3 “What was difficult?” answer</h3>
+
+<p>“The difficult part was establishing trustworthy behavior across several opaque boundaries: a preview MCU, sparse platform support, and a binary-only model runtime. The key was to replace assumptions with evidence—inspect archive symbols, validate actual clock registers, count physical NPU interrupts, inject failures, and preserve machine-readable hardware results.”</p>
+
+<h2 id="whiteboard">3. Whiteboard walkthroughs</h2>
+
+<h3>3.1 Data path</h3>
+
+<pre>Float waveform[256]
+        │  host reads generated bias/scale/shift
+        ▼
+Signed int8 tensor[256]
+        │  protocol v2: magic/version/type/seq/len/payload/CRC32
+        ▼
+UART @ 115200 ──► Zephyr request validator ──► ACK
+                                             │
+                                             ▼
+                                   tvmgen_default_run()
+                                      │           │
+                                 CPU stages   TINIElite stage
+                                                   │ DONE IRQ 41
+                                                   ▼
+                                            ISR gives semaphore
+                                                   │
+                                      TI_NPU_NNC_IRQHandler()
+                                                   │ repeat
+                                                   ▼
+             RESULT: 3 int8 scores + timing + IRQ counts + CRC32</pre>
+
+<h3>3.2 Reliability layers</h3>
+
+<pre>Corrupted bytes ──► CRC/error + stream resynchronization
+Missing NPU DONE ─► 100 ms semaphore timeout + structured error + cold reset
+Whole firmware hang ► independent 4 s WWDT0 hardware reset
+After reset ──────► fresh READY + reset-cause/status validation + regression</pre>
+
+<h3>3.3 Software layering</h3>
+
+<pre>Host test client
+──────────────────────────────────────────────────────────
+Application: request dispatch, inference policy, telemetry, watchdog
+──────────────────────────────────────────────────────────
+Generated TVM/TI runtime        Zephyr kernel/services
+──────────────────────────────────────────────────────────
+UART + pinctrl + TINIElite glue + clock/WWDT register logic
+──────────────────────────────────────────────────────────
+AM13E230: Cortex-M33, flash/SRAM, UNICOMM, TINIElite, WWDT0</pre>
+
+<h2 id="questions">4. Technical question bank</h2>
+
+<h3>Project and AI fundamentals</h3>
+
+<div class="qa"><div class="question">1. What makes this an edge-AI project?</div><div class="answer">Inference runs on the microcontroller/NPU near the data source. The host supplies and verifies test inputs, but no cloud service computes the model output.</div></div>
+
+<div class="qa"><div class="question">2. Did you train the model?</div><div class="answer">No. TI tooling supplied a generated static archive, header, and six fixtures. My work was platform bring-up, runtime integration, communications, reliability, tooling, and validation.</div></div>
+
+<div class="qa"><div class="question">3. What exactly is classified?</div><div class="answer">A vector of 256 waveform features/samples. The model returns three signed int8 scores ordered sawtooth, sine, square; the largest score is treated as the winner.</div></div>
+
+<div class="qa"><div class="question">4. Are the outputs probabilities?</div><div class="answer">No. They are signed quantized scores. There is no demonstrated softmax calibration or probability interpretation.</div></div>
+
+<div class="qa"><div class="question">5. What is quantization?</div><div class="answer">Mapping higher-precision values into a small integer range. Here the host applies generated bias, scale, integer shift, and clipping to produce int8 input, reducing memory and matching the accelerator's compiled model contract.</div></div>
+
+<div class="qa"><div class="question">6. Why must preprocessing match exactly?</div><div class="answer">The model was compiled for a particular numeric transformation. Different scaling, rounding, clipping, ordering, or signedness changes tensor values and can change predictions even if firmware and model are otherwise correct.</div></div>
+
+<div class="qa"><div class="question">7. Why is this a hybrid graph?</div><div class="answer">The generated runtime orchestrates the graph on Cortex-M33, executes some generated CPU operations, and offloads supported convolution/pooling work to TINIElite.</div></div>
+
+<h3>Zephyr and platform bring-up</h3>
+
+<div class="qa"><div class="question">8. Why use Zephyr instead of bare metal?</div><div class="answer">Zephyr provides startup, device registration, devicetree/Kconfig integration, kernel synchronization, time APIs, reboot support, native tests, and a standard build ecosystem. Low-level drivers were still required for unsupported hardware.</div></div>
+
+<div class="qa"><div class="question">9. What does out-of-tree mean?</div><div class="answer">The new board, SoC, bindings, and drivers live in the project module rather than modifying upstream Zephyr files. A clean pinned Zephyr checkout discovers them through module metadata.</div></div>
+
+<div class="qa"><div class="question">10. What is west?</div><div class="answer">Zephyr's multi-repository workspace tool. It reads the manifest, fetches exact dependencies, locates the workspace, and drives commands such as build and Twister.</div></div>
+
+<div class="qa"><div class="question">11. What is devicetree?</div><div class="answer">A build-time description of hardware resources and connections: memory ranges, register blocks, interrupts, clocks, pins, and enabled devices. Drivers obtain validated constants from it.</div></div>
+
+<div class="qa"><div class="question">12. What is a devicetree binding?</div><div class="answer">A YAML schema for a compatible device. It documents and validates required properties, such as UART register regions and clock reference.</div></div>
+
+<div class="qa"><div class="question">13. What is Kconfig?</div><div class="answer">A compile-time feature configuration system. It controls whether drivers, serial support, reboot, stack sizes, and diagnostic fault interfaces are included.</div></div>
+
+<div class="qa"><div class="question">14. How do CMake, Kconfig, and devicetree differ?</div><div class="answer">CMake chooses source/link inputs; Kconfig chooses software features; devicetree describes the hardware instances those features operate on.</div></div>
+
+<div class="qa"><div class="question">15. What is MMIO?</div><div class="answer">Memory-mapped I/O exposes peripheral registers at fixed addresses. A 32-bit read/write becomes a hardware register operation. Zephyr's <code>sys_read32/sys_write32</code> make that intent explicit.</div></div>
+
+<h3>Clocking and timing</h3>
+
+<div class="qa"><div class="question">16. Why was clock configuration important?</div><div class="answer">CPU time conversion, UART baud, NPU timing, and flash safety all depend on the real clock. Merely declaring 200 MHz while hardware remained at 32 MHz created false performance numbers.</div></div>
+
+<div class="qa"><div class="question">17. How is 200 MHz generated?</div><div class="answer">From the board's 25 MHz crystal using PLL predivide 2, multiply 32, and output divide 2: 25/2×32/2 = 200 MHz, followed by a staged clock-source transition.</div></div>
+
+<div class="qa"><div class="question">18. Why are flash wait states required?</div><div class="answer">Flash cannot supply instructions at a 200 MHz core rate without extra access cycles. Three wait states are configured before raising the clock.</div></div>
+
+<div class="qa"><div class="question">19. Why is flash configuration code in RAM?</div><div class="answer">It is unsafe to change flash access timing while executing the same operation from flash. A RAM-resident routine avoids that dependency.</div></div>
+
+<div class="qa"><div class="question">20. How did you validate the clock?</div><div class="answer">Firmware reads raw source, PLL, divider, status, and flash registers, derives the active frequency, and returns both values and validation flags to the host. The evidence records 200 MHz and three wait states.</div></div>
+
+<div class="qa"><div class="question">21. How are times measured?</div><div class="answer">Using the 32-bit hardware cycle counter around defined code/wait regions, then converting the unsigned cycle difference using Zephyr's known cycles-per-second value.</div></div>
+
+<h3>UART and protocol</h3>
+
+<div class="qa"><div class="question">22. Why does the UART have two base addresses?</div><div class="answer">UNICOMM has a wrapper for reset/power/mode and a UART register region for data/control/status. Applying offsets to the wrong region can access invalid addresses.</div></div>
+
+<div class="qa"><div class="question">23. Is UART interrupt-driven?</div><div class="answer">No. Byte transfer uses Zephyr's polling API. NPU completion is interrupt-driven. An earlier UART IRQ attempt used an incorrect base and was reverted; async UART remains future work.</div></div>
+
+<div class="qa"><div class="question">24. Why use a custom binary protocol?</div><div class="answer">The application needs exact int8 tensors and structured binary metrics. A framed protocol avoids text parsing overhead and adds length, sequencing, integrity, errors, and recovery rules.</div></div>
+
+<div class="qa"><div class="question">25. Why CRC-32 rather than a checksum?</div><div class="answer">An additive checksum has weak error detection and previously exposed signedness differences. Standard CRC-32 detects common burst and multibit corruption much more reliably.</div></div>
+
+<div class="qa"><div class="question">26. Why include sequence numbers?</div><div class="answer">A delayed ACK/result from an earlier retry must not satisfy a newer request. The host accepts only the expected sequence.</div></div>
+
+<div class="qa"><div class="question">27. How does resynchronization work?</div><div class="answer">Both sides scan for two magic bytes. The host keeps a sliding buffer and, after an invalid candidate, drops one byte and searches again so it can recover even when a new frame begins inside a damaged candidate.</div></div>
+
+<div class="qa"><div class="question">28. What is the purpose of READY?</div><div class="answer">It means the server is idle and communicates expected input/output sizes. It also provides a clear post-reset synchronization point.</div></div>
+
+<div class="qa"><div class="question">29. What is the purpose of ACK?</div><div class="answer">It confirms a particular sequence passed framing and CRC checks and was accepted before the longer inference or fault action begins.</div></div>
+
+<h3>NPU integration and interrupts</h3>
+
+<div class="qa"><div class="question">30. What is <code>mod.a</code>?</div><div class="answer">A static archive generated by TI MCU NNC/TVM for Cortex-M33 and TINIElite. It contains graph/runtime code and generated accelerator kernels, linked into the final ELF.</div></div>
+
+<div class="qa"><div class="question">31. What is an ABI?</div><div class="answer">The binary contract between separately compiled components: symbol names, parameter types, calling convention, layouts, and behavior. Our NPU callbacks must exactly match what <code>mod.a</code> expects.</div></div>
+
+<div class="qa"><div class="question">32. What callbacks does the archive need?</div><div class="answer"><code>NPU_getCtlReg</code>, <code>NPU_setInstrMem</code>, and <code>NPU_setParamMem</code>. They expose the control address and safely stage generated words into NPU SRAM.</div></div>
+
+<div class="qa"><div class="question">33. Why not keep all weights in NPU SRAM?</div><div class="answer">Parameter SRAM is only 2 KiB. The generated runtime uses it as a stage-local scratchpad and swaps content as the graph progresses.</div></div>
+
+<div class="qa"><div class="question">34. How does NPU completion work?</div><div class="answer">TINIElite raises DONE on IRQ 41. The ISR reads masked status, clears DONE, increments an atomic count, and gives a semaphore. The waiting thread wakes and calls the generated continuation function.</div></div>
+
+<div class="qa"><div class="question">35. Why not call the generated handler inside the ISR?</div><div class="answer">Opaque generated code may be long or use services unsuitable for interrupt context. A minimal ISR reduces latency and defers graph continuation to normal thread context.</div></div>
+
+<div class="qa"><div class="question">36. Why use an atomic counter?</div><div class="answer">The ISR writes the counter while thread context reads it. Atomic operations avoid a data race and ensure each completion is counted safely.</div></div>
+
+<div class="qa"><div class="question">37. What is a spurious interrupt?</div><div class="answer">An entry into the TINIElite ISR when masked DONE is not set. It may indicate misrouting, stale state, or another unexpected source. The driver counts it and valid results require zero.</div></div>
+
+<div class="qa"><div class="question">38. Why five interrupts when four NPU kernel symbols exist?</div><div class="answer">The binary runtime may split a named kernel into internal sublayers or use a schedule not visible in source. The defensible observation is five acknowledged hardware completions per inference; do not invent an unverified mapping.</div></div>
+
+<div class="qa"><div class="question">39. Does the interrupt version run faster?</div><div class="answer">No. It measured about 4.9% slower end-to-end than polling in the direct comparison because of interrupt/kernel overhead. Its benefit is bounded blocking and improved schedulability, not raw latency.</div></div>
+
+<h3>Fault tolerance and concurrency</h3>
+
+<div class="qa"><div class="question">40. Why is the current application single-threaded?</div><div class="answer">One request at a time keeps protocol order, timing, recovery, and the binary runtime's global state deterministic. NPU hardware and ISR still operate concurrently with the blocked main thread.</div></div>
+
+<div class="qa"><div class="question">41. Why is the NPU timeout 100 ms?</div><div class="answer">Normal stages complete in hundreds of microseconds, so 100 ms is comfortably above expected jitter while still bounding failure. It is a reliability threshold, not a performance target.</div></div>
+
+<div class="qa"><div class="question">42. Why reset the full MCU after NPU timeout?</div><div class="answer">The binary runtime may retain partially advanced global continuation state. Without a documented local recovery contract, cold reset is the safest way to restore all software and peripheral state.</div></div>
+
+<div class="qa"><div class="question">43. Why add a watchdog if you already have timeouts?</div><div class="answer">Software timeouts require software to keep executing. An independently clocked hardware watchdog also covers total application deadlock or broken control flow.</div></div>
+
+<div class="qa"><div class="question">44. Why not feed the watchdog from a timer thread?</div><div class="answer">A background feeder could remain alive while useful processing is stuck. Feeding only at main-loop progress makes the watchdog reflect application liveness.</div></div>
+
+<div class="qa"><div class="question">45. What is fault injection?</div><div class="answer">Deliberately causing a known failure—bad CRC, missing NPU start, watchdog starvation, UART BREAK—to prove detection and recovery paths that normal tests rarely execute.</div></div>
+
+<h3>Testing, WSL, and reproducibility</h3>
+
+<div class="qa"><div class="question">46. Why are unit tests not enough?</div><div class="answer">Host/native tests validate pure logic but cannot prove pin mux, PLL, NPU power, physical IRQ routing, watchdog reset, USB transport, or target timing. Hardware tests close those gaps.</div></div>
+
+<div class="qa"><div class="question">47. What do ASan and UBSan add?</div><div class="answer">On native_sim they detect memory-safety errors and undefined C behavior in portable protocol code. They complement, not replace, target tests.</div></div>
+
+<div class="qa"><div class="question">48. How do you prove the NPU code is linked?</div><div class="answer">CI inspects the final ELF symbol table for generated TINIElite kernels, the TI continuation handler, and project integration symbols. Runtime completion counters prove physical execution behavior.</div></div>
+
+<div class="qa"><div class="question">49. How does hardware reach WSL?</div><div class="answer"><code>usbipd-win</code> attaches the Windows USB device to the WSL 2 VM. Linux then sees the XDS110/ACM interfaces; udev and the dialout group grant restricted access.</div></div>
+
+<div class="qa"><div class="question">50. What does XDS110 do?</div><div class="answer">It is TI's on-board debug probe, exposing debug/programming and application UART interfaces over USB.</div></div>
+
+<div class="qa"><div class="question">51. What does DSLite do?</div><div class="answer">TI UniFlash's command-line debug-server tool uses the CCXML target configuration to erase, program, verify, and control the device through XDS110.</div></div>
+
+<div class="qa"><div class="question">52. Why use a clean west workspace?</div><div class="answer">The legacy Zephyr checkout contains older in-tree modifications and a duplicate board name. A clean pinned checkout proves the repository contains all required project changes and avoids accidental dependency on local state.</div></div>
+
+<h2 id="hard">5. Hard challenges and honest answers</h2>
+
+<div class="qa"><div class="question">“You only tested six inputs. Why should I trust this?”</div><div class="answer">Trust is scoped. The six vectors establish deterministic integration regression, and repeating them 600 times stresses transport/runtime stability. They do not establish model quality. A true accuracy study needs a separate representative labeled dataset, provenance, and confusion-matrix metrics.</div></div>
+
+<div class="qa"><div class="question">“Could the firmware simply return hardcoded expected values?”</div><div class="answer">The linked ELF contains generated NPU kernels; the runtime invokes project NPU memory callbacks; the physical device produces five acknowledged DONE interrupts per inference; a deliberately absent completion triggers the real timeout; and results contain timing/IRQ telemetry. Together these are stronger than output matching alone.</div></div>
+
+<div class="qa"><div class="question">“Why should I believe 701 µs after earlier numbers were wrong?”</div><div class="answer">The earlier mistake was explicitly retained and corrected. Current measurements are paired with raw PLL/source/divider/flash register read-back proving 200 MHz. The lesson is that cycle conversion must be anchored to observed hardware state.</div></div>
+
+<div class="qa"><div class="question">“Is this production ready?”</div><div class="answer">No; it is a hardware-validated engineering prototype. Production work would include async UART, deployment configuration without fault injection, wider peripheral/EMI/security testing, stack optimization, field update strategy, upstream review, and product-specific safety requirements.</div></div>
+
+<div class="qa"><div class="question">“Why not compare against CPU inference?”</div><div class="answer">The available archive targets TINIElite and no equivalent source model or CPU-target artifact exists. A fair comparison requires the same model, quantization, preprocessing, compiler assumptions, and verified clock. Fabricating a substitute would be misleading.</div></div>
+
+<div class="qa"><div class="question">“How much power did the NPU save?”</div><div class="answer">That was not measured. Latency and main-thread wait bounds were recorded, but energy requires board-current instrumentation and controlled workloads. Blocking the CPU does not by itself quantify system power.</div></div>
+
+<div class="qa"><div class="question">“Why use raw registers rather than a standard Zephyr clock/watchdog driver?”</div><div class="answer">The preview platform lacked those reviewed upstream abstractions. The project isolated raw accesses, used devicetree addresses, followed TI SDK sequences, bounded status waits, and added read-back tests. Converting them into reusable upstream drivers is future work.</div></div>
+
+<div class="qa"><div class="question">“What would you redesign with full model source?”</div><div class="answer">Reproduce the training/export toolchain, create an independent dataset evaluation, generate matched CPU/NPU variants, define a failure-reporting callback ABI, characterize per-layer latency/memory, and evaluate dynamic or partitioned model storage if the platform permits it.</div></div>
+
+<h2 id="star">6. STAR stories</h2>
+
+<h3>6.1 Correcting the clock and performance evidence</h3>
+
+<p><strong>Situation:</strong> The project reported impressive microsecond latency based on Zephyr cycle conversion.<br>
+<strong>Task:</strong> Verify that the measurement represented real hardware behavior.<br>
+<strong>Action:</strong> Added read-only clock telemetry, discovered MCLK was 32 MHz despite 200 MHz metadata, implemented TI's crystal/PLL/flash sequence, and added host validation of raw registers.<br>
+<strong>Result:</strong> Achieved read-back-validated 200 MHz operation and replaced misleading values with defensible 701 µs recovery-image timing.</p>
+
+<h3>6.2 Moving from polling to verified interrupts</h3>
+
+<p><strong>Situation:</strong> The early NPU path polled a status register and was described too strongly.<br>
+<strong>Task:</strong> prove real interrupt-driven completion and bound failure.<br>
+<strong>Action:</strong> Implemented IRQ 41 status/clear/mask handling, atomic counters, semaphore delivery, 100 ms waits, protocol metrics, and spurious-interrupt rejection.<br>
+<strong>Result:</strong> 600 inferences produced exactly 3,000 acknowledged completions and zero spurious IRQs.</p>
+
+<h3>6.3 Hardening a fragile serial protocol</h3>
+
+<p><strong>Situation:</strong> The prototype used a fixed packet and additive checksum and could desynchronize.<br>
+<strong>Task:</strong> create a recoverable test/control channel.<br>
+<strong>Action:</strong> Designed versioned length-delimited frames with sequences, CRC-32, typed errors, absolute deadlines, retries, and a sliding host parser.<br>
+<strong>Result:</strong> CRC corruption and UART BREAK were rejected, later transactions recovered, and stress testing required zero retries.</p>
+
+<h3>6.4 Recovering from complete deadlock</h3>
+
+<p><strong>Situation:</strong> NPU timeouts could recover a peripheral stall but not a frozen application.<br>
+<strong>Task:</strong> add independent liveness supervision.<br>
+<strong>Action:</strong> Configured WWDT0 from a 32.768 kHz source, routed violation to BOOTRST, fed only on request-loop progress, and added deliberate starvation/status checks.<br>
+<strong>Result:</strong> Hardware reset occurred with cause <code>0x0e</code>, the watchdog restarted, and 600 post-recovery inferences passed.</p>
+
+<h3>6.5 Completing a native WSL workflow</h3>
+
+<p><strong>Situation:</strong> The inherited project had stale Windows paths, a lost virtual environment, and an assumption that flashing had to remain in Windows.<br>
+<strong>Task:</strong> establish one reproducible Linux workflow under WSL.<br>
+<strong>Action:</strong> rebuilt the west/toolchain environment, attached XDS110 with usbipd, added restricted udev rules, installed Linux UniFlash, and wrote repository-relative scripts.<br>
+<strong>Result:</strong> Build, flash, verify, UART test, fault tests, and CI now operate from the WSL-centered repository.</p>
+
+<h2 id="resume">7. Résumé wording and ownership</h2>
+
+<h3>Strong concise bullet</h3>
+
+<div class="callout good">
+  Built out-of-tree Zephyr support and a WSL-native deployment/test workflow for TI's AM13E230 Cortex-M33 MCU; integrated a TVM-generated TINIElite NPU waveform classifier with interrupt-driven completion, CRC-framed UART, bounded recovery, and hardware-backed CI evidence.
+</div>
+
+<h3>Evidence-oriented second bullet</h3>
+
+<div class="callout good">
+  Validated 600 repeated on-board inferences with 3,000 acknowledged NPU DONE interrupts, zero spurious interrupts or transport retries, read-back-verified 200 MHz clocking, CRC/UART fault recovery, NPU timeout reset, and independent hardware-watchdog recovery.
+</div>
+
+<h3>Ownership sentence</h3>
+
+<p>“The neural network was supplied as a generated binary artifact. I owned the embedded platform bring-up, driver/runtime integration, host protocol, reliability mechanisms, WSL workflow, testing, evidence, and repository engineering.”</p>
+
+<h2 id="demo">8. Live demonstration plan</h2>
+
+<h3>8.1 Before the interview</h3>
+
+<ul>
+  <li>Charge laptop and connect the LaunchPad with a known data-capable USB cable.</li>
+  <li>In elevated PowerShell, confirm the XDS110 BUSID and attach it to WSL.</li>
+  <li>In WSL, verify <code>lsusb</code>, the serial device, and group permissions.</li>
+  <li>Activate the clean west workspace environment and confirm UniFlash path.</li>
+  <li>Build once and keep the known-good HEX.</li>
+  <li>Keep JSON evidence available in case hardware connection fails during the interview.</li>
+</ul>
+
+<h3>8.2 Demonstration sequence</h3>
+
+<pre>./scripts/build.sh
+./scripts/flash.sh
+# Press RESET once if READY is not observed after flashing.
+./scripts/test.sh
+./scripts/test.sh --clock-status
+./scripts/test.sh --fault-test --repeat 10 --quiet</pre>
+
+<p>Explain what each command proves. Do not run watchdog/NPU reset tests unless time permits and you have practiced the reset/READY sequence.</p>
+
+<h3>8.3 If the board does not respond</h3>
+
+<ol>
+  <li>Check <code>usbipd list</code>; reattach if state is only Shared.</li>
+  <li>Check the Linux serial path and permissions.</li>
+  <li>Ensure no terminal has the ACM port open.</li>
+  <li>Press RESET once and wait for <code>READY</code>.</li>
+  <li>Reflash and verify if necessary.</li>
+  <li>Fall back to committed evidence and explain the diagnostic process calmly.</li>
+</ol>
+
+<h2 id="facts">9. Final fact sheet</h2>
+
+<table>
+  <tr><th>Item</th><th>Value</th></tr>
+  <tr><td>Board / SoC / CPU</td><td>TI LP-AM13E230 / AM13E23019 / Arm Cortex-M33</td></tr>
+  <tr><td>Accelerator</td><td>TINIElite NPU</td></tr>
+  <tr><td>RTOS</td><td>Pinned development revision of Zephyr (commit recorded in <code>west.yml</code>)</td></tr>
+  <tr><td>Input / output</td><td>256 signed int8 values / 3 signed int8 scores</td></tr>
+  <tr><td>Classes</td><td>Sawtooth, sine, square</td></tr>
+  <tr><td>Clock</td><td>200 MHz MCLK; 100 MHz UART source; 25 MHz crystal</td></tr>
+  <tr><td>UART</td><td>115200 baud, 8N1, polling byte API</td></tr>
+  <tr><td>NPU interrupt</td><td>IRQ 41, five completions per inference</td></tr>
+  <tr><td>NPU stage timeout</td><td>100 ms</td></tr>
+  <tr><td>Hardware watchdog</td><td>WWDT0, 32.768 kHz source, four-second timeout</td></tr>
+  <tr><td>Protocol</td><td>Version 2, little-endian, sequence + length + IEEE CRC-32</td></tr>
+  <tr><td>Current recovery-image timing</td><td>554 µs wait, 129 µs runtime, 701 µs total median</td></tr>
+  <tr><td>Stress evidence</td><td>600/600 exact fixtures, zero retries, 3,000 DONE IRQs, zero spurious</td></tr>
+  <tr><td>Footprint</td><td>25,492 B flash; 43,616 B RAM including 32 KiB main stack</td></tr>
+  <tr><td>Model ownership</td><td>Generated artifact supplied externally; training/source model unavailable</td></tr>
+</table>
+
+<h3>Commands worth remembering</h3>
+
+<pre>./scripts/build.sh                    # clean target build
+./scripts/flash.sh                    # Linux DSLite erase/program/verify
+./scripts/test.sh                     # all six fixtures
+./scripts/pipeline.sh                 # build + flash + test
+./scripts/static_check.sh             # C formatting + Cppcheck
+python -m unittest discover -s tests -v
+ruff check tools tests
+ruff format --check tools tests
+shellcheck scripts/*.sh</pre>
+
+<div class="callout">
+  <span class="label">Final mental model</span><br>
+  The model archive supplies neural-network computation. This project supplies the trustworthy embedded system around it: a supported platform, known clocks, safe hardware access, validated transport, interrupt synchronization, bounded failure behavior, independent recovery, reproducible tooling, and evidence.
+</div>
+</body>
+</html>

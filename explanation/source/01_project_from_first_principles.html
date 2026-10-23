@@ -1,0 +1,315 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>AM13E230 TINIElite — Project from First Principles</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<section class="title-page">
+  <div class="title-kicker">Interview study guide · Volume 1</div>
+  <div class="rule"></div>
+  <h1>AM13E230 TINIElite Edge AI<br>Project from First Principles</h1>
+  <p class="subtitle">What the project is, what problem it solves, what happens from input to output, and exactly what was built.</p>
+  <div class="meta">
+    <strong>Author:</strong> Jainil Bavishi<br>
+    <strong>Platform:</strong> TI LP-AM13E230 LaunchPad · Arm Cortex-M33 · TINIElite NPU · Zephyr RTOS<br>
+    <strong>Documentation baseline:</strong> 23 October 2026
+  </div>
+</section>
+
+<section class="toc">
+  <h2>Contents</h2>
+  <ol>
+    <li><a href="#purpose">The project in plain English</a></li>
+    <li><a href="#problem">The engineering problem</a></li>
+    <li><a href="#io">Input, processing, and output</a></li>
+    <li><a href="#concepts">Concepts needed to understand the system</a></li>
+    <li><a href="#architecture">Complete system architecture</a></li>
+    <li><a href="#flow">End-to-end execution flow</a></li>
+    <li><a href="#built">What we implemented and why</a></li>
+    <li><a href="#hardware">Hardware and memory map</a></li>
+    <li><a href="#repo">Repository organization</a></li>
+    <li><a href="#scope">Ownership, proof, and project boundaries</a></li>
+    <li><a href="#pitch">How to explain it aloud</a></li>
+  </ol>
+</section>
+
+<h2 id="purpose">1. The project in plain English</h2>
+
+<div class="callout good">
+  <span class="label">One-sentence definition</span><br>
+  This project turns a TI LP-AM13E230 microcontroller board into a reliable, testable edge-AI waveform classifier that runs a generated neural network partly on the chip's TINIElite NPU under Zephyr RTOS.
+</div>
+
+<p>The input represents one waveform as <strong>256 numerical samples</strong>. The host computer converts those floating-point samples into the signed 8-bit format expected by the model and sends them to the board over USB UART. The board runs inference and returns three signed scores in this fixed order:</p>
+
+<table>
+  <tr><th>Output index</th><th>Class</th><th>Meaning</th></tr>
+  <tr><td>0</td><td>Sawtooth</td><td>Model score for a sawtooth waveform</td></tr>
+  <tr><td>1</td><td>Sine</td><td>Model score for a sine waveform</td></tr>
+  <tr><td>2</td><td>Square</td><td>Model score for a square waveform</td></tr>
+</table>
+
+<p>The largest score is treated as the predicted class. These values are signed <code>int8</code> model outputs, not calibrated probabilities. The board also returns measured execution times and NPU interrupt counters so the host can verify that hardware acceleration actually occurred.</p>
+
+<p><strong>Edge AI</strong> means the inference is executed on the device at the edge of the system rather than sending the tensor to a cloud server. The PC currently supplies test data and checks results, but it does not perform the neural-network inference.</p>
+
+<h2 id="problem">2. The engineering problem</h2>
+
+<p>The available starting point was not a complete application. The important supplied artifact was a TI/TVM-generated static library named <code>mod.a</code>, plus its generated C header and six test fixtures. The library contained compiled neural-network code, but a usable embedded system still needed all of the surrounding infrastructure.</p>
+
+<div class="two-col">
+  <div class="card">
+    <h3>What was available</h3>
+    <ul>
+      <li>LP-AM13E230 development board.</li>
+      <li>Arm Cortex-M33 and TINIElite NPU hardware.</li>
+      <li>Generated model archive <code>mod.a</code>.</li>
+      <li>Generated API header and quantization constants.</li>
+      <li>Six golden regression fixtures.</li>
+      <li>TI technical collateral and debug tools.</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h3>What was missing</h3>
+    <ul>
+      <li>Zephyr support for this preview board and SoC.</li>
+      <li>UART and pin-control drivers.</li>
+      <li>NPU power, memory, and interrupt integration.</li>
+      <li>A robust host-to-board protocol.</li>
+      <li>Timeout and deadlock recovery.</li>
+      <li>Reproducible WSL build, flash, test, and CI workflows.</li>
+    </ul>
+  </div>
+</div>
+
+<p>The real project was therefore broader than “run a model.” It was a <strong>platform bring-up, device-driver, runtime-integration, communications, reliability, and validation project</strong> centered on a real edge-AI workload.</p>
+
+<h2 id="io">3. Input, processing, and output</h2>
+
+<div class="diagram">
+  <div class="flow">
+    <div class="box"><strong>256 float samples</strong><br><span class="small">fixture on host</span></div>
+    <div class="arrow">→</div>
+    <div class="box"><strong>Normalize + quantize</strong><br><span class="small">signed int8 tensor</span></div>
+    <div class="arrow">→</div>
+    <div class="box"><strong>CRC-framed UART</strong><br><span class="small">USB serial link</span></div>
+    <div class="arrow">→</div>
+    <div class="box green"><strong>Hybrid inference</strong><br><span class="small">Cortex-M33 + NPU</span></div>
+    <div class="arrow">→</div>
+    <div class="box"><strong>3 scores + metrics</strong><br><span class="small">verified by host</span></div>
+  </div>
+</div>
+
+<h3>3.1 Model shape</h3>
+
+<ul>
+  <li>Generated input tensor: <code>(1, 1, 256, 1)</code>, signed 8-bit.</li>
+  <li>Generated output tensor: <code>(1, 3)</code>, signed 8-bit.</li>
+  <li>The dimensions of size one are batch/channel layout details. The meaningful sample dimension is 256.</li>
+</ul>
+
+<h3>3.2 Quantization</h3>
+
+<p>Embedded accelerators commonly use integer arithmetic because it needs less memory and is efficient in hardware. The generated header defines this conversion:</p>
+
+<pre>input_int = clip(int((input_float + bias) × scale) >> shift, -128, 127)
+
+bias  = -70.02075
+scale = 187.0
+shift = 6</pre>
+
+<p>The Python client reads these constants directly from the generated header instead of duplicating them manually. It applies C/Python integer truncation, performs the right shift, and clips the result to the valid <code>int8</code> range. Matching preprocessing matters: even a correct model can give different outputs if the host uses a different scale, rounding rule, order, or data type.</p>
+
+<h3>3.3 What the output proves</h3>
+
+<p>The host compares all three returned bytes with the corresponding golden output. An exact match on the six fixtures proves that this firmware revision reproduces those six supplied references. It does <strong>not</strong> establish general accuracy on unseen data.</p>
+
+<h2 id="concepts">4. Concepts needed to understand the system</h2>
+
+<table>
+  <tr><th>Concept</th><th>Simple explanation</th><th>How it appears here</th></tr>
+  <tr><td>Microcontroller (MCU)</td><td>A small computer on one chip with CPU, memory, and peripherals.</td><td>AM13E23019 with an Arm Cortex-M33.</td></tr>
+  <tr><td>RTOS</td><td>An operating system for predictable embedded tasks, drivers, timing, and synchronization.</td><td>Zephyr supplies startup, device model, kernel primitives, tests, and build tooling.</td></tr>
+  <tr><td>NPU</td><td>Hardware specialized for neural-network operations.</td><td>TINIElite executes generated convolution/pooling stages.</td></tr>
+  <tr><td>Driver</td><td>Software that converts a standard or project API into hardware register operations.</td><td>Custom UART, pinctrl, and TINIElite integration.</td></tr>
+  <tr><td>MMIO</td><td>Peripherals controlled by reading/writing fixed memory addresses.</td><td><code>sys_read32</code> and <code>sys_write32</code> access clock, UART, watchdog, and NPU registers.</td></tr>
+  <tr><td>Interrupt</td><td>A hardware event that temporarily transfers control to an interrupt handler.</td><td>NPU DONE on IRQ 41 wakes the waiting application.</td></tr>
+  <tr><td>Semaphore</td><td>A kernel synchronization counter used to block until an event occurs.</td><td>The ISR gives; the inference thread takes with a 100 ms timeout.</td></tr>
+  <tr><td>UART</td><td>An asynchronous serial byte stream.</td><td>115200 baud communication between host and board.</td></tr>
+  <tr><td>CRC-32</td><td>A strong error-detecting code for accidental corruption.</td><td>Every protocol frame protects header fields and payload.</td></tr>
+  <tr><td>Watchdog</td><td>An independent timer that resets a stuck system if software stops showing progress.</td><td>WWDT0 resets after four seconds without a feed.</td></tr>
+  <tr><td>Devicetree</td><td>Structured hardware description consumed at build time.</td><td>Defines addresses, clocks, interrupts, memory, and enabled devices.</td></tr>
+  <tr><td>Kconfig</td><td>Compile-time feature configuration system.</td><td>Enables drivers and gates dangerous fault-injection commands.</td></tr>
+  <tr><td>ABI</td><td>Binary-level contract between separately compiled code.</td><td><code>mod.a</code> expects specific NPU memory functions and exports runtime functions.</td></tr>
+  <tr><td>Static library</td><td>Compiled object code linked into the final executable.</td><td><code>mod.a</code> is linked into <code>zephyr.elf</code>.</td></tr>
+</table>
+
+<h2 id="architecture">5. Complete system architecture</h2>
+
+<div class="diagram">
+  <div class="flow">
+    <div class="box"><strong>Python client</strong><br>fixture parsing<br>quantization<br>framing/retries<br>result checking</div>
+    <div class="arrow">↔</div>
+    <div class="box amber"><strong>USB / XDS110</strong><br>UART transport<br>debug probe<br>WSL USB forwarding</div>
+    <div class="arrow">↔</div>
+    <div class="box green"><strong>Zephyr application</strong><br>request server<br>clock telemetry<br>timeout/reset<br>watchdog feed</div>
+  </div>
+  <div style="height:3mm"></div>
+  <div class="flow">
+    <div class="box"><strong>Platform layer</strong><br>board + SoC<br>clock + pinctrl<br>UART driver</div>
+    <div class="arrow">↔</div>
+    <div class="box"><strong>Generated runtime</strong><br>TVM graph control<br>CPU operations<br>continuation handler</div>
+    <div class="arrow">↔</div>
+    <div class="box green"><strong>TINIElite driver/NPU</strong><br>power + privilege<br>instruction/parameter SRAM<br>DONE IRQ 41</div>
+  </div>
+</div>
+
+<h3>5.1 Why Zephyr?</h3>
+
+<p>Zephyr provides a standard device model, build system, compile-time hardware description, kernel synchronization, time conversion, reboot services, native simulation, and a large testing ecosystem. The alternative would be to write a completely bare-metal startup and scheduling environment. The project still requires low-level register work because AM13E230 support was unavailable in the pinned upstream revision.</p>
+
+<h3>5.2 What “out-of-tree” means</h3>
+
+<p>The board and driver support live in this repository rather than being copied into the upstream Zephyr checkout. Zephyr discovers the repository as a module through <code>zephyr/module.yml</code>. This prevents local patches from being mixed into millions of upstream lines, makes Git history focused, and allows a clean, pinned Zephyr checkout to reproduce the build.</p>
+
+<h3>5.3 Why the inference is hybrid</h3>
+
+<p>The generated runtime owns the graph. It performs orchestration and some operations on the Cortex-M33, while generated TINIElite kernels offload supported stages. The current ELF contains three convolution entry points and one average-pooling entry point, plus CPU-side generated functions. Five acknowledged NPU completions are observed per inference. Because the graph and sublayer schedule are contained in a binary archive, the documentation does not invent a layer-by-layer network architecture that cannot be independently inspected.</p>
+
+<h2 id="flow">6. End-to-end execution flow</h2>
+
+<ol>
+  <li><strong>Power-on:</strong> the Cortex-M33 begins Zephyr startup.</li>
+  <li><strong>Clock initialization:</strong> a pre-kernel routine safely configures flash wait states, starts the 25 MHz crystal, locks the PLL, and moves MCLK to 200 MHz.</li>
+  <li><strong>Driver initialization:</strong> Zephyr initializes pin routing, UNICOMM UART, TINIElite power/privilege/interrupt state, and application devices.</li>
+  <li><strong>Safety initialization:</strong> the application configures WWDT0 for an independent four-second reset and verifies the NPU device is ready.</li>
+  <li><strong>Readiness:</strong> the firmware drains stale UART bytes and sends a CRC-protected <code>READY</code> frame declaring 256 input bytes and three outputs.</li>
+  <li><strong>Host preprocessing:</strong> Python reads a float fixture and quantizes 256 values to <code>int8</code>.</li>
+  <li><strong>Request:</strong> Python sends a protocol-v2 frame containing type, sequence, payload length, tensor, and CRC-32.</li>
+  <li><strong>Validation:</strong> firmware checks UART errors, magic, version, type, length, deadline, and CRC.</li>
+  <li><strong>Acknowledgement:</strong> a valid inference request receives a sequence-matched <code>ACK</code>.</li>
+  <li><strong>Runtime start:</strong> the application prepares interrupt state and calls <code>tvmgen_default_run()</code>.</li>
+  <li><strong>NPU execution:</strong> generated code copies microcode/parameters into the TINIElite SRAM windows and starts a hardware stage.</li>
+  <li><strong>Completion:</strong> DONE IRQ 41 enters the small driver ISR, which acknowledges the interrupt, increments a counter, and gives a semaphore.</li>
+  <li><strong>Continuation:</strong> the application wakes and calls the generated <code>TI_NPU_NNC_IRQHandler()</code> in thread context. The runtime either launches another stage or marks the graph finished.</li>
+  <li><strong>Response:</strong> firmware returns three scores, accelerator wait time, runtime time, total time, completion count, spurious count, and CRC.</li>
+  <li><strong>Verification:</strong> the host checks frame integrity, sequence, exact scores, nonzero completions, zero spurious IRQs, and optional stress/fault-test criteria.</li>
+</ol>
+
+<h2 id="built">7. What we implemented and why</h2>
+
+<table>
+  <tr><th>Implemented area</th><th>Why it was necessary</th><th>Key result</th></tr>
+  <tr><td>Out-of-tree board/SoC port</td><td>The preview MCU was not supported by the pinned Zephyr tree.</td><td>Zephyr can build for <code>lp_am13e230/am13e23019</code>.</td></tr>
+  <tr><td>Clock initialization and telemetry</td><td>Correct timing, UART baud, flash safety, and latency claims require a known clock.</td><td>Read-back validated 200 MHz MCLK and three flash wait states.</td></tr>
+  <tr><td>Pinctrl integration</td><td>PA0/PA1 must be routed to UNICOMM UART functions.</td><td>Standard Zephyr pinctrl data replaces hardcoded application pin writes.</td></tr>
+  <tr><td>Polling UART driver</td><td>No suitable Zephyr driver existed for the dual-base UNICOMM peripheral.</td><td>TX, RX, baud configuration, and hardware error reporting work.</td></tr>
+  <tr><td>Protocol v2</td><td>A raw fixed packet/checksum could not reliably detect, correlate, or recover from failures.</td><td>Length, version, sequence, CRC-32, errors, deadlines, resynchronization, retries.</td></tr>
+  <tr><td>TINIElite adapter</td><td>The generated archive expects hardware memory callbacks and completion handling.</td><td>Power/reset/privilege, bounded SRAM writes, IRQ 41, semaphore delivery.</td></tr>
+  <tr><td>Hybrid runtime integration</td><td>Generated execution continues in stages rather than one blocking NPU call.</td><td>Runtime start/wait/continuation loop with metrics.</td></tr>
+  <tr><td>NPU timeout recovery</td><td>A missing interrupt must not hang forever or leave opaque runtime state reused.</td><td>100 ms bounded wait, structured error, cold reset, restored readiness.</td></tr>
+  <tr><td>Independent WWDT0 watchdog</td><td>A software timeout cannot recover code that is completely deadlocked.</td><td>Four-second hardware reset, reset-cause read-back, validated restart.</td></tr>
+  <tr><td>Python regression client</td><td>Repeatable preprocessing, transport, scoring, metrics, and fault tests were needed.</td><td>One client supports fixtures, stress, clocks, CRC, NPU stall, and watchdog tests.</td></tr>
+  <tr><td>WSL-native workflow</td><td>The complete developer flow needed to work from Linux under WSL.</td><td>Build, Linux UniFlash/DSLite flash, UART test, and USB permission scripts.</td></tr>
+  <tr><td>Automated quality gates</td><td>A hardware demo needs reproducible software evidence.</td><td>Host tests, sanitized ztests, lint/format/static checks, cross-build, symbol checks, artifacts.</td></tr>
+</table>
+
+<h2 id="hardware">8. Hardware and memory map</h2>
+
+<table>
+  <tr><th>Resource</th><th>Address / configuration</th><th>Use</th></tr>
+  <tr><td>Flash</td><td><code>0x00000000</code>, 512 KiB</td><td>Firmware and linked model archive.</td></tr>
+  <tr><td>Main SRAM</td><td><code>0x20000000</code>, 96 KiB</td><td>Stacks, globals, input/output, runtime working memory.</td></tr>
+  <tr><td>Separate SRAM/code alias</td><td><code>0x00c18000</code>, 32 KiB</td><td>Described by SoC devicetree; not the primary linked SRAM.</td></tr>
+  <tr><td>Core</td><td>Arm Cortex-M33, MCLK 200 MHz</td><td>Zephyr, runtime orchestration, CPU graph stages.</td></tr>
+  <tr><td>UART</td><td><code>0x40601000</code>, 115200 baud</td><td>Data/status registers and host link.</td></tr>
+  <tr><td>UNICOMM wrapper</td><td><code>0x40632000</code></td><td>Power, reset, and peripheral mode.</td></tr>
+  <tr><td>TINIElite</td><td><code>0x408ff000</code>, IRQ 41</td><td>Neural-network acceleration and interrupt registers.</td></tr>
+  <tr><td>NPU instruction SRAM</td><td>NPU base + <code>0x2000</code>, 256 words</td><td>Generated microcode staging.</td></tr>
+  <tr><td>NPU parameter SRAM</td><td>NPU base + <code>0x2800</code>, 512 words</td><td>Per-stage parameter staging.</td></tr>
+  <tr><td>WWDT0</td><td><code>0x400d0000</code>, 32.768 kHz source</td><td>Independent four-second liveness supervision.</td></tr>
+  <tr><td>XDS110</td><td>USB VID:PID <code>0451:bef3</code></td><td>Debug probe and application UART bridge.</td></tr>
+</table>
+
+<h2 id="repo">9. Repository organization</h2>
+
+<table>
+  <tr><th>Path</th><th>Responsibility</th></tr>
+  <tr><td><code>app/</code></td><td>Main server, clock telemetry, NPU orchestration, protocol, UART framing, watchdog.</td></tr>
+  <tr><td><code>boards/</code></td><td>LaunchPad identity, CPU clock, enabled peripherals, and UART pins.</td></tr>
+  <tr><td><code>soc/</code></td><td>AM13x Kconfig identity, CPU features, early clock setup, pinctrl data types.</td></tr>
+  <tr><td><code>dts/</code></td><td>Memory/peripheral description and binding schemas.</td></tr>
+  <tr><td><code>drivers/</code></td><td>TINIElite adapter, UNICOMM UART, and pin controller.</td></tr>
+  <tr><td><code>include/</code></td><td>Public project driver API and pin constants.</td></tr>
+  <tr><td><code>models/</code></td><td>Binary model archive, generated header, license, hashes, and six fixtures.</td></tr>
+  <tr><td><code>tools/</code></td><td>Python host/regression client.</td></tr>
+  <tr><td><code>scripts/</code></td><td>Build, flash, test, pipeline, static checks, and XDS110 setup.</td></tr>
+  <tr><td><code>tests/</code></td><td>Python unit tests and Zephyr <code>native_sim</code> protocol tests.</td></tr>
+  <tr><td><code>docs/</code></td><td>Architecture, protocol, audit, validation, evidence, and roadmap.</td></tr>
+  <tr><td><code>west.yml</code></td><td>Pins Zephyr and the required CMSIS modules.</td></tr>
+  <tr><td><code>.github/workflows/ci.yml</code></td><td>Public software quality and firmware build automation.</td></tr>
+</table>
+
+<h2 id="scope">10. Ownership, proof, and project boundaries</h2>
+
+<div class="two-col">
+  <div class="card">
+    <span class="tag done">Implemented and validated</span>
+    <ul>
+      <li>Zephyr platform integration.</li>
+      <li>Clock, pinctrl, UART, and NPU glue.</li>
+      <li>Interrupt completion and bounded recovery.</li>
+      <li>Watchdog supervision.</li>
+      <li>Framed protocol and host client.</li>
+      <li>WSL-native build/flash/test.</li>
+      <li>Automated software and hardware evidence.</li>
+    </ul>
+  </div>
+  <div class="card">
+    <span class="tag external">Provided externally</span>
+    <ul>
+      <li>Trained neural-network model.</li>
+      <li>Generated <code>mod.a</code> and header.</li>
+      <li>Six golden vectors.</li>
+      <li>TI NPU runtime internals inside the archive.</li>
+      <li>Hardware documentation and UniFlash tooling.</li>
+    </ul>
+  </div>
+</div>
+
+<div class="callout warn">
+  <span class="label">Do not overclaim</span><br>
+  Six fixtures are a regression set, not an accuracy dataset. There is no source model, training code, independent labeled dataset, CPU-equivalent artifact, or power measurement. The system is a strong hardware-validated engineering prototype, not a production-certified product.
+</div>
+
+<h3>10.1 What proves real NPU use?</h3>
+
+<ul>
+  <li>The linked ELF contains generated TINIElite convolution and pooling symbols.</li>
+  <li>The generated archive calls project-supplied NPU instruction/parameter memory callbacks.</li>
+  <li>Physical IRQ 41 produces exactly five acknowledged completions per inference.</li>
+  <li>The host rejects a result with zero completions or any spurious completion.</li>
+  <li>A deliberate missing-completion test reaches the real semaphore timeout path and resets cleanly.</li>
+</ul>
+
+<p>Timing alone is not treated as proof. Direct symbol, MMIO, interrupt, and fault-path evidence is stronger.</p>
+
+<h2 id="pitch">11. How to explain it aloud</h2>
+
+<h3>Thirty-second version</h3>
+
+<div class="callout">
+  I built the platform and reliability layers needed to run a TVM-generated waveform classifier on TI's AM13E230 microcontroller under Zephyr. A Python client quantizes 256 samples and sends them through a CRC-protected UART protocol. The firmware runs a hybrid CPU/NPU graph, waits for real TINIElite completion interrupts, and returns three class scores plus timing and interrupt evidence. I also added clock validation, NPU timeout recovery, an independent hardware watchdog, WSL-native flashing, tests, and CI. I integrated the supplied binary model; I did not train it.
+</div>
+
+<h3>Two-minute version</h3>
+
+<div class="callout">
+  The target was a preview TI AM13E230 LaunchPad with a Cortex-M33 and a TINIElite neural accelerator. The only model-side inputs were a generated static library, its header, and six reference vectors, while the pinned Zephyr version did not support the board. I created an out-of-tree board and SoC port, configured the real 200 MHz clock tree and flash wait states, and implemented pinctrl, polling UART, and the NPU adapter expected by the generated binary. On the host, Python reproduces the model's int8 preprocessing and exchanges versioned, sequence-numbered, CRC-32 frames with the firmware. During inference, the generated runtime alternates between CPU orchestration and NPU stages. IRQ 41 is acknowledged in a small ISR, which signals a semaphore; the application continues the generated runtime in thread context with a 100 ms bound. A timeout produces a structured error and cold reset because the binary runtime may retain opaque state. A separate four-second hardware watchdog covers total firmware deadlock. The complete flow builds, flashes, and tests natively in WSL. On hardware, six fixtures passed exactly, and a 600-inference run produced 3,000 acknowledged NPU interrupts, zero spurious interrupts, and zero transport retries. Those are regression results, not a claim of general model accuracy.
+</div>
+
+<p class="footer-note">Continue with Volume 2 for the source-level implementation and register-by-register reasoning.</p>
+</body>
+</html>

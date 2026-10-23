@@ -1,0 +1,342 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>AM13E230 TINIElite — History, Validation, and Limitations</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<section class="title-page">
+  <div class="title-kicker">Interview study guide · Volume 3</div>
+  <div class="rule"></div>
+  <h1>Development History,<br>Validation, and Limitations</h1>
+  <p class="subtitle">What changed from the original prototype to the current repository, which failures taught the important lessons, and what the retained evidence actually proves.</p>
+  <div class="meta">AM13E230 TINIElite Edge AI · Jainil Bavishi · 23 October 2026</div>
+</section>
+
+<section class="toc">
+  <h2>Contents</h2>
+  <ol>
+    <li><a href="#timeline">Project evolution</a></li>
+    <li><a href="#handoff">How to interpret the original handoff</a></li>
+    <li><a href="#failures">Major bugs, experiments, and lessons</a></li>
+    <li><a href="#migration">Windows-to-WSL and repository migration</a></li>
+    <li><a href="#verification">Verification strategy</a></li>
+    <li><a href="#results">Hardware results and performance</a></li>
+    <li><a href="#proof">What is proven and how</a></li>
+    <li><a href="#limitations">Open limitations and future work</a></li>
+    <li><a href="#claims">Interview-safe claims</a></li>
+  </ol>
+</section>
+
+<h2 id="timeline">1. Project evolution</h2>
+
+<h3>Phase A — Initial board and UART bring-up (July 2026)</h3>
+
+<ul>
+  <li>Created an AM13E23019 SoC description and LP-AM13E230 board definition inside an experimental Zephyr checkout.</li>
+  <li>Reverse-engineered the dual-base UNICOMM layout from TI material.</li>
+  <li>Implemented basic polling TX/RX and reached the first UART console output.</li>
+  <li>Diagnosed missing pin mux and incorrect RX FIFO status logic.</li>
+</ul>
+
+<h3>Phase B — Generated model and NPU integration</h3>
+
+<ul>
+  <li>Inspected <code>mod.a</code> with Arm binutils to discover exported and unresolved symbols.</li>
+  <li>Implemented NPU power/reset/privilege and the memory callbacks expected by the archive.</li>
+  <li>Added NPU devicetree information and the initial execution loop.</li>
+  <li>Learned that the generated runtime advances through hardware stages using a continuation function rather than one simple blocking accelerator call.</li>
+</ul>
+
+<h3>Phase C — First host protocol and automation</h3>
+
+<ul>
+  <li>Created a Python script to parse generated test vectors and quantize inputs.</li>
+  <li>Built an early magic-header/fixed-payload/additive-checksum protocol.</li>
+  <li>Experimented with a UART thread and message queue to separate reception from inference.</li>
+  <li>Automated Windows build/flash/test through PowerShell and DSLite.</li>
+</ul>
+
+<h3>Phase D — Debugging and early profiling</h3>
+
+<ul>
+  <li>Fixed NPU access faults, NPU power sequencing, stack overflow, and UART data loss.</li>
+  <li>Replaced millisecond timing with the hardware cycle counter.</li>
+  <li>Attempted UART interrupts and persistent NPU SRAM caching; both were abandoned after hardware faults.</li>
+  <li>Reported early latency values before the clock tree was independently read back.</li>
+</ul>
+
+<h3>Phase E — WSL-native reconstruction and public repository (October 2026)</h3>
+
+<ul>
+  <li>Reconstructed Python/west/toolchain dependencies inside Ubuntu 22.04 under WSL.</li>
+  <li>Attached the XDS110 with <code>usbipd-win</code> and restricted udev permissions.</li>
+  <li>Installed Linux TI UniFlash and proved native WSL erase/program/verify, replacing the earlier assumption that flashing must remain on Windows.</li>
+  <li>Extracted project-owned changes into a clean out-of-tree repository with a pinned Zephyr manifest.</li>
+  <li>Replaced the prototype transport with protocol v2 and retained JSON evidence.</li>
+</ul>
+
+<h3>Phase F — Reliability and evidence hardening</h3>
+
+<ul>
+  <li>Read back the clock tree, discovered the 32 MHz/200 MHz mismatch, implemented the real 200 MHz startup, and invalidated misleading early timings.</li>
+  <li>Replaced NPU completion polling with verified IRQ 41 + semaphore completion.</li>
+  <li>Added NPU-stage timeout, cold-reset recovery, and a separately clocked WWDT0 watchdog.</li>
+  <li>Moved pin routing into Zephyr pinctrl and added UART receive error reporting.</li>
+  <li>Added host unit tests, sanitized Zephyr-native ztests, static analysis, formatting, cross-build CI, symbol checks, and build artifacts.</li>
+</ul>
+
+<h3>Repository milestones</h3>
+
+<table>
+  <tr><th>Commit</th><th>Purpose</th></tr>
+  <tr><td><code>08104e2</code></td><td>Initial hardware-validated out-of-tree demo.</td></tr>
+  <tr><td><code>87d49bc</code></td><td>Robust protocol and stress evidence.</td></tr>
+  <tr><td><code>8493233</code></td><td>Real 200 MHz clock initialization and validation.</td></tr>
+  <tr><td><code>ee9293c</code></td><td>Interrupt-driven NPU completion.</td></tr>
+  <tr><td><code>644a4ae</code></td><td>Bounded NPU timeout and reset recovery.</td></tr>
+  <tr><td><code>e2eae52</code></td><td>Independent hardware watchdog recovery.</td></tr>
+  <tr><td><code>d35b301</code></td><td>UART/pinctrl hardening and native tests.</td></tr>
+  <tr><td><code>ab8927f</code></td><td>Proper Zephyr library integration.</td></tr>
+  <tr><td><code>a1f0873</code></td><td>Python quality gates and robustness fixes.</td></tr>
+</table>
+
+<h2 id="handoff">2. How to interpret the original handoff</h2>
+
+<p>The original knowledge-transfer document accurately captures valuable discovery work, failed experiments, and the state of the early Windows prototype. It is not a description of the final repository. Use this correction table:</p>
+
+<table>
+  <tr><th>Earlier statement</th><th>Current reality</th></tr>
+  <tr><td>Multithreaded UART thread + <code>k_msgq</code></td><td>The final server is intentionally single-request and synchronous. NPU completion still uses ISR/semaphore concurrency.</td></tr>
+  <tr><td>259-byte packet + additive checksum</td><td>Protocol v2 uses a variable-length header, sequence number, CRC-32, and structured responses. An inference request is 268 bytes.</td></tr>
+  <tr><td>NPU completion through CTL5 polling</td><td>Current completion uses physical DONE IRQ 41; polling is retained only as historical baseline evidence.</td></tr>
+  <tr><td>“282 µs pure NPU” / “340 µs hybrid”</td><td>Invalid as current latency because hardware ran at 32 MHz while software converted cycles as 200 MHz. Current recovery image: 554/129/701 µs.</td></tr>
+  <tr><td>“100% accuracy”</td><td>Incorrect scientific claim. Six fixtures matched exactly; no independent dataset exists.</td></tr>
+  <tr><td>DSLite is Windows-only</td><td>Linux UniFlash/DSLite 9.7 was installed and hardware flashing from WSL was verified.</td></tr>
+  <tr><td>Hardcoded COM9 and Windows paths</td><td>Current client discovers Linux serial devices or accepts <code>TINI_UART_PORT</code>; scripts use repository-relative paths and environment overrides.</td></tr>
+  <tr><td>Modifications live inside Zephyr</td><td>Current work is an out-of-tree module and manifest repository.</td></tr>
+  <tr><td>Several CPU/NPU model variants available</td><td>The maintainable public project contains only the active generated <code>mod.a</code>, header, and six fixtures. No equivalent CPU model is available.</td></tr>
+</table>
+
+<h2 id="failures">3. Major bugs, experiments, and lessons</h2>
+
+<h3>3.1 UART had no output</h3>
+
+<p><strong>Cause:</strong> PA0/PA1 were not routed to the UART function. A peripheral can be correctly configured internally while remaining physically disconnected from pins.</p>
+<p><strong>Fix evolution:</strong> initial direct IOMUX writes proved the setting; the final implementation expresses pins in devicetree and applies them through Zephyr pinctrl.</p>
+<p><strong>Lesson:</strong> debug signal paths from peripheral register to package pin, not just driver code.</p>
+
+<h3>3.2 Receive always appeared empty</h3>
+
+<p><strong>Cause:</strong> the code interpreted RX FIFO Full rather than RX FIFO Empty. The correct rule is: if RXFE is set, return “no character”; otherwise read RXDATA.</p>
+<p><strong>Lesson:</strong> status-bit names and polarity matter more than intuition.</p>
+
+<h3>3.3 UART interrupt attempt BusFaulted</h3>
+
+<p><strong>Cause:</strong> interrupt register offsets were applied to the UNICOMM wrapper base rather than the UART base, producing an invalid MMIO access.</p>
+<p><strong>Decision:</strong> revert to the known polling API rather than pretend an unverified interrupt path worked. UART async support remains future work.</p>
+
+<h3>3.4 NPU access HardFault</h3>
+
+<p><strong>Cause:</strong> the GSC peripheral protection configuration did not grant privileged Cortex-M33 access to the coprocessor memory window.</p>
+<p><strong>Fix:</strong> set the TINIElite privilege bit during driver initialization.</p>
+
+<h3>3.5 NPU never completed</h3>
+
+<p><strong>Cause:</strong> power/reset control registers require unlock keys in their upper bits. Setting only the low enable bit did not perform the protected operation.</p>
+<p><strong>Fix:</strong> implement the TI-aligned reset/power sequence with keys.</p>
+
+<h3>3.6 Parameter SRAM caching experiment failed</h3>
+
+<p><strong>Hypothesis:</strong> retain all model weights in NPU SRAM to avoid repeated loads.</p>
+<p><strong>Why it failed:</strong> parameter SRAM is 2 KiB and serves as stage-local scratchpad. The generated runtime swaps data according to its own schedule. Freezing prior content breaks later stages and can cause faults.</p>
+<p><strong>Lesson:</strong> optimize only after understanding hardware capacity and the generated runtime's ownership model.</p>
+
+<h3>3.7 Random inference HardFaults</h3>
+
+<p><strong>Cause:</strong> the generated runtime needed more than the original small main stack for intermediate data.</p>
+<p><strong>Fix:</strong> configure a conservative 32 KiB main stack. This is safe for the known image but consumes a significant fraction of 96 KiB SRAM; stack watermarking is a future optimization.</p>
+
+<h3>3.8 UART bytes were lost or corrupted</h3>
+
+<p><strong>Historical cause:</strong> an earlier console/interrupt arrangement competed for incoming bytes. The final driver exposes only the polling UART API, and the application owns the receive path.</p>
+<p><strong>Additional hardening:</strong> physical overrun/parity/framing/break/noise flags now become structured transport errors.</p>
+
+<h3>3.9 Additive checksum mismatch</h3>
+
+<p><strong>Cause:</strong> signed versus unsigned byte arithmetic differed between Python and C.</p>
+<p><strong>Long-term fix:</strong> replace the entire prototype packet with explicit unsigned serialization and standard CRC-32.</p>
+
+<h3>3.10 Partial frame after serial reopen</h3>
+
+<p><strong>Observed behavior:</strong> a missing final CRC byte was followed by the first magic byte of a later <code>READY</code>, so a naïve parser consumed part of the next frame.</p>
+<p><strong>Fix:</strong> the host parser now slides one byte after an invalid candidate instead of discarding the whole declared frame. A unit test recreates the exact boundary, and ten repeated reopen/fault/recovery sessions passed.</p>
+
+<h3>3.11 Timing looked excellent but was wrong</h3>
+
+<p><strong>Cause:</strong> devicetree and Zephyr were told the CPU ran at 200 MHz, while clock read-back showed the MCU still at 32 MHz. Cycle conversion therefore divided by 200 MHz and understated elapsed time by roughly 6.25×.</p>
+<p><strong>Fix:</strong> implement the real clock sequence, add raw register telemetry, and mark all earlier timings superseded.</p>
+<p><strong>Lesson:</strong> metadata is not measurement. Verify clocks at hardware registers before making performance claims.</p>
+
+<h2 id="migration">4. Windows-to-WSL and repository migration</h2>
+
+<h3>4.1 USB forwarding</h3>
+
+<p>WSL 2 does not directly own Windows USB devices. <code>usbipd-win</code> binds the XDS110 on Windows and attaches it to the Ubuntu VM. The board appears as Linux USB devices and an ACM serial port. Binding persists, but attachment usually must be repeated after unplug/reboot.</p>
+
+<pre># Elevated Windows PowerShell
+&amp; "C:\Program Files\usbipd-win\usbipd.exe" list
+&amp; "C:\Program Files\usbipd-win\usbipd.exe" bind --force --busid 4-3
+&amp; "C:\Program Files\usbipd-win\usbipd.exe" attach --wsl --busid 4-3</pre>
+
+<p>The actual BUSID must be copied from <code>list</code>; angle-bracket placeholders are documentation notation, not literal PowerShell syntax.</p>
+
+<h3>4.2 Linux permissions</h3>
+
+<p>A narrow udev rule grants the <code>dialout</code> group access to TI XDS110 runtime/firmware-update USB IDs rather than making every USB device globally writable.</p>
+
+<h3>4.3 Native flashing</h3>
+
+<p>TI UniFlash 9.7 for Linux supplies <code>dslite.sh</code>. <code>scripts/flash.sh</code> sets its library paths, uses the repository CCXML, and requests erase, program, verify, and unlock operations. Native WSL flashing was physically verified.</p>
+
+<h3>4.4 Clean workspace requirement</h3>
+
+<p>The old Zephyr checkout still contained legacy in-tree project edits, including another board with the same name. Building the out-of-tree module against that contaminated tree can create duplicate-board conflicts. Reproducible builds use a fresh west workspace at the pinned revision. The legacy tree was preserved rather than destructively rewritten.</p>
+
+<h2 id="verification">5. Verification strategy</h2>
+
+<p>No single test proves the complete system. The project uses layers of evidence:</p>
+
+<table>
+  <tr><th>Layer</th><th>Checks</th><th>Failure class caught</th></tr>
+  <tr><td>Artifact integrity</td><td>SHA-256 manifest for archive, header, vectors.</td><td>Accidental generated-artifact changes.</td></tr>
+  <tr><td>Python unit tests</td><td>16 tests for parsing, quantization, framing, CRC, recovery, result/status validation.</td><td>Host and protocol-reference regressions.</td></tr>
+  <tr><td>Native Zephyr tests</td><td>5 ztests with ASan and UBSan.</td><td>C CRC/validation bugs and memory/undefined behavior in portable protocol code.</td></tr>
+  <tr><td>Static quality</td><td>Ruff, formatting, Cppcheck, ShellCheck, syntax compilation.</td><td>Style, suspicious C patterns, script errors.</td></tr>
+  <tr><td>Cross-build</td><td>Clean pinned Zephyr + GNU Arm Embedded GCC 10.3.1.</td><td>Target compile/link/configuration problems.</td></tr>
+  <tr><td>ELF inspection</td><td>NPU kernels, continuation handler, wait API, watchdog, protocol, pinctrl symbols.</td><td>Silent omission of required integration from the linked image.</td></tr>
+  <tr><td>Flash verification</td><td>TI DSLite erase/program/verify.</td><td>Image not actually reaching target flash.</td></tr>
+  <tr><td>Hardware smoke</td><td>Six exact fixtures, IRQ counts, clock status.</td><td>Basic end-to-end board failures.</td></tr>
+  <tr><td>Hardware stress</td><td>600 inferences, JSON timing/results.</td><td>Repeatability and transport instability.</td></tr>
+  <tr><td>Fault injection</td><td>CRC damage, NPU timeout, watchdog deadlock, UART BREAK.</td><td>Error paths that happy-path tests cannot exercise.</td></tr>
+</table>
+
+<h3>5.1 Why sanitizers run on native_sim</h3>
+
+<p>ASan and UBSan are practical on a host process, where they can detect out-of-bounds memory access and undefined behavior with rich diagnostics. They do not simulate AM13E230 peripherals, so physical hardware tests remain necessary.</p>
+
+<h3>5.2 Why symbol checks matter</h3>
+
+<p>A successful link alone does not prove the intended accelerator path was retained. CI runs <code>arm-none-eabi-nm</code> and requires key model, interrupt, protocol, watchdog, and pinctrl symbols. Runtime IRQ evidence then complements this static proof.</p>
+
+<h2 id="results">6. Hardware results and performance</h2>
+
+<h3>6.1 Current recovery-enabled image</h3>
+
+<table>
+  <tr><th>Measurement</th><th>Result</th></tr>
+  <tr><td>Golden fixtures</td><td>6/6 exact output vectors.</td></tr>
+  <tr><td>Stress regression</td><td>600/600 exact results; zero retries.</td></tr>
+  <tr><td>NPU completions</td><td>5 per inference; 3,000 total.</td></tr>
+  <tr><td>Spurious NPU interrupts</td><td>0.</td></tr>
+  <tr><td>Accelerator wait</td><td>554 µs median.</td></tr>
+  <tr><td>Generated runtime/CPU portion</td><td>129 µs median.</td></tr>
+  <tr><td>Total inference</td><td>701 µs median.</td></tr>
+  <tr><td>Clock state</td><td>200 MHz MCLK; 100 MHz UART source; 3 flash wait states.</td></tr>
+  <tr><td>Firmware footprint</td><td>25,492 bytes flash; 43,616 bytes RAM.</td></tr>
+</table>
+
+<h3>6.2 Polling versus interrupt completion</h3>
+
+<table>
+  <tr><th>Version</th><th>Wait / NPU</th><th>Runtime</th><th>Total</th><th>Main-thread interpretation</th></tr>
+  <tr><td>Clock-validated polling baseline</td><td>510 µs median</td><td>128 µs</td><td>668 µs</td><td>Main thread actively runnable for at least 76.3% of inference.</td></tr>
+  <tr><td>IRQ + semaphore</td><td>554 µs</td><td>117–129 µs</td><td>689–701 µs</td><td>Main thread blocked during NPU waits; ≤21% wall time remains for non-wait main-thread work.</td></tr>
+</table>
+
+<p>Interrupt completion increased latency by about 33 µs (4.9%) in the direct comparison. That is acceptable because the goal was bounded, schedulable completion—not claiming interrupts are always faster. Exact whole-system CPU utilization and energy were not measured.</p>
+
+<h3>6.3 Fault-recovery evidence</h3>
+
+<ul>
+  <li>Deliberately corrupted CRC was rejected and the next request succeeded without reset.</li>
+  <li>Deliberate NPU non-start returned <code>-ETIMEDOUT</code>, cold-reset, restored <code>READY</code>, then passed 600 inferences.</li>
+  <li>Deliberate watchdog starvation caused reset cause <code>0x0e</code>, watchdog restarted, then passed 600 inferences.</li>
+  <li>Physical UART BREAK produced structured transport error <code>8</code> / <code>-EIO</code>, followed by fresh readiness and successful inference.</li>
+</ul>
+
+<h2 id="proof">7. What is proven and how</h2>
+
+<table>
+  <tr><th>Claim</th><th>Evidence</th><th>Status</th></tr>
+  <tr><td>The firmware builds reproducibly.</td><td>Pinned manifest, clean local build, public GitHub Actions cross-build.</td><td><span class="tag done">Proven</span></td></tr>
+  <tr><td>The generated NPU path is linked.</td><td>ELF symbols for TINIElite kernels and continuation handler.</td><td><span class="tag done">Proven</span></td></tr>
+  <tr><td>Physical NPU completions drive progress.</td><td>IRQ 41 counters, host enforcement, 3,000 completions/zero spurious.</td><td><span class="tag done">Proven</span></td></tr>
+  <tr><td>Six supplied cases reproduce golden outputs.</td><td>Exact three-byte comparisons on physical board.</td><td><span class="tag done">Proven</span></td></tr>
+  <tr><td>The system runs at 200 MHz safely.</td><td>PLL/source/divisor/flash raw register read-back.</td><td><span class="tag done">Proven</span></td></tr>
+  <tr><td>Transport recovers from corruption.</td><td>Deliberate CRC damage and UART BREAK tests.</td><td><span class="tag done">Proven</span></td></tr>
+  <tr><td>Stalled accelerator and firmware recover.</td><td>NPU semaphore timeout/cold reset and WWDT0 reset-cause tests.</td><td><span class="tag done">Proven</span></td></tr>
+  <tr><td>General waveform accuracy is high.</td><td>No independent labeled dataset.</td><td><span class="tag external">Not established</span></td></tr>
+  <tr><td>NPU is faster/more efficient than CPU model.</td><td>No equivalent CPU artifact or power measurement.</td><td><span class="tag external">Not established</span></td></tr>
+  <tr><td>Production readiness/certification.</td><td>No product safety/security/field qualification program.</td><td><span class="tag future">Not claimed</span></td></tr>
+</table>
+
+<h2 id="limitations">8. Open limitations and future work</h2>
+
+<h3>8.1 External inputs required</h3>
+
+<ul>
+  <li><strong>Independent accuracy study:</strong> requires a representative labeled dataset and authoritative preprocessing definition.</li>
+  <li><strong>Model regeneration:</strong> requires source model, training pipeline, and compatible licensed compiler flow.</li>
+  <li><strong>CPU comparison:</strong> requires an equivalent CPU-target model artifact.</li>
+  <li><strong>Power/energy:</strong> requires current measurement equipment or board instrumentation.</li>
+</ul>
+
+<h3>8.2 Engineering improvements</h3>
+
+<ul>
+  <li>Implement and validate interrupt-driven or asynchronous UART with buffering.</li>
+  <li>Measure stack high-water mark and reduce the conservative 32 KiB allocation.</li>
+  <li>Add trace-based whole-system CPU utilization and interrupt-load measurement.</li>
+  <li>Pin a redistributable container image digest for stronger toolchain reproducibility.</li>
+  <li>Separate reusable AM13x support further and prepare upstream-quality Zephyr patches.</li>
+  <li>Replace remaining raw clock/reset/power register logic with reviewed subsystem abstractions when platform support exists.</li>
+  <li>Disable diagnostic fault-injection Kconfig options in a deployment configuration.</li>
+</ul>
+
+<h3>8.3 Known ABI limitation</h3>
+
+<p>The archive's memory callbacks return <code>void</code>. Bounds violations are prevented/logged locally, but a callback cannot return an error to the generated runtime. This is an interface limitation of the available binary artifact, not something that can be completely repaired without a compatible regenerated runtime or a separately checked fault channel.</p>
+
+<h2 id="claims">9. Interview-safe claims</h2>
+
+<div class="two-col">
+  <div class="card">
+    <h3>Safe and specific</h3>
+    <ul>
+      <li>“I integrated a supplied TVM/TI model archive; I did not train it.”</li>
+      <li>“I built out-of-tree Zephyr platform support and the surrounding inference system.”</li>
+      <li>“Six supplied fixtures matched exactly across 600 repeated inferences.”</li>
+      <li>“We verified five physical NPU completion interrupts per inference.”</li>
+      <li>“The current recovery image measured 701 µs median on a read-back-validated 200 MHz clock.”</li>
+      <li>“The design recovers from CRC damage, NPU timeout, UART errors, and complete main-loop deadlock.”</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h3>Avoid</h3>
+    <ul>
+      <li>“I created or trained the neural network.”</li>
+      <li>“The model has 100% accuracy.”</li>
+      <li>“The whole graph runs only on the NPU.”</li>
+      <li>“Interrupts made it faster.”</li>
+      <li>“The firmware is production ready.”</li>
+      <li>“Power consumption or NPU-vs-CPU speedup was measured.”</li>
+      <li>Quoting superseded 282/340 µs values.</li>
+    </ul>
+  </div>
+</div>
+
+<p class="footer-note">Continue with Volume 4 for ready-to-practice explanations, hard questions, STAR stories, and a live-demo checklist.</p>
+</body>
+</html>
