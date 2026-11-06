@@ -31,6 +31,15 @@
 
 <h2 id="timeline">1. Project evolution</h2>
 
+<div class="callout good">
+  <span class="label">How to read the history tables</span><br>
+  Each table contrasts an earlier state with a later, verified state. It does
+  not mean every early experiment was wrong; early work was often necessary
+  discovery. It means that claims must follow the final implementation and
+  retained evidence, not an older prototype. For basic terms such as object
+  code, Kconfig, and out-of-tree development, read Volume 0 first.
+</div>
+
 <h3>Phase A — Initial board and UART bring-up (July 2026)</h3>
 
 <ul>
@@ -105,6 +114,13 @@
 <h2 id="handoff">2. How to interpret the original handoff</h2>
 
 <p>The original knowledge-transfer document accurately captures valuable discovery work, failed experiments, and the state of the early Windows prototype. It is not a description of the final repository. Use this correction table:</p>
+
+<p>For example, the row saying “modifications live inside Zephyr” describes
+where experimental files once happened to be stored. The current result is an
+out-of-tree module: the same sort of board/driver support lives in this project
+repository and is discovered by Zephyr through metadata. This makes a clean
+build reproducible and prevents hidden local Zephyr edits from becoming a
+dependency.</p>
 
 <table>
   <tr><th>Earlier statement</th><th>Current reality</th></tr>

@@ -64,7 +64,30 @@
 
 <p>The generated library is statically linked. Replacing the model therefore means supplying a compatible archive/header and rebuilding the firmware; this is not a dynamic model loader.</p>
 
-<h3>1.3 Kconfig versus devicetree</h3>
+<h3>1.3 Source code, object code, library, ELF, and HEX</h3>
+
+<p>This is the build chain behind the previous paragraph. C source files are
+human-readable instructions. The Arm compiler translates each source file into
+an object file (<code>.o</code>): machine code plus data, with unresolved names
+allowed. A static archive (<code>.a</code>) is a collection of such object
+files. The linker resolves the names across Zephyr, the application, drivers,
+and <code>mod.a</code>, assigns final flash/RAM addresses, and emits
+<code>zephyr.elf</code>. A HEX conversion then creates the addressable image
+that DSLite programs to flash.</p>
+
+<pre>C source + generated header
+    -> compiler -> .o object files
+    -> linker + Zephyr/project objects + mod.a -> zephyr.elf
+    -> objcopy/converter -> zephyr.hex -> XDS110/DSLite -> board flash</pre>
+
+<p>Object code is therefore not “source code in another format.” It is the
+processor-specific binary translation of source. It can be inspected through
+symbols, but it is not a complete runnable firmware until the linker resolves
+all required functions and memory locations. The CI symbol gate checks the
+finished ELF precisely because a model archive merely existing on disk does not
+prove it was pulled into the firmware.</p>
+
+<h3>1.4 Kconfig versus devicetree</h3>
 
 <table>
   <tr><th>Mechanism</th><th>Question it answers</th><th>Example</th></tr>
@@ -72,6 +95,20 @@
   <tr><td>Devicetree</td><td>Which hardware exists and where/how is it connected?</td><td>UART base addresses, NPU IRQ 41, watchdog address, clock rates, pins.</td></tr>
   <tr><td>CMake</td><td>Which source/object files are compiled and linked?</td><td>Add drivers, application sources, and <code>mod.a</code>.</td></tr>
 </table>
+
+<p><strong>Kconfig is compile-time feature selection.</strong> Kconfig files
+define available symbols and dependencies; board defaults and
+<code>app/prj.conf</code> request values; the configuration system produces the
+final <code>.config</code> used for compilation. It is not a runtime setting
+that a UART command changes after flashing. The NPU/watchdog fault-injection
+symbols are a concrete example: when enabled, diagnostic protocol messages
+exist so recovery can be tested; a deployment configuration disables them.</p>
+
+<p><strong>Devicetree is hardware description.</strong> NPU IRQ 41, UART
+addresses, PA0/PA1 pin routing, and watchdog base addresses are physical
+facts—not user preferences. Devicetree communicates those facts to a driver.
+CMake is a third, separate concern: it chooses sources/libraries to compile and
+link. For a longer teaching explanation and diagrams, see Volume 0.</p>
 
 <h2 id="dt">2. Devicetree, bindings, and configuration</h2>
 

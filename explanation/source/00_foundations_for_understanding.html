@@ -1,0 +1,321 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>AM13E230 TINIElite — Foundations for Understanding the Project</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<section class="title-page">
+  <div class="title-kicker">Interview study guide · Volume 0</div>
+  <div class="rule"></div>
+  <h1>Foundations for<br>Understanding the Project</h1>
+  <p class="subtitle">A plain-language guide to the build system, object code, static libraries, Kconfig, devicetree, out-of-tree development, and the meaning of “what we implemented and why.”</p>
+  <div class="meta">AM13E230 TINIElite Edge AI · Jainil Bavishi · November 2026</div>
+</section>
+
+<section class="toc">
+  <h2>Contents</h2>
+  <ol>
+    <li><a href="#how">How to use this pack</a></li>
+    <li><a href="#build">From C source to firmware: object code and linking</a></li>
+    <li><a href="#zephyr">Zephyr workspace and out-of-tree development</a></li>
+    <li><a href="#config">Kconfig, devicetree, and CMake — three different jobs</a></li>
+    <li><a href="#implemented">What “we implemented” actually means</a></li>
+    <li><a href="#flow">The complete project flow</a></li>
+    <li><a href="#interview">Interview answers to practise</a></li>
+  </ol>
+</section>
+
+<h2 id="how">1. How to use this pack</h2>
+
+<p>Read this volume first if the terms in the other documents feel dense. Then
+read Volume 1 for the project story, Volume 2 for the source-level design,
+Volume 3 for validation/history, and Volume 4 for interview practice.</p>
+
+<div class="callout good">
+  <span class="label">The one-sentence mental model</span><br>
+  The project takes a supplied compiled AI model, builds it into firmware with
+  the platform support that the unsupported board was missing, sends test data
+  to the board safely, runs inference locally, and proves the important
+  hardware behaviors with repeatable tests.
+</div>
+
+<p>When a document says <strong>“implemented”</strong>, read it as
+<strong>“designed, wrote, integrated, tested, or automated this surrounding
+platform/firmware behavior.”</strong> It does not mean that the neural network
+itself was trained or that the source model was created. The trained/generated
+model archive was supplied as an input.</p>
+
+<h2 id="build">2. From C source to firmware</h2>
+
+<h3>2.1 Why source code cannot run directly</h3>
+
+<p>You write C or Python in human-readable source files. A Cortex-M33 processor
+does not execute C text. It executes machine instructions: binary bit patterns
+defined by its Arm instruction set. The build converts the source into those
+instructions and packs them with data at known memory addresses.</p>
+
+<div class="diagram">
+  <div class="flow">
+    <div class="box"><strong>C source</strong><br><span class="small">main.c, driver.c</span></div>
+    <div class="arrow">→ compiler →</div>
+    <div class="box"><strong>Object code</strong><br><span class="small">main.o, driver.o</span></div>
+    <div class="arrow">→ linker →</div>
+    <div class="box green"><strong>ELF firmware</strong><br><span class="small">zephyr.elf</span></div>
+    <div class="arrow">→ converter →</div>
+    <div class="box amber"><strong>Flash image</strong><br><span class="small">zephyr.hex</span></div>
+  </div>
+</div>
+
+<h3>2.2 What is object code?</h3>
+
+<p><strong>Object code</strong> is the compiler’s binary translation of one
+source file. It is usually stored in an <code>.o</code> file. It contains
+machine instructions and data for that source file, but it is not normally a
+complete runnable program yet.</p>
+
+<p>For example, <code>app_npu.c</code> can call a function defined elsewhere.
+Its object file records “I need a function with this name” rather than knowing
+where the function will finally live in flash. It can also contain unfinished
+address references. The <strong>linker</strong> resolves these references when
+it combines all object code into one final program.</p>
+
+<table>
+  <tr><th>Thing</th><th>Simple meaning</th><th>Example in this project</th></tr>
+  <tr><td>Source code</td><td>Text written by humans.</td><td><code>app/src/app_npu.c</code></td></tr>
+  <tr><td>Object file</td><td>Machine code made from one source file, with unresolved references allowed.</td><td>A build-directory <code>.o</code> compiled from <code>app_npu.c</code></td></tr>
+  <tr><td>Static library / archive</td><td>A collection of object files placed in one file, normally ending in <code>.a</code>.</td><td><code>mod.a</code>, the supplied generated model archive</td></tr>
+  <tr><td>Linker</td><td>Program that selects needed object code, resolves names, and assigns final addresses.</td><td>Links Zephyr, project drivers, and model archive into <code>zephyr.elf</code></td></tr>
+  <tr><td>ELF</td><td>Debuggable executable format containing code, data, symbols, and memory layout.</td><td><code>build/zephyr/zephyr.elf</code></td></tr>
+  <tr><td>HEX</td><td>Text-based programming image describing bytes and flash addresses.</td><td><code>build/zephyr/zephyr.hex</code> programmed by DSLite</td></tr>
+</table>
+
+<h3>2.3 What is mod.a?</h3>
+
+<p><code>mod.a</code> is a static library: an archive of compiled object code
+produced by TI’s model-generation tooling. It contains generated runtime/graph
+code and accelerator-related code, not readable C source for the model.
+During the link, the final firmware takes the necessary pieces from this archive
+and places them into <code>zephyr.elf</code>.</p>
+
+<p>This is why this project is an <strong>integration</strong> project. The work
+was to give the supplied archive the environment it requires: exact symbols,
+memory callbacks, NPU register access, interrupts, clocks, input tensor
+preprocessing, and a way to test it on the board. It is not valid to say the
+archive was trained or regenerated here.</p>
+
+<h3>2.4 Why the linker matters in this project</h3>
+
+<p>A static archive is not automatically copied in full. Linkers usually pull
+only members that satisfy a needed symbol. The application link uses
+<code>-Wl,-u,tvmgen_default_run</code> so the model entry point is treated as
+needed. CI then inspects the final ELF symbols for the generated NPU kernels,
+the continuation handler, and project callback symbols. This is evidence that
+the intended binary pieces were linked, not merely stored in the repository.</p>
+
+<div class="callout warn">
+  <span class="label">Useful interview distinction</span><br>
+  “The archive is present” is weak evidence. “The final ELF contains its
+  required symbols, and hardware reports its expected IRQ completions” is much
+  stronger evidence of integration.
+</div>
+
+<h2 id="zephyr">3. Zephyr workspace and out-of-tree development</h2>
+
+<h3>3.1 What is a Zephyr workspace?</h3>
+
+<p>Zephyr projects normally use several Git repositories. A workspace is one
+parent directory containing the Zephyr source tree, this project, and required
+modules. The <code>west</code> tool reads <code>west.yml</code> to fetch the
+pinned revisions and to locate the workspace.</p>
+
+<pre>am13e230-workspace/
+├── .venv/                         Python environment containing west
+├── zephyr/                        pinned upstream Zephyr source
+├── modules/hal/cmsis/             Arm CMSIS module
+├── modules/hal/cmsis_6/           Arm CMSIS 6 module
+└── am13e230-tinielite-zephyr/     this project repository</pre>
+
+<h3>3.2 What “out of tree” means</h3>
+
+<p><strong>Out of tree</strong> means project files live <em>outside</em> the
+upstream Zephyr source tree. “Tree” means the directory tree of a source
+repository. The project does not edit or paste files inside
+<code>zephyr/boards</code>, <code>zephyr/soc</code>, or
+<code>zephyr/drivers</code>. Instead, its own repository contains:</p>
+
+<pre>am13e230-tinielite-zephyr/
+├── boards/       project board definition
+├── soc/          AM13x SoC support and early clock code
+├── dts/          hardware description and binding schemas
+├── drivers/      project UART, pinctrl, and TINIElite drivers
+├── app/          application firmware
+└── zephyr/module.yml  declaration that lets Zephyr discover the above</pre>
+
+<p>During the build, Zephyr reads <code>zephyr/module.yml</code>. That metadata
+says, in effect, “also search this project for board, SoC, devicetree, Kconfig,
+and CMake content.” Zephyr can then build a board that upstream Zephyr itself
+does not yet contain.</p>
+
+<h3>3.3 In-tree versus out-of-tree: concrete comparison</h3>
+
+<table>
+  <tr><th>Approach</th><th>Where a new board driver would be placed</th><th>Problem or benefit</th></tr>
+  <tr><td>In-tree local modification</td><td>Inside a locally edited <code>zephyr/</code> checkout.</td><td>It may build on one laptop, but Git history is mixed with upstream, updates are hard, and a clean clone may miss invisible local edits.</td></tr>
+  <tr><td>Out-of-tree module (this project)</td><td>Inside this repository, discovered through <code>module.yml</code>.</td><td>The project repository holds its own changes. A clean pinned upstream checkout plus this repository can reproduce the build.</td></tr>
+  <tr><td>Upstreamed support</td><td>Accepted into the official Zephyr repository after review.</td><td>Best long-term reuse, but it needs reusable design, tests, documentation, and community review. This project has not reached that stage.</td></tr>
+</table>
+
+<p>Out of tree does <strong>not</strong> mean “not part of the build.” It means
+“part of the build without modifying upstream source.” It also does not mean
+“temporary” or “wrong.” It is a normal Zephyr way to develop a board and an
+application before deciding whether the reusable platform portion should be
+upstreamed.</p>
+
+<h3>3.4 Why it was especially important here</h3>
+
+<p>The inherited environment had an older Zephyr checkout with project edits and
+a duplicate board name. That made it easy for a build to accidentally depend on
+unstated local files. A clean out-of-tree repository plus a pinned manifest
+proves what this project actually needs, makes GitHub practical, and avoids
+destructively changing the legacy checkout.</p>
+
+<h2 id="config">4. Kconfig, devicetree, and CMake</h2>
+
+<p>These three systems are often confused because all act during a build. They
+answer different questions:</p>
+
+<table>
+  <tr><th>System</th><th>Question</th><th>Simple analogy</th><th>Project example</th></tr>
+  <tr><td>CMake</td><td>What source/object/library inputs are built and linked?</td><td>Which ingredients go into the recipe?</td><td>Compile application/driver C files and link <code>mod.a</code>.</td></tr>
+  <tr><td>Kconfig</td><td>Which software features and compile-time settings are selected?</td><td>Which optional recipe features are enabled?</td><td>Enable serial/reboot/NPU driver; set stack size; permit test-only fault injection.</td></tr>
+  <tr><td>Devicetree</td><td>Which physical hardware exists and how is it connected?</td><td>What kitchen equipment and wiring exist?</td><td>UART register blocks, IRQ 41, pins PA0/PA1, clock rates, NPU and watchdog addresses.</td></tr>
+</table>
+
+<h3>4.1 What is Kconfig, thoroughly?</h3>
+
+<p><strong>Kconfig</strong> is Zephyr’s compile-time configuration language and
+menu system. A Kconfig symbol normally starts with <code>CONFIG_</code> after
+configuration. It answers questions such as:</p>
+
+<ul>
+  <li>Should a driver be compiled in?</li>
+  <li>Should reboot support, serial support, or a kernel option be present?</li>
+  <li>How large should the main thread stack be?</li>
+  <li>Should a diagnostic-only fault command be accepted?</li>
+</ul>
+
+<p>It is <strong>compile time</strong>, so it changes the built firmware image.
+It is not a value that a normal UART request can toggle after the firmware is
+flashed. To change a Kconfig option, edit configuration input, rebuild, and
+flash the new image.</p>
+
+<div class="diagram">
+  <div class="flow">
+    <div class="box"><strong>Kconfig files</strong><br><span class="small">available options, dependencies, defaults</span></div>
+    <div class="arrow">+</div>
+    <div class="box"><strong>prj.conf / board defaults</strong><br><span class="small">requested values</span></div>
+    <div class="arrow">→</div>
+    <div class="box green"><strong>generated .config</strong><br><span class="small">final valid selection</span></div>
+    <div class="arrow">→</div>
+    <div class="box amber"><strong>compiled firmware</strong><br><span class="small">only selected code/features</span></div>
+  </div>
+</div>
+
+<p>For example, the project has test-only options:</p>
+
+<pre>CONFIG_APP_NPU_FAULT_INJECTION=y
+CONFIG_APP_WATCHDOG_FAULT_INJECTION=y</pre>
+
+<p>With <code>=y</code>, diagnostic messages can intentionally create an NPU
+timeout or stop watchdog feeding so recovery can be proven. In a deployment
+configuration, set them to <code>n</code> or omit them so those commands do not
+exist in the firmware. This is why Kconfig is useful: it makes a feature
+explicitly selectable and lets dependencies prevent invalid combinations.</p>
+
+<p>Typical Kconfig relationships are:</p>
+
+<ul>
+  <li><strong>depends on:</strong> feature B can only be enabled if A exists.</li>
+  <li><strong>select:</strong> enabling A automatically enables a required lower-level feature B.</li>
+  <li><strong>default:</strong> value used unless a more specific configuration overrides it.</li>
+  <li><strong>choice:</strong> exactly one option in a group may be selected.</li>
+</ul>
+
+<h3>4.2 Devicetree is not Kconfig</h3>
+
+<p>Devicetree describes a physical instance. For example, NPU base address
+<code>0x408ff000</code> and IRQ 41 are hardware facts. It would be wrong to
+treat them as a user preference. Kconfig decides whether the NPU driver feature
+is built; devicetree tells that driver which registers and interrupt it must use.</p>
+
+<p>Similarly, Kconfig can enable serial support, but devicetree/pinctrl says
+which UART exists and which PA0/PA1 functions route its signals to pins. CMake
+then ensures the corresponding source files are compiled.</p>
+
+<h2 id="implemented">5. “What we implemented and why” — how to read it</h2>
+
+<p>The table in Volume 1 is not a list of random technologies. Each row has the
+same three-part engineering story:</p>
+
+<ol>
+  <li><strong>Implemented area:</strong> the concrete subsystem added or changed.</li>
+  <li><strong>Why it was necessary:</strong> the real gap or risk that existed without it.</li>
+  <li><strong>Key result:</strong> the visible capability or evidence after the work.</li>
+</ol>
+
+<p>Use this sentence pattern in an interview: <strong>“The platform did not
+provide X, so I implemented Y. That let the system do Z, and I verified it by
+W.”</strong></p>
+
+<table>
+  <tr><th>Problem before the work</th><th>What was implemented</th><th>Why it matters now</th></tr>
+  <tr><td>Zephyr did not know this preview board existed.</td><td>Out-of-tree board, SoC, devicetree, pinctrl, and driver support.</td><td>Firmware can build reproducibly for the real LP-AM13E230 instead of relying on private edits.</td></tr>
+  <tr><td>The real clock was not configured to match assumed timing.</td><td>Crystal/PLL/flash initialization plus register telemetry.</td><td>UART settings, flash safety, and measured microseconds are tied to actual 200 MHz hardware.</td></tr>
+  <tr><td>Raw serial bytes could be damaged, truncated, or stale.</td><td>Versioned UART frames with length, CRC-32, sequence, errors, deadline, and resync.</td><td>A test client can identify the correct response and recover rather than silently accepting bad data.</td></tr>
+  <tr><td>The supplied model archive needed hardware-specific functions.</td><td>TINIElite callbacks, NPU power/privilege setup, SRAM staging, IRQ handling.</td><td>The generated runtime can use the real accelerator, not just be stored as a file.</td></tr>
+  <tr><td>A missing NPU completion could hang the application.</td><td>100 ms bounded wait, structured error, cold reset.</td><td>Known accelerator failures become observable/recoverable instead of infinite waits.</td></tr>
+  <tr><td>A total CPU/application hang cannot execute software timeout logic.</td><td>Independently clocked WWDT0, fed only by main-loop progress.</td><td>The board can reset even when normal firmware control flow is broken.</td></tr>
+  <tr><td>Manual, one-off testing would be hard to trust or repeat.</td><td>Python regression client, scripts, tests, CI, JSON hardware evidence.</td><td>Another person can repeat build/flash/test and see exactly what was measured.</td></tr>
+</table>
+
+<h3>5.1 What was supplied versus what was our engineering work</h3>
+
+<table>
+  <tr><th>Supplied input (do not overclaim)</th><th>Project engineering work</th></tr>
+  <tr><td>Generated model archive <code>mod.a</code>, header, licence, and six golden fixtures.</td><td>Linked archive into firmware; supplied ABI callbacks, input preparation, target drivers, interrupt path, and validation.</td></tr>
+  <tr><td>TI chip/board, SDK register information, XDS110 debug probe, and TI flashing tool.</td><td>Created Zephyr board/SoC/DTS integration; configured clock/UART/NPU/watchdog; made WSL workflow reproducible.</td></tr>
+  <tr><td>Zephyr RTOS and CMSIS upstream dependencies.</td><td>Pinned dependencies, integrated as a module, wrote app/driver code, tests, scripts, docs, and CI checks.</td></tr>
+</table>
+
+<h2 id="flow">6. Complete flow from typing a command to seeing a result</h2>
+
+<ol>
+  <li>You run <code>./scripts/build.sh</code>.</li>
+  <li>west finds pinned Zephyr/modules and discovers this out-of-tree project through <code>module.yml</code>.</li>
+  <li>CMake selects project/application/driver sources and <code>mod.a</code>.</li>
+  <li>Kconfig resolves which features are compiled; devicetree generates the hardware constants.</li>
+  <li>The Arm compiler produces object code; the linker makes <code>zephyr.elf</code>; conversion makes <code>zephyr.hex</code>.</li>
+  <li><code>./scripts/flash.sh</code> uses Linux DSLite and XDS110 to erase, program, and verify the board.</li>
+  <li>On boot, firmware safely configures the 200 MHz clock, drivers, NPU, UART, and watchdog, then sends READY.</li>
+  <li>The Python client quantizes a 256-sample fixture, sends a CRC-protected frame, and receives ACK.</li>
+  <li>The generated runtime runs CPU and NPU stages; DONE IRQ 41 wakes the thread for each accelerator completion.</li>
+  <li>The board returns scores/timing/IRQ counts. The host checks CRC, sequence, exact scores, nonzero completions, and zero spurious IRQs.</li>
+</ol>
+
+<h2 id="interview">7. Short answers to practise</h2>
+
+<div class="qa"><div class="question">What is object code?</div><div class="answer">Object code is the binary machine-code translation of one source file. It can still contain unresolved references. The linker combines object code and libraries into the final ELF firmware.</div></div>
+
+<div class="qa"><div class="question">What is a static library?</div><div class="answer">It is an archive of object code, usually a .a file. Here mod.a is a supplied generated model archive. At link time the required members become part of the final firmware, so there is no dynamic loading on the board.</div></div>
+
+<div class="qa"><div class="question">What does out-of-tree mean here?</div><div class="answer">The AM13E230 board, SoC, devicetree, and drivers live in our own repository, not inside upstream Zephyr. module.yml lets a clean pinned Zephyr checkout discover them during build. This keeps changes reproducible and separate from upstream.</div></div>
+
+<div class="qa"><div class="question">What is Kconfig?</div><div class="answer">Kconfig is Zephyr’s compile-time feature-selection system. It decides what software support is compiled into a specific firmware image—for example drivers, stack sizes, and test-only fault interfaces. It is different from devicetree, which describes physical hardware, and CMake, which selects sources/libraries to build.</div></div>
+
+<div class="qa"><div class="question">What did you implement, as opposed to what was given?</div><div class="answer">The model archive, header, and six fixtures were supplied. I implemented the Zephyr platform support and firmware environment around them: board/SoC/DTS integration, clock/pins/UART/NPU/watchdog support, framed host protocol, recovery, WSL flashing/testing, and validation/CI. I did not train or regenerate the model.</div></div>
+
+<p class="footer-note">Next: read Volume 1 for the project story and the complete implementation map.</p>
+</body>
+</html>

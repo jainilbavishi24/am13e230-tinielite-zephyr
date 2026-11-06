@@ -128,6 +128,11 @@ shift = 6</pre>
 
 <h2 id="concepts">4. Concepts needed to understand the system</h2>
 
+<p>If terms such as <em>object code</em>, <em>static library</em>,
+<em>Kconfig</em>, or <em>out of tree</em> are new, read Volume 0 first. The
+short definitions below are reminders; Volume 0 teaches how they fit together
+in the actual build.</p>
+
 <table>
   <tr><th>Concept</th><th>Simple explanation</th><th>How it appears here</th></tr>
   <tr><td>Microcontroller (MCU)</td><td>A small computer on one chip with CPU, memory, and peripherals.</td><td>AM13E23019 with an Arm Cortex-M33.</td></tr>
@@ -145,6 +150,15 @@ shift = 6</pre>
   <tr><td>ABI</td><td>Binary-level contract between separately compiled code.</td><td><code>mod.a</code> expects specific NPU memory functions and exports runtime functions.</td></tr>
   <tr><td>Static library</td><td>Compiled object code linked into the final executable.</td><td><code>mod.a</code> is linked into <code>zephyr.elf</code>.</td></tr>
 </table>
+
+<div class="callout good">
+  <span class="label">Do not mix up these three build concepts</span><br>
+  CMake selects source files and libraries to compile/link. Kconfig chooses
+  software features included in this firmware image. Devicetree describes the
+  actual board hardware—addresses, interrupts, clocks, and pins. In this
+  project, CMake links <code>mod.a</code>; Kconfig can enable diagnostic fault
+  commands; devicetree tells drivers where the UART, NPU, and watchdog exist.
+</div>
 
 <h2 id="architecture">5. Complete system architecture</h2>
 
@@ -174,6 +188,15 @@ shift = 6</pre>
 
 <p>The board and driver support live in this repository rather than being copied into the upstream Zephyr checkout. Zephyr discovers the repository as a module through <code>zephyr/module.yml</code>. This prevents local patches from being mixed into millions of upstream lines, makes Git history focused, and allows a clean, pinned Zephyr checkout to reproduce the build.</p>
 
+<p>More concretely, a workspace contains a <code>zephyr/</code> directory with
+unmodified upstream code and a sibling <code>am13e230-tinielite-zephyr/</code>
+directory containing this project’s <code>boards/</code>, <code>soc/</code>,
+<code>dts/</code>, <code>drivers/</code>, and <code>app/</code>. “Out of tree”
+does not mean excluded from the build. It means Zephyr includes project
+components through module metadata instead of private edits to upstream files.
+This was essential because an old Zephyr checkout had hidden project edits and
+a duplicate board name. Volume 0 gives the complete visual explanation.</p>
+
 <h3>5.3 Why the inference is hybrid</h3>
 
 <p>The generated runtime owns the graph. It performs orchestration and some operations on the Cortex-M33, while generated TINIElite kernels offload supported stages. The current ELF contains three convolution entry points and one average-pooling entry point, plus CPU-side generated functions. Five acknowledged NPU completions are observed per inference. Because the graph and sublayer schedule are contained in a binary archive, the documentation does not invent a layer-by-layer network architecture that cannot be independently inspected.</p>
@@ -200,6 +223,12 @@ shift = 6</pre>
 
 <h2 id="built">7. What we implemented and why</h2>
 
+<p>Read every row as an engineering story, not a vocabulary list:
+<strong>there was a specific missing capability or risk; we implemented a
+concrete subsystem; the final column states what capability or evidence that
+created.</strong> The table is about the surrounding embedded system. It does
+not say that the neural network was trained here.</p>
+
 <table>
   <tr><th>Implemented area</th><th>Why it was necessary</th><th>Key result</th></tr>
   <tr><td>Out-of-tree board/SoC port</td><td>The preview MCU was not supported by the pinned Zephyr tree.</td><td>Zephyr can build for <code>lp_am13e230/am13e23019</code>.</td></tr>
@@ -215,6 +244,30 @@ shift = 6</pre>
   <tr><td>WSL-native workflow</td><td>The complete developer flow needed to work from Linux under WSL.</td><td>Build, Linux UniFlash/DSLite flash, UART test, and USB permission scripts.</td></tr>
   <tr><td>Automated quality gates</td><td>A hardware demo needs reproducible software evidence.</td><td>Host tests, sanitized ztests, lint/format/static checks, cross-build, symbol checks, artifacts.</td></tr>
 </table>
+
+<h3>7.1 The table in everyday language</h3>
+
+<ul>
+  <li><strong>Board/SoC port:</strong> Zephyr had no knowledge of this preview
+  board, so we taught it the memory map, CPU, peripherals, pins, and startup
+  information required to build an image for it.</li>
+  <li><strong>Clock and telemetry:</strong> firmware cannot honestly report
+  microseconds or generate a correct UART baud rate if its actual clock is
+  unknown, so we configured and read back the 200 MHz clock state.</li>
+  <li><strong>UART protocol:</strong> a byte stream alone has no message
+  boundaries or integrity. We added frames, CRC, sequences, errors, and
+  recovery so the host knows exactly what it received.</li>
+  <li><strong>TINIElite adapter:</strong> the supplied compiled model knew how
+  to request accelerator work, but not how this Zephyr board exposes NPU
+  registers and memory. We wrote that bridge.</li>
+  <li><strong>Timeout and watchdog:</strong> normal code must not wait forever,
+  and a completely frozen CPU cannot execute a normal timeout. Those two
+  different risks need both software timeout/reset logic and independent
+  watchdog hardware.</li>
+  <li><strong>Client, scripts, and tests:</strong> a demo performed by hand is
+  difficult to repeat. The tooling turns inputs, flashing, score checking,
+  fault injection, and evidence collection into repeatable commands.</li>
+</ul>
 
 <h2 id="hardware">8. Hardware and memory map</h2>
 
