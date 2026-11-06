@@ -261,6 +261,7 @@ The live completion matrix is in
 
 ## Documentation
 
+- [Agent-ready project handoff](docs/PROJECT_HANDOFF.md)
 - [Complete project explanation and interview study PDFs](explanation/README.md)
 - [Architecture](docs/ARCHITECTURE.md)
 - [UART protocol](docs/PROTOCOL.md)
