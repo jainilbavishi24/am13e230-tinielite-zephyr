@@ -2,7 +2,7 @@
 set -euo pipefail
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-source_rule="$repo_root/scripts/99-xds110-wsl.rules"
+source_rule="$repo_root/config/udev/99-xds110-wsl.rules"
 target_rule=/etc/udev/rules.d/99-xds110-wsl.rules
 
 sudo install -m 0644 "$source_rule" "$target_rule"

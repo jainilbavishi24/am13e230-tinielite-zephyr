@@ -6,7 +6,7 @@ user_home="$(getent passwd "$(id -u)" | cut -d: -f6)"
 uniflash_root="${TI_UNIFLASH_ROOT:-$user_home/ti/uniflash_9.7.0}"
 dslite="${DSLITE_LINUX_PATH:-$uniflash_root/dslite.sh}"
 hex_file="${1:-$repo_root/build/zephyr/zephyr.hex}"
-ccxml="${CCXML_PATH:-$repo_root/config/AM13E23019_Zephyr.ccxml}"
+ccxml="${CCXML_PATH:-$repo_root/config/debug/AM13E23019_Zephyr.ccxml}"
 
 for required in "$dslite" "$hex_file" "$ccxml"; do
     if [[ ! -e "$required" ]]; then

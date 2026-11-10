@@ -9,425 +9,492 @@
 <section class="title-page">
   <div class="title-kicker">Interview study guide · Volume 2</div>
   <div class="rule"></div>
-  <h1>Firmware and Platform<br>Deep Dive</h1>
-  <p class="subtitle">How the current implementation works from Zephyr discovery and boot through clocking, UART, model execution, interrupts, watchdog recovery, and host validation.</p>
-  <div class="meta">AM13E230 TINIElite Edge AI · Jainil Bavishi · 23 October 2026</div>
+  <h1>Firmware and Platform<br>Deep Dive — Gently</h1>
+  <p class="subtitle">A beginner-first explanation of what happens when the PC sends one AI input to the AM13E230 board, why every part exists, and only then how the code implements it.</p>
+  <div class="meta">AM13E230 TINIElite Edge AI · Jainil Bavishi · November 2026</div>
 </section>
 
 <section class="toc">
-  <h2>Contents</h2>
+  <h2>How to use this volume</h2>
+  <p>You do <strong>not</strong> need to memorize every register, address, macro,
+or symbol in this document. First understand the story in Sections 1–3. Then
+read the later sections when you want to know how that part is implemented.</p>
   <ol>
-    <li><a href="#build">How the firmware is assembled</a></li>
-    <li><a href="#dt">Devicetree, bindings, and configuration</a></li>
-    <li><a href="#boot">Boot and 200 MHz clock configuration</a></li>
-    <li><a href="#pinctrl">Pin control and UART driver</a></li>
-    <li><a href="#protocol">Protocol-v2 design</a></li>
-    <li><a href="#host">Python host client</a></li>
-    <li><a href="#model">Generated model and binary ABI</a></li>
-    <li><a href="#npu">TINIElite driver and memory interface</a></li>
-    <li><a href="#irq">Interrupt-driven inference</a></li>
-    <li><a href="#timing">Timing measurements</a></li>
-    <li><a href="#watchdog">Timeouts, reset, and watchdog</a></li>
-    <li><a href="#main">Application state machine and concurrency</a></li>
-    <li><a href="#files">File-by-file responsibility map</a></li>
+    <li><a href="#story">The whole project in one simple story</a></li>
+    <li><a href="#words">Six words that unlock the rest</a></li>
+    <li><a href="#one-run">Follow one inference from PC to result</a></li>
+    <li><a href="#build">How source files become board firmware</a></li>
+    <li><a href="#configuration">Three configuration systems, three jobs</a></li>
+    <li><a href="#clock">Why clock setup matters</a></li>
+    <li><a href="#uart">How the PC and board talk</a></li>
+    <li><a href="#model">How the compiled model is connected</a></li>
+    <li><a href="#npu">How the NPU and interrupt work together</a></li>
+    <li><a href="#safety">What happens when something goes wrong</a></li>
+    <li><a href="#files">Where to look in the repository</a></li>
+    <li><a href="#interview">What to say in an interview</a></li>
   </ol>
 </section>
 
-<h2 id="build">1. How the firmware is assembled</h2>
+<h2 id="story">1. The whole project in one simple story</h2>
 
-<p>The repository is a Zephyr module and a west manifest repository. These two ideas solve different problems:</p>
+<p>Imagine a small AI laboratory split into two parts:</p>
 
 <ul>
-  <li><strong>west manifest:</strong> <code>west.yml</code> pins the upstream Zephyr commit and imports only required modules such as CMSIS. This makes dependency revisions explicit.</li>
-  <li><strong>Zephyr module:</strong> <code>zephyr/module.yml</code> tells Zephyr that this repository contributes CMake/Kconfig content and is also a board, devicetree, and SoC root.</li>
+  <li><strong>The PC is the test supervisor.</strong> It prepares an input,
+  sends it to the board, receives the result, and checks whether the result is
+  what the supplied model expects.</li>
+  <li><strong>The AM13E230 board is the worker.</strong> It runs the AI model
+  locally. It does not send the input to a cloud service.</li>
 </ul>
 
-<div class="diagram">
-  <div class="flow">
-    <div class="box"><strong>west.yml</strong><br><span class="small">fetch pinned Zephyr + CMSIS</span></div>
-    <div class="arrow">→</div>
-    <div class="box"><strong>module.yml</strong><br><span class="small">discover board/SoC/drivers</span></div>
-    <div class="arrow">→</div>
-    <div class="box"><strong>app CMake</strong><br><span class="small">compile sources + link mod.a</span></div>
-    <div class="arrow">→</div>
-    <div class="box green"><strong>zephyr.elf / .hex</strong><br><span class="small">flashable firmware</span></div>
-  </div>
+<pre>PC: prepare one test tensor
+        │  USB UART
+        ▼
+AM13E230 board: validate the request and start the model
+        │
+        ▼
+Generated AI runtime: CPU work + supported NPU stages
+        │  output scores + timing + interrupt counters
+        ▼
+PC: check the result and diagnostics</pre>
+
+<p>The difficult part is not simply calling an AI function. The board is a
+preview device with no ready-made upstream Zephyr support. The project supplies
+the missing platform layer: board description, startup clock setup, UART,
+pins, watchdog, TINIElite NPU driver, test protocol, and build process.</p>
+
+<div class="callout good">
+  <span class="label">The main idea to remember</span><br>
+  We took a supplied compiled AI model and built a trustworthy embedded system
+  around it so it can run on the board and be tested repeatedly.
 </div>
 
-<h3>1.1 Why pin Zephyr?</h3>
+<h2 id="words">2. Six words that unlock the rest</h2>
 
-<p>Zephyr APIs, build rules, bindings, and board conventions evolve. A commit hash makes the build deterministic and prevents an unrelated upstream change from silently altering the platform. The current pin is <code>9574b65fbaa01aa0c8f418bd7a6b97beb15fcc54</code>.</p>
+<div class="two-col">
+  <div class="card"><h4>Firmware</h4><p>The program stored in a microcontroller's flash memory. Here, <code>zephyr.hex</code> is programmed onto the AM13E230.</p></div>
+  <div class="card"><h4>Driver</h4><p>Code that knows how to control one hardware block. The UART driver sends bytes; the TINIElite driver controls the NPU.</p></div>
+  <div class="card"><h4>Register</h4><p>A tiny hardware-controlled memory location used to configure or observe a peripheral. A UART register holds received data; an NPU register reports completion.</p></div>
+  <div class="card"><h4>Interrupt</h4><p>A hardware notification that briefly gets the CPU's attention. The NPU raises DONE interrupt 41 when one accelerator stage finishes.</p></div>
+  <div class="card"><h4>Semaphore</h4><p>A software signal that makes a task wait until an event happens. The application waits on one instead of constantly checking the NPU.</p></div>
+  <div class="card"><h4>ABI</h4><p>An exact agreement between already-compiled software pieces. The supplied model archive expects certain function names and data layouts.</p></div>
+</div>
 
-<h3>1.2 CMake linking details</h3>
+<p>One useful analogy: the NPU is a specialist worker, an interrupt is its
+“I am done” bell, and a semaphore is the application waiting by the bell rather
+than repeatedly asking “are you done yet?”</p>
 
-<p><code>app/CMakeLists.txt</code> compiles the six application source files, exposes the generated model header, and links <code>models/waveform_classifier/artifacts/mod.a</code>. The option <code>-Wl,-u,tvmgen_default_run</code> forces the archive entry point to be pulled into the ELF even if archive extraction rules would otherwise discard it.</p>
+<h2 id="one-run">3. Follow one inference from PC to result</h2>
 
-<p>The generated library is statically linked. Replacing the model therefore means supplying a compatible archive/header and rebuilding the firmware; this is not a dynamic model loader.</p>
+<p>This is the most important section. If you can explain this sequence in
+your own words, you understand the centre of the project.</p>
 
-<h3>1.3 Source code, object code, library, ELF, and HEX</h3>
+<ol>
+  <li><strong>Build selection.</strong> Before flashing, the developer selects
+  a model package, such as <code>waveform_classifier</code> or
+  <code>electrical_fault_6class</code>.</li>
+  <li><strong>Board boots.</strong> Firmware sets up the clock, pins, UART,
+  NPU, watchdog, and application.</li>
+  <li><strong>Board says READY.</strong> It sends its model identity, expected
+  input size, output size, and data types to the PC.</li>
+  <li><strong>PC checks the contract.</strong> The PC refuses to send an input
+  if it selected a different model or tensor shape. This prevents silent
+  nonsense, such as sending 256 bytes to a model that expects 3,072 bytes.</li>
+  <li><strong>PC prepares input.</strong> For the waveform model, it converts
+  256 floating-point samples into the required signed 8-bit values. For the
+  electrical-fault model, it sends 768 float values in the declared channel
+  order.</li>
+  <li><strong>PC sends a protected message.</strong> The UART frame includes a
+  message type, sequence number, length, and CRC error check.</li>
+  <li><strong>Firmware validates it.</strong> The board checks that the message
+  is complete, the size is correct, and the CRC matches before starting AI
+  work.</li>
+  <li><strong>The generated model begins.</strong> A small generated adapter
+  passes the input/output buffers to the correct generated model function.</li>
+  <li><strong>CPU and NPU cooperate.</strong> The generated runtime performs
+  some work on the Cortex-M33 CPU and gives supported stages to TINIElite.</li>
+  <li><strong>The NPU rings the bell.</strong> Each finished hardware stage
+  raises the DONE interrupt. The short interrupt handler records it and wakes
+  the waiting application.</li>
+  <li><strong>The model continues or finishes.</strong> The normal application
+  context, not the interrupt handler, calls the generated continuation code.
+  Eventually the output scores are ready.</li>
+  <li><strong>The board replies.</strong> It returns output bytes, timing
+  values, and interrupt counters. The PC checks output and diagnostics against
+  the package fixtures.</li>
+</ol>
 
-<p>This is the build chain behind the previous paragraph. C source files are
-human-readable instructions. The Arm compiler translates each source file into
-an object file (<code>.o</code>): machine code plus data, with unresolved names
-allowed. A static archive (<code>.a</code>) is a collection of such object
-files. The linker resolves the names across Zephyr, the application, drivers,
-and <code>mod.a</code>, assigns final flash/RAM addresses, and emits
-<code>zephyr.elf</code>. A HEX conversion then creates the addressable image
-that DSLite programs to flash.</p>
+<div class="callout warn">
+  <span class="label">Important scope</span><br>
+  Exact supplied fixtures prove that this integrated binary behaves
+  deterministically for those cases. They do not prove broad real-world model
+  accuracy.
+</div>
 
-<pre>C source + generated header
-    -> compiler -> .o object files
-    -> linker + Zephyr/project objects + mod.a -> zephyr.elf
-    -> objcopy/converter -> zephyr.hex -> XDS110/DSLite -> board flash</pre>
+<h2 id="build">4. How source files become board firmware</h2>
 
-<p>Object code is therefore not “source code in another format.” It is the
-processor-specific binary translation of source. It can be inspected through
-symbols, but it is not a complete runnable firmware until the linker resolves
-all required functions and memory locations. The CI symbol gate checks the
-finished ELF precisely because a model archive merely existing on disk does not
-prove it was pulled into the firmware.</p>
+<h3>4.1 Start with a simple picture</h3>
 
-<h3>1.4 Kconfig versus devicetree</h3>
+<pre>Project C files + Zephyr C files + supplied model archive
+                         │
+                         ▼
+                      compiler
+                         │
+                         ▼
+                object files (.o files)
+                         │
+                         ▼
+                       linker
+                         │
+                         ▼
+             zephyr.elf  →  zephyr.hex  →  board flash</pre>
+
+<p>The compiler turns human-written C into processor instructions. Each C file
+becomes an <strong>object file</strong>, usually ending in <code>.o</code>.
+An object file can refer to functions stored elsewhere; it does not need to be
+a complete program on its own.</p>
+
+<p>The <strong>linker</strong> is the final assembler. It joins Zephyr, this
+project's drivers, the application, and the model archive. It resolves function
+names and chooses final flash/RAM addresses. The result is
+<code>zephyr.elf</code>, a complete firmware executable. A conversion step
+creates <code>zephyr.hex</code>, which the XDS110/DSLite tool programs to board
+flash.</p>
+
+<h3>4.2 What is <code>mod.a</code>?</h3>
+
+<p><code>mod.a</code> is a <strong>static library</strong>, also called an
+archive. Think of it as a box containing already-compiled object files. TI's
+model-generation tool created it. It contains generated model/runtime code and
+NPU-related code; it is not the original trainable model source.</p>
+
+<p>That is why this is accurately called an <strong>integration project</strong>.
+The work was to supply the environment that the compiled archive needs, not to
+claim the neural network was trained from scratch in this repository.</p>
+
+<h3>4.3 Why the linker check matters</h3>
+
+<p>Putting an archive in a folder does not prove its code reached the board.
+The build forces the model entry function to be linked, and checks the final
+ELF for model, NPU, and project symbols. This is similar to checking that an
+ingredient was actually put into a cake, not merely left in the kitchen.</p>
+
+<h2 id="configuration">5. Three configuration systems, three jobs</h2>
+
+<p>These names are intimidating only because they all run during a build. They
+do different jobs:</p>
 
 <table>
-  <tr><th>Mechanism</th><th>Question it answers</th><th>Example</th></tr>
-  <tr><td>Kconfig</td><td>Which software features are compiled?</td><td><code>CONFIG_TINYENGINE_AM13E230X</code>, stack size, serial, reboot, test-only fault injection.</td></tr>
-  <tr><td>Devicetree</td><td>Which hardware exists and where/how is it connected?</td><td>UART base addresses, NPU IRQ 41, watchdog address, clock rates, pins.</td></tr>
-  <tr><td>CMake</td><td>Which source/object files are compiled and linked?</td><td>Add drivers, application sources, and <code>mod.a</code>.</td></tr>
+  <tr><th>System</th><th>Simple question</th><th>Example in this project</th></tr>
+  <tr><td>CMake</td><td>What code and libraries should be built?</td><td>Compile application/driver C files; link the selected <code>mod.a</code>.</td></tr>
+  <tr><td>Kconfig</td><td>Which software options should exist in this firmware?</td><td>Enable drivers, set stack size, optionally enable diagnostic fault tests.</td></tr>
+  <tr><td>Devicetree</td><td>What physical hardware exists and how is it wired?</td><td>UART address, NPU IRQ 41, pin assignment, watchdog and clock hardware.</td></tr>
 </table>
 
-<p><strong>Kconfig is compile-time feature selection.</strong> Kconfig files
-define available symbols and dependencies; board defaults and
-<code>app/prj.conf</code> request values; the configuration system produces the
-final <code>.config</code> used for compilation. It is not a runtime setting
-that a UART command changes after flashing. The NPU/watchdog fault-injection
-symbols are a concrete example: when enabled, diagnostic protocol messages
-exist so recovery can be tested; a deployment configuration disables them.</p>
+<h3>5.1 Kconfig: software choices before compiling</h3>
 
-<p><strong>Devicetree is hardware description.</strong> NPU IRQ 41, UART
-addresses, PA0/PA1 pin routing, and watchdog base addresses are physical
-facts—not user preferences. Devicetree communicates those facts to a driver.
-CMake is a third, separate concern: it chooses sources/libraries to compile and
-link. For a longer teaching explanation and diagrams, see Volume 0.</p>
+<p>Kconfig options begin with <code>CONFIG_</code>. For example, a diagnostic
+option can include deliberately dangerous test messages that simulate an NPU
+stall or watchdog failure. Those options are chosen while building; they are
+not normal buttons the PC can turn on after the board is flashed.</p>
 
-<h2 id="dt">2. Devicetree, bindings, and configuration</h2>
+<h3>5.2 Devicetree: the board's hardware map</h3>
 
-<h3>2.1 SoC description</h3>
+<p>Devicetree describes hardware facts: where a peripheral's registers are,
+which interrupt it uses, and which pins connect to it. The UART does not “move”
+because C code wants it to; its address and pins are physical properties. The
+driver reads those facts from devicetree-generated configuration.</p>
 
-<p><code>dts/arm/ti/am13e23019.dtsi</code> describes the Cortex-M33, flash and SRAM regions, fixed clock nodes, SYSCTL, pin controller, flash controller, UART, TINIElite, and WWDT0. Disabled-by-default peripheral nodes become usable when the board/application sets <code>status = "okay"</code>.</p>
+<h3>5.3 Why this repository has many top-level platform folders</h3>
 
-<h3>2.2 Board description</h3>
+<p>Zephyr discovers boards, SoCs, devicetree files, drivers, and headers at
+specific module roots. Therefore <code>boards/</code>, <code>soc/</code>,
+<code>dts/</code>, <code>drivers/</code>, and <code>include/</code> correctly
+stay at the repository root. They are not random clutter. Moving them under a
+cosmetic folder would break Zephyr's standard discovery architecture.</p>
 
-<p><code>lp_am13e230.dts</code> identifies the board, chooses the flash/SRAM/console, declares 200 MHz CPU metadata, assigns the 100 MHz UART source, and enables UART. <code>app.overlay</code> enables TINIElite and WWDT0 specifically for this application.</p>
+<h3>5.4 What “out of tree” means in this project</h3>
 
-<h3>2.3 Why binding YAML files matter</h3>
+<p>The project does not edit the downloaded upstream Zephyr source tree.
+Instead, <code>zephyr/module.yml</code> tells Zephyr to also search this
+repository for board, SoC, devicetree, CMake, and Kconfig content. That is
+called <strong>out-of-tree support</strong>: the platform participates in the
+build without becoming a hidden local modification of upstream Zephyr.</p>
 
-<p>A binding defines the schema for a compatible device. It documents expected properties and lets Zephyr validate the devicetree at build time. For example, the UART binding requires register regions, register names, a clock, current speed, and pinctrl support. A typo or missing required property becomes a build error rather than a mysterious runtime failure.</p>
+<h2 id="clock">6. Why clock setup matters</h2>
 
-<h3>2.4 Compile-time device construction</h3>
-
-<p>Macros such as <code>DEVICE_DT_INST_DEFINE</code>, <code>DT_INST_REG_ADDR_BY_NAME</code>, and <code>DT_INST_IRQN</code> turn validated devicetree nodes into constant driver configuration. This removes runtime device enumeration and catches many integration errors during compilation.</p>
-
-<h2 id="boot">3. Boot and 200 MHz clock configuration</h2>
+<p>A clock is the CPU's beat. Faster beats mean the CPU can execute more steps
+per second, but other hardware such as flash and UART must be configured to
+match. This board is intended to run at 200 MHz.</p>
 
 <div class="callout danger">
-  <span class="label">Critical lesson</span><br>
-  Declaring <code>clock-frequency = &lt;200000000&gt;</code> does not configure hardware. It only tells software what the frequency is supposed to be. An early version declared 200 MHz while the chip actually ran at 32 MHz, making cycle-to-time conversions wrong.
+  <span class="label">A real bug that taught an important lesson</span><br>
+  Software once <em>claimed</em> the CPU ran at 200 MHz, but hardware was still
+  running at 32 MHz. Timing calculations based on 200 MHz were therefore wrong.
+  A number in a configuration file is only a promise; registers must be set and
+  read back to prove the hardware agrees.
 </div>
 
-<h3>3.1 Early initialization</h3>
-
-<p><code>soc/ti/am13x/clock.c</code> registers <code>am13e230_clock_init</code> with <code>SYS_INIT(..., PRE_KERNEL_1, 0)</code>. It runs before the Zephyr kernel and timer depend on the declared clock. The sequence follows the retained TI SDK configuration:</p>
+<h3>6.1 What the boot code does</h3>
 
 <ol>
-  <li>Execute a RAM-resident function that disables flash cache paths temporarily and programs three flash read wait states.</li>
-  <li>Configure the dedicated X1/X2 pins and start the board's 25 MHz crystal.</li>
-  <li>Wait until hardware reports the high-frequency source is good.</li>
-  <li>Disable the PLL and wait for its off status before changing its configuration.</li>
-  <li>Select the 25 MHz reference, predivide by 2, multiply by 32, and divide the output by 2: <code>(25 MHz / 2 × 32) / 2 = 200 MHz</code>.</li>
-  <li>Load device-specific PLL analog parameters from retained addresses.</li>
-  <li>Enable the PLL and wait for lock/good status.</li>
-  <li>Switch MCLK gradually through external division by 4, division by 2, then bypass to avoid an abrupt frequency transition.</li>
-  <li>Set the MCLK divider configuration required by the TI sequence.</li>
+  <li>Set flash wait states. At high CPU speed, flash needs extra clock cycles
+  to safely provide instructions.</li>
+  <li>Start the board's 25 MHz crystal oscillator.</li>
+  <li>Configure and lock the PLL. A PLL is hardware that derives a faster,
+  stable clock from a reference clock.</li>
+  <li>Use the TI sequence to produce 200 MHz:
+  <code>(25 MHz / 2 × 32) / 2 = 200 MHz</code>.</li>
+  <li>Switch to that clock in safe stages rather than abruptly.</li>
+  <li>Read back raw registers and report whether the expected configuration is
+  genuinely active.</li>
 </ol>
 
-<h3>3.2 Why configure flash from RAM?</h3>
+<p>The few instructions that change flash timing run from RAM, not flash. This
+avoids changing the timing rules of the storage currently supplying the
+instructions being executed.</p>
 
-<p>At higher CPU frequencies, flash cannot return instructions in a single core cycle. Wait states give flash extra cycles. Modifying flash timing while executing code from that same flash is risky, so the small routine is marked <code>__ramfunc</code> and runs from SRAM.</p>
+<h3>6.2 Why the UART cares about the clock too</h3>
 
-<h3>3.3 Bounded status waits</h3>
+<p>UART baud rate is derived from its clock. If the driver believes it has a
+100 MHz UART source but hardware supplies something else, “115200 baud” is not
+really 115200 baud and the PC may see corrupt text. The project therefore
+checks both MCLK and UART-source assumptions.</p>
 
-<p>Crystal and PLL status loops use a finite iteration count and return <code>-ETIMEDOUT</code> if hardware never becomes healthy. A boot failure is preferable to silently continuing with inconsistent timing assumptions.</p>
+<h2 id="uart">7. How the PC and board talk</h2>
 
-<h3>3.4 Independent read-back</h3>
+<h3>7.1 Pins are not automatically UART pins</h3>
 
-<p><code>app_clock.c</code> reads raw clock and flash registers, derives active MCLK from divisors, and returns twelve words to the host. Five validation bits cover source selection, high-speed clock health, PLL/reference health, expected frequency, and sufficient flash wait states. Hardware evidence recorded all five bits set, 200 MHz MCLK, 100 MHz UART source, and three wait states.</p>
+<p>A microcontroller pin can usually perform several jobs. PA0 and PA1 must be
+routed to the UART peripheral before bytes can leave or enter the board. This
+is called <strong>pin control</strong>, or pinctrl. Without it, the UART may be
+configured internally but electrically disconnected from the outside world.</p>
 
-<h2 id="pinctrl">4. Pin control and UART driver</h2>
+<h3>7.2 UART is deliberately simple here</h3>
 
-<h3>4.1 Pin routing</h3>
+<p>The driver uses polling for individual UART bytes: it checks whether receive
+data exists or transmit space is available. That is simple and useful during
+board bring-up. It is independent of the NPU design: UART can poll while NPU
+completion uses an interrupt.</p>
 
-<p>A physical package pin can serve many peripheral functions. The board pinctrl file routes PA0 to UART TX and PA1 to UART RX using function 9; RX also enables its input path. The custom pinctrl driver writes the generated configuration to the proper PINCM entry at the IOMUX base.</p>
+<p>Polling UART is acceptable for this single-request test server, but an
+interrupt-driven or asynchronous buffered UART is a future improvement for
+throughput-heavy use.</p>
 
-<h3>4.2 Dual-base UNICOMM architecture</h3>
+<h3>7.3 The protective message envelope</h3>
 
-<p>The UART is part of a configurable UNICOMM block. It has two relevant address regions:</p>
-
-<ul>
-  <li><code>0x40632000</code>: wrapper control for reset, power, and selecting UART mode.</li>
-  <li><code>0x40601000</code>: UART clock, control, status, data, baud, and error registers.</li>
-</ul>
-
-<p>Confusing these bases caused an early interrupt experiment to BusFault. The current driver keeps them as separately named devicetree regions.</p>
-
-<h3>4.3 Initialization sequence</h3>
-
-<ol>
-  <li>Apply the default pinctrl state.</li>
-  <li>Reset and power the UNICOMM wrapper.</li>
-  <li>Select UART mode.</li>
-  <li>Disable UART while changing configuration.</li>
-  <li>Enable receive/transmit, select 8 data bits/no parity/one stop bit.</li>
-  <li>Select bus clock and divide-by-one.</li>
-  <li>Compute integer/fractional baud divisors with overflow-safe 64-bit intermediates.</li>
-  <li>Latch divisors through the line-control write and enable UART.</li>
-</ol>
-
-<p>At the active 100 MHz source and 115200 baud, the normal 16× oversampling path is appropriate. The driver also contains 8× and 3× cases for baud rates that would otherwise exceed the available clock relationship.</p>
-
-<h3>4.4 Polling API</h3>
-
-<ul>
-  <li><code>poll_in</code> checks RX FIFO empty; if data exists, it reads the low byte.</li>
-  <li><code>poll_out</code> waits while the TX FIFO is full, then writes one byte.</li>
-  <li><code>err_check</code> maps overrun, parity, framing, break, and noise bits to Zephyr error flags and clears their latched status.</li>
-</ul>
-
-<p>UART byte transfer remains polling-based. NPU completion is interrupt-driven; these are independent design choices. Polling simplified early board bring-up and is adequate for the single-request protocol, but interrupt or asynchronous UART with buffering is a future production improvement.</p>
-
-<h2 id="protocol">5. Protocol-v2 design</h2>
-
-<h3>5.1 Frame format</h3>
+<p>Raw UART is just a stream of bytes. The receiver needs to know where one
+message begins, how long it is, and whether it was damaged. Protocol v3 wraps
+every message in this envelope:</p>
 
 <table>
-  <tr><th>Offset</th><th>Size</th><th>Field</th><th>Purpose</th></tr>
-  <tr><td>0</td><td>2</td><td><code>5a a5</code></td><td>Magic bytes used to find frame boundaries.</td></tr>
-  <tr><td>2</td><td>1</td><td>Version = 2</td><td>Reject incompatible wire formats.</td></tr>
-  <tr><td>3</td><td>1</td><td>Message type</td><td>Request/response meaning.</td></tr>
-  <tr><td>4</td><td>2</td><td>Sequence</td><td>Match ACK/result/error to a request.</td></tr>
-  <tr><td>6</td><td>2</td><td>Payload length</td><td>Bound parsing and support multiple message shapes.</td></tr>
-  <tr><td>8</td><td>variable</td><td>Payload</td><td>Tensor, result, status, or error data.</td></tr>
-  <tr><td>8 + length</td><td>4</td><td>IEEE CRC-32</td><td>Detect corruption in all fields except magic.</td></tr>
+  <tr><th>Part</th><th>Plain purpose</th></tr>
+  <tr><td>Magic bytes</td><td>Special starting pattern used to find the next message.</td></tr>
+  <tr><td>Version</td><td>Stops two incompatible protocol versions from pretending to understand each other.</td></tr>
+  <tr><td>Message type</td><td>Says whether this is input, result, READY, error, or status.</td></tr>
+  <tr><td>Sequence number</td><td>Connects a reply to the correct request.</td></tr>
+  <tr><td>Length</td><td>Tells the receiver how many payload bytes must arrive.</td></tr>
+  <tr><td>CRC-32</td><td>Mathematical fingerprint used to detect accidental corruption.</td></tr>
 </table>
 
-<p>All multibyte values are little-endian, matching the Cortex-M33 and Python <code>struct</code> formats. A normal inference request is 268 bytes: 8-byte header + 256-byte tensor + 4-byte CRC.</p>
+<p>The firmware validates the frame before using it. If bytes are damaged, it
+returns a structured error and looks for the next valid magic pattern rather
+than treating corrupted bytes as an AI input.</p>
 
-<h3>5.2 Why each field exists</h3>
+<h3>7.4 READY versus ACK</h3>
 
-<ul>
-  <li><strong>Magic:</strong> allows scanning past boot logs, line noise, or damaged bytes.</li>
-  <li><strong>Version:</strong> prevents two incompatible implementations from misinterpreting each other.</li>
-  <li><strong>Type:</strong> supports inference, telemetry, and deliberately gated diagnostics.</li>
-  <li><strong>Sequence:</strong> prevents a delayed response from satisfying the wrong request.</li>
-  <li><strong>Length:</strong> prevents buffer assumptions and validates each message contract.</li>
-  <li><strong>CRC-32:</strong> provides much stronger accidental-corruption detection than the original additive checksum.</li>
-</ul>
+<p><code>READY</code> means: “I have booted, I am idle, and here is the exact
+model/tensor contract linked into me.” <code>ACK</code> means: “I accepted this
+particular numbered request and will now work on it.” Keeping these separate
+makes diagnosis much clearer.</p>
 
-<h3>5.3 CRC definition</h3>
+<h2 id="model">8. How the compiled model is connected</h2>
 
-<p>The reflected IEEE CRC-32 uses polynomial <code>0xedb88320</code>, initial state <code>0xffffffff</code>, and final XOR <code>0xffffffff</code>. It covers version, type, sequence, length, and payload. The magic bytes are excluded because they are synchronization markers.</p>
+<h3>8.1 Why one common application cannot directly call every model</h3>
 
-<h3>5.4 Receiver behavior</h3>
+<p>Generated model packages may use different input sizes, data types, C
+struct names, struct field names, and output sizes. If the common UART/NPU
+code directly named these details, every new compatible model would require
+editing many unrelated files. That would be fragile.</p>
 
-<p>The firmware drains stale bytes, emits <code>READY</code>, then applies one absolute one-second deadline to the complete incoming frame. It reports structured errors for version, type, length, CRC, timeout, inference, internal, and physical UART problems. Test-only NPU/watchdog fault requests are accepted only when their Kconfig options are enabled.</p>
+<h3>8.2 The model manifest is the label on the package</h3>
 
-<h3>5.5 Why READY and ACK both exist</h3>
-
-<p><code>READY</code> means the server is idle and advertises its tensor shape. <code>ACK</code> means one particular sequence passed framing/CRC validation and was accepted for a potentially longer action. The host can therefore distinguish “board not ready,” “request rejected,” and “inference accepted but no result.”</p>
-
-<h2 id="host">6. Python host client</h2>
-
-<p><code>tools/send_tensor.py</code> is more than a serial sender. It is the reference implementation of preprocessing and wire validation.</p>
-
-<h3>6.1 Responsibilities</h3>
+<p>Each <code>models/&lt;name&gt;/model.json</code> declares facts such as:</p>
 
 <ul>
-  <li>Parse six float vectors and expected outputs from generated C fixtures.</li>
-  <li>Parse bias, scale, and shift from the generated model header.</li>
-  <li>Quantize and clip exactly 256 values.</li>
-  <li>Encode/decode little-endian protocol-v2 frames and CRC.</li>
-  <li>Resynchronize after boot text, damaged candidates, or partial frames.</li>
-  <li>Require matching message types and sequences.</li>
-  <li>Retry transport failures only within a configured budget.</li>
-  <li>Reject zero NPU completions or any spurious interrupt.</li>
-  <li>Run CRC, NPU stall, watchdog stall, and clock status tests.</li>
-  <li>Compute min, mean, median, p95, max, and write machine-readable JSON.</li>
+  <li>where the archive and generated header live;</li>
+  <li>input/output shape, size, type, labels, and alignment;</li>
+  <li>how host-side preprocessing must work;</li>
+  <li>the generated C struct and field names; and</li>
+  <li>the generated entry, completion, and continuation symbols.</li>
 </ul>
 
-<h3>6.2 Sliding resynchronization</h3>
+<h3>8.3 The generated adapter: the small translator</h3>
 
-<p>The <code>FrameReader</code> keeps a byte buffer, searches for magic, waits for the declared candidate size, and validates the candidate. On a bad CRC it discards only one byte and searches again. This matters because the final byte of a damaged frame might actually be the first magic byte of the following valid frame. Dropping the whole candidate could lose recovery data.</p>
+<pre>model.json says:
+  input field name = input_1
+  output field name = output
+  entry function = tvmgen_default_run
 
-<h2 id="model">7. Generated model and binary ABI</h2>
+generator writes build/generated/model_adapter.c:
+  app_model_run(input, output)
+      → put input/output into those generated structures
+      → call tvmgen_default_run(...)</pre>
 
-<h3>7.1 What the archive exports</h3>
+<p>So the application calls stable functions such as
+<code>app_model_run()</code>, while the generated adapter handles package
+specific names. This is model-agnostic at <strong>build time</strong>, not at
+runtime: a different archive still requires a new firmware build and flash.</p>
 
-<ul>
-  <li><code>tvmgen_default_run()</code>: graph entry point.</li>
-  <li><code>tvmgen_default_finished</code>: completion flag.</li>
-  <li><code>TI_NPU_NNC_IRQHandler()</code>: generated continuation function.</li>
-  <li>Three generated NPU convolution symbols and one average-pool symbol.</li>
-  <li>CPU-side generated reshape/pad, cast/add, and dense/postprocessing symbols.</li>
-</ul>
+<div class="callout good">
+  <span class="label">Why metadata is still necessary</span><br>
+  A <code>.a</code> archive is compiled machine code, not a self-describing AI
+  file. It cannot safely tell us its intended preprocessing, labels, tensor
+  meaning, or whether it is compatible. The manifest records those facts, and
+  validation rejects broken or stale metadata.
+</div>
 
-<h3>7.2 What the archive requires from the project</h3>
+<h2 id="npu">9. How the NPU and interrupt work together</h2>
 
-<ul>
-  <li><code>NPU_getCtlReg()</code>: address of the TINIElite CTL5 register.</li>
-  <li><code>NPU_setInstrMem()</code>: bounded word copies into 1 KiB instruction SRAM.</li>
-  <li><code>NPU_setParamMem()</code>: bounded word copies into 2 KiB parameter SRAM.</li>
-</ul>
+<h3>9.1 What TINIElite does</h3>
 
-<p>This interface is an ABI: names, calling convention, types, and data layout must match what the already-compiled archive expects. The copy callbacks return <code>void</code>; the integration logs invalid writes but cannot return a failure through this ABI. Eliminating that limitation needs a regenerated compatible runtime or an added out-of-band error mechanism.</p>
+<p>TINIElite is the on-chip neural-processing accelerator. It executes
+supported graph stages without asking the Cortex-M33 CPU to perform every
+operation itself. The generated model is hybrid: some graph work is CPU code
+and supported stages are sent to the NPU. This project does not claim a measured
+CPU-versus-NPU speedup because an equivalent CPU-only model artifact is absent.</p>
 
-<h3>7.3 Why not reverse engineer or regenerate it?</h3>
+<p>The NPU has small instruction and parameter memories. The generated runtime
+loads what it needs for a stage, starts the stage, then later loads the next
+stage's material. It does not keep the full model in the NPU's small local
+memory at once.</p>
 
-<p>The archive is a licensed generated artifact. The original ONNX model, training pipeline, and generator configuration are absent. The responsible approach is to integrity-check and integrate the archive within its license, not claim reproducible training or reconstruct proprietary internals.</p>
+<h3>9.2 What happens when an NPU stage finishes</h3>
 
-<h2 id="npu">8. TINIElite driver and memory interface</h2>
+<pre>Application thread                    NPU hardware
+------------------                    ------------
+start generated model stage  ───────► working
+wait on semaphore              │
+                               └────► stage completes
+                                      raises DONE interrupt 41
 
-<h3>8.1 Initialization</h3>
+short interrupt handler:
+  clear DONE status
+  count completion
+  give semaphore
 
-<p>The driver follows TI's retained sequence: apply reset control keys, enable power with the required key, wait briefly, grant the Cortex-M33 privileged access through GSC, clear stale DONE status, unmask DONE, connect IRQ 41, clear pending NVIC state, and enable the IRQ.</p>
+application thread wakes:
+  call generated continuation
+  start next stage or finish model</pre>
 
-<p>Hardware “key” fields protect important control registers from accidental writes. Writing only the enable bit would not be accepted.</p>
+<p>The interrupt handler is intentionally tiny. It does not run the large,
+opaque generated model continuation. It only acknowledges hardware and wakes
+the normal application context. That is safer and keeps interrupt latency
+predictable.</p>
 
-<h3>8.2 Safe SRAM copies</h3>
+<h3>9.3 Why a semaphore is better than repeatedly checking</h3>
 
-<p>The helper verifies a non-null source, 32-bit-aligned byte offset, nonzero word count, and a range that cannot exceed hardware capacity. It then uses <code>sys_write32</code> for each MMIO word. The subtraction-style bound check avoids unsigned addition overflow.</p>
+<p>Repeatedly checking a status bit is called polling. It wastes CPU attention
+while no progress is possible. A semaphore lets the application sleep until
+the interrupt signals it. It also provides a clean 100 ms deadline: if the
+signal never arrives, the system treats that as a fault.</p>
 
-<h3>8.3 Why parameters are loaded stage by stage</h3>
+<h2 id="safety">10. What happens when something goes wrong</h2>
 
-<p>TINIElite parameter SRAM is only 512 words (2 KiB), so it acts as a staging/scratchpad memory rather than storage for the whole model. An earlier attempt to retain all weights and avoid reloads caused failure. The generated runtime knows what each hardware stage requires and swaps instructions/parameters accordingly.</p>
+<h3>10.1 Bad UART data</h3>
 
-<h2 id="irq">9. Interrupt-driven inference</h2>
+<p>The CRC, length, type, version, and sequence checks prevent damaged or stale
+data from being treated as a valid tensor. The parser can resynchronize by
+searching for the next message-start bytes. UART hardware errors such as break,
+framing, parity, or overrun are also reported.</p>
 
-<h3>9.1 Preparing a run</h3>
+<h3>10.2 NPU stage never completes</h3>
 
-<p><code>tinyengine_prepare_inference()</code> briefly disables IRQ 41, clears hardware DONE, resets the semaphore, clears pending NVIC state, and re-enables the IRQ. This prevents a stale completion from immediately satisfying a new inference.</p>
+<p>If the semaphore wait reaches 100 ms without a completion interrupt, the
+firmware returns a timeout error, gives the UART transmitter a short chance to
+finish the error message, then performs a cold reset. A full reset is
+deliberate: the binary model runtime may have hidden partially updated state,
+and the project does not have its source-level recovery contract.</p>
 
-<h3>9.2 ISR design</h3>
+<h3>10.3 Entire application stops progressing</h3>
 
-<p>The ISR deliberately does very little:</p>
+<p>A software timeout cannot help if the main application itself is frozen.
+The independent hardware watchdog solves that wider problem. It has a
+four-second period and is fed only after the main loop makes real progress. If
+the main loop becomes stuck, it stops feeding the watchdog; the watchdog then
+resets the board.</p>
 
-<ol>
-  <li>Read the masked interrupt status.</li>
-  <li>If DONE is set, write-one-to-clear it.</li>
-  <li>Atomically increment the completion counter.</li>
-  <li>Give the completion semaphore.</li>
-  <li>If DONE is not set, increment the spurious counter.</li>
-</ol>
+<p>There is intentionally no background task whose only job is feeding the
+watchdog. Such a task could keep the board alive while the useful application
+was deadlocked, defeating the point of the watchdog.</p>
 
-<p>Generated continuation code is <strong>not</strong> executed inside the ISR. Keeping the ISR short reduces interrupt latency and avoids running opaque, potentially long code in interrupt context.</p>
+<h3>10.4 How the project tests recovery</h3>
 
-<h3>9.3 Application/runtime handshake</h3>
+<p>Diagnostic-only protocol messages can intentionally corrupt a frame, wait
+for an NPU event without starting the NPU, or withhold watchdog feeding. After
+a reset, the PC requires a fresh valid READY message and then reruns normal
+inference. These dangerous commands are controlled by build-time Kconfig
+options and should not be enabled in a deployed configuration.</p>
 
-<pre>prepare interrupt state
-start total timer
-call tvmgen_default_run()          # generated runtime starts first work
-
-while tvmgen_default_finished == 0:
-    wait on semaphore (maximum 100 ms)
-    call TI_NPU_NNC_IRQHandler()   # continue graph in thread context
-
-collect elapsed time and IRQ counters
-reject zero completions or any spurious completion</pre>
-
-<p>The same hardware interrupt may represent completion of an internal NPU sublayer. The observed contract is five acknowledged completions per inference. The binary archive does not provide enough source-level visibility to claim an exact one-to-one mapping between the four named NPU functions and all five interrupts.</p>
-
-<h3>9.4 Semaphore versus polling</h3>
-
-<p>Polling repeatedly reads a register and keeps the CPU runnable. A semaphore lets Zephyr block the thread until the ISR signals progress. This improves schedulability and creates a natural timeout boundary. It does not guarantee lower end-to-end latency; interrupt entry, kernel synchronization, and scheduling add overhead.</p>
-
-<h2 id="timing">10. Timing measurements</h2>
-
-<p>The application uses <code>k_cycle_get_32()</code> and converts elapsed cycle differences with <code>k_cyc_to_us_floor32()</code>. Unsigned subtraction naturally handles one counter wrap as long as the measured interval is shorter than the wrap period.</p>
+<h2 id="files" class="page-break">11. Where to look in the repository</h2>
 
 <table>
-  <tr><th>Metric</th><th>What it measures</th><th>What it does not mean</th></tr>
-  <tr><td><code>accelerator_us</code></td><td>Time spent blocked waiting for NPU completion semaphores across stages.</td><td>Not pure arithmetic-only silicon time; includes IRQ/wakeup delivery.</td></tr>
-  <tr><td><code>runtime_us</code></td><td>Time inside initial generated runtime call and continuation calls.</td><td>Not total CPU utilization of the whole system.</td></tr>
-  <tr><td><code>total_us</code></td><td>Wall time from just before runtime start until graph finished.</td><td>Does not include UART request/response transfer.</td></tr>
+  <tr><th>If you want to understand...</th><th>Start here</th><th>Why</th></tr>
+  <tr><td>The main request loop</td><td><code>app/src/main.c</code></td><td>It receives requests, dispatches work, sends replies, and feeds the watchdog.</td></tr>
+  <tr><td>The protocol</td><td><code>app/src/app_uart.c</code> and <code>docs/PROTOCOL.md</code></td><td>These define frame parsing, CRC, errors, and responses.</td></tr>
+  <tr><td>NPU waiting and timing</td><td><code>app/src/app_npu.c</code></td><td>It starts the model bridge, waits for completion, handles timeout, and records metrics.</td></tr>
+  <tr><td>Clock correctness</td><td><code>soc/ti/am13x/clock.c</code> and <code>app/src/app_clock.c</code></td><td>One configures early clocks; one reads them back for verification.</td></tr>
+  <tr><td>UART hardware setup</td><td><code>drivers/serial/uart_am13e230x.c</code></td><td>It controls the UNICOMM UART peripheral.</td></tr>
+  <tr><td>NPU hardware/interrupt</td><td><code>drivers/misc/tinyengine/tinyengine_am13e230x.c</code></td><td>It handles power, NPU memory writes, IRQ 41, counters, and semaphore signalling.</td></tr>
+  <tr><td>Model selection</td><td><code>models/&lt;name&gt;/model.json</code> and <code>app/CMakeLists.txt</code></td><td>The manifest states the model contract; CMake validates it and generates the adapter.</td></tr>
+  <tr><td>PC test client</td><td><code>tools/send_tensor.py</code></td><td>It prepares tensors, communicates over serial, and validates results.</td></tr>
+  <tr><td>Exact evidence and limits</td><td><code>docs/VALIDATION.md</code> and <code>docs/QUALITY_GATES.md</code></td><td>They distinguish demonstrated results from pending work.</td></tr>
 </table>
 
-<p>The recovery-enabled image recorded medians of 554 µs accelerator wait, 129 µs runtime, and 701 µs total. The difference between summed components and total includes measurement boundaries and loop/kernel overhead.</p>
+<div style="page-break-before: always; height: 10mm;"></div>
+<h2 id="interview">12. What to say in an interview</h2>
 
-<h2 id="watchdog">11. Timeouts, reset, and watchdog</h2>
+<div class="qa">
+  <div class="question">What did you actually implement?</div>
+  <div class="answer">I integrated supplied TI-generated model archives into
+  an out-of-tree Zephyr port for AM13E230. I added the board/SoC support,
+  clock and pin setup, UART protocol, NPU driver and interrupt handling,
+  model-package selection, fault recovery, host test tooling, and validation
+  workflow. I did not claim to train the original model.</div>
+</div>
 
-<h3>11.1 NPU-stage timeout</h3>
+<div class="qa">
+  <div class="question">Why use an interrupt instead of checking the NPU in a loop?</div>
+  <div class="answer">The NPU tells the CPU when a stage is complete. The
+  application can wait on a semaphore instead of wasting CPU time polling a
+  register. The design also gives each stage a clear timeout boundary.</div>
+</div>
 
-<p>Every hardware stage has a 100 ms semaphore deadline. On timeout, firmware returns structured inference error <code>-ETIMEDOUT</code>, waits 10 ms for the final polling-UART byte to leave the transmitter, then requests a cold system reset.</p>
+<div class="qa">
+  <div class="question">What is the model adapter?</div>
+  <div class="answer">It is a tiny C bridge generated at build time from the
+  model manifest. It hides vendor-specific C names and structures behind the
+  stable <code>app_model.h</code> interface, so compatible models do not need
+  hand-written integration code.</div>
+</div>
 
-<p>A full reset is intentional. The generated binary may keep continuation globals or partially updated internal state. Without its source-level recovery contract, continuing after a failed stage could produce subtle corruption. Resetting restores a known boot state.</p>
+<div class="qa">
+  <div class="question">How do you know the current code is not just “building by accident”?</div>
+  <div class="answer">The project validates model hashes and manifests, runs
+  host and native tests, static checks, and pristine Arm cross-builds. The
+  final ELF is inspected for required model/NPU symbols. Both real protocol-v3
+  packages were then freshly flashed and passed exact fixtures, clock, CRC,
+  interrupt, NPU-timeout, watchdog, and 600-inference hardware gates.</div>
+</div>
 
-<h3>11.2 Why a software timeout is insufficient</h3>
+<div class="callout good">
+  <span class="label">Final mental model</span><br>
+  The PC safely sends a correctly shaped tensor. The Zephyr application checks
+  it, passes it through a generated model bridge, waits safely for NPU stages,
+  recovers from failures, and returns both the result and evidence that the
+  accelerator completed its work.
+</div>
 
-<p>The NPU timeout only works if the main application and kernel are still running. A total deadlock, corrupted control flow, or disabled scheduling could prevent that code from executing. Therefore the design also uses an independent hardware watchdog.</p>
-
-<h3>11.3 WWDT0 configuration</h3>
-
-<ul>
-  <li>Clock: independent 32.768 kHz low-frequency source.</li>
-  <li>Configured period: four seconds.</li>
-  <li>Feed window: fully open.</li>
-  <li>Violation action: BOOTRST rather than NMI.</li>
-  <li>Feed policy: only forward progress in the main request loop feeds it.</li>
-</ul>
-
-<p>There is deliberately no background “watchdog feeder” thread. Such a thread might continue feeding while the useful application is deadlocked, hiding the fault the watchdog is meant to catch.</p>
-
-<h3>11.4 Fault injection</h3>
-
-<p>Test-only protocol requests can deliberately wait for an NPU completion without starting hardware or stop all watchdog feeds. After reboot, the host requires a fresh valid <code>READY</code>. For the watchdog test it also checks reset cause <code>0x0e</code> and confirms WWDT0 is running again. Kconfig flags are intended to disable these dangerous commands in deployed builds.</p>
-
-<h2 id="main">12. Application state machine and concurrency</h2>
-
-<p>The current design is a single synchronous server, not the original two-thread/message-queue prototype. One main loop:</p>
-
-<ol>
-  <li>feeds the watchdog;</li>
-  <li>advertises readiness and waits for one request;</li>
-  <li>validates and dispatches clock/watchdog/diagnostic/inference work;</li>
-  <li>runs at most one inference;</li>
-  <li>sends one response; and</li>
-  <li>returns to readiness.</li>
-</ol>
-
-<p>Concurrency still exists at the hardware/kernel boundary: the main thread blocks, the NPU executes independently, and IRQ 41 gives the semaphore. Single-request serialization was chosen because the generated runtime has opaque global state and because it makes ordering, timing, error recovery, and watchdog progress deterministic.</p>
-
-<h3>12.1 Buffers and alignment</h3>
-
-<p>The application owns static 16-byte-aligned arrays for 256 input bytes and three output bytes. Static storage avoids lifetime errors and dynamic allocation. The main stack is conservatively configured to 32 KiB because the generated runtime uses substantial stack/intermediate space; the total reported RAM footprint includes this reservation.</p>
-
-<h2 id="files">13. File-by-file responsibility map</h2>
-
-<table>
-  <tr><th>File</th><th>What to say in an interview</th></tr>
-  <tr><td><code>app/src/main.c</code></td><td>Synchronous request dispatcher, watchdog progress boundary, inference/error/reset policy.</td></tr>
-  <tr><td><code>app_npu.c</code></td><td>Generated runtime bridge, interrupt-wait loop, timeout, and timing/IRQ metrics.</td></tr>
-  <tr><td><code>app_uart.c</code></td><td>Firmware framing, deadlines, CRC validation, structured response encoding.</td></tr>
-  <tr><td><code>app_protocol.c</code></td><td>Portable CRC-32 and request-contract validation; tested on <code>native_sim</code>.</td></tr>
-  <tr><td><code>app_clock.c</code></td><td>Independent register read-back and clock correctness verdict.</td></tr>
-  <tr><td><code>app_watchdog.c</code></td><td>Raw WWDT0 setup, progress feed, retained reset-cause reporting, deliberate stall.</td></tr>
-  <tr><td><code>soc/ti/am13x/clock.c</code></td><td>Pre-kernel crystal/PLL/flash sequence that makes software timing metadata true.</td></tr>
-  <tr><td><code>uart_am13e230x.c</code></td><td>Dual-base UNICOMM power/configuration and Zephyr polling UART API.</td></tr>
-  <tr><td><code>pinctrl_am13e230x.c</code></td><td>Applies devicetree-generated PINCM settings through standard Zephyr pinctrl.</td></tr>
-  <tr><td><code>tinyengine_am13e230x.c</code></td><td>NPU power/privilege, bounded hardware SRAM writes, ISR, counters, semaphore API.</td></tr>
-  <tr><td><code>tools/send_tensor.py</code></td><td>Reference preprocessing, robust stream parser, regression/stress/fault harness.</td></tr>
-  <tr><td><code>tests/</code></td><td>Host behavior tests and sanitized target-independent C protocol tests.</td></tr>
-  <tr><td><code>scripts/</code></td><td>Repeatable WSL developer workflow.</td></tr>
-</table>
-
-<p class="footer-note">Continue with Volume 3 for the project chronology, failures, corrected measurements, proof matrix, and honest limitations.</p>
+<p class="footer-note">Read Volume 3 next for the project history, validation evidence, and limitations. Return to this volume whenever a term in the source code feels unfamiliar.</p>
 </body>
 </html>

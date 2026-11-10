@@ -1,0 +1,16 @@
+#ifndef INPUT_CONFIG_H_
+#define INPUT_CONFIG_H_
+
+#define SKIP_NORMALIZE
+#define FE_CONCAT
+#define FE_NUM_FRAME_CONCAT 1
+#define OUTPUT_INT
+#define FE_VARIABLES 6
+#define FE_FRAME_SIZE 128
+#define FE_HL 1
+#define FE_FEATURE_SIZE_PER_FRAME 128
+#define FE_STACKING_CHANNELS 6
+#define FE_STACKING_FRAME_WIDTH 128
+#define FE_NN_OUT_SIZE 6
+
+#endif /* INPUT_CONFIG_H_ */

@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "name": "electrical_fault_6class",
+  "display_name": "Electrical fault 6-class classifier",
+  "model_id": "0x7f95a1db",
+  "target": {
+    "device_family": "AM13E2",
+    "accelerator": "TINIElite",
+    "requires_npu": true
+  },
+  "artifacts": {
+    "library": "artifacts/mod.a",
+    "header": "artifacts/tvmgen_default.h",
+    "entry_symbol": "tvmgen_default_run"
+  },
+  "runtime": {
+    "input_struct": "tvmgen_default_inputs",
+    "output_struct": "tvmgen_default_outputs",
+    "completion_symbol": "tvmgen_default_finished",
+    "continuation_symbol": "TI_NPU_NNC_IRQHandler"
+  },
+  "input": {
+    "shape": [1, 6, 128, 1],
+    "dtype": "float32",
+    "size_bytes": 3072,
+    "runtime_field": "input_1"
+  },
+  "output": {
+    "shape": [1, 6],
+    "dtype": "int8",
+    "size_bytes": 6,
+    "runtime_field": "output",
+    "labels": [
+      "No fault",
+      "BC fault",
+      "ABC fault",
+      "AG fault",
+      "ABG fault",
+      "ABCG fault"
+    ]
+  },
+  "preprocessing": {
+    "type": "identity_float32_le"
+  },
+  "golden_vectors": {
+    "format": "ti_c_arrays_v1",
+    "path": "golden_vectors/test_vector.c",
+    "input_array": "model_test_input",
+    "output_array": "golden_output"
+  },
+  "io_alignment": 16
+}

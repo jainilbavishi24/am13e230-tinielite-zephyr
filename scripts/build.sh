@@ -18,8 +18,13 @@ done
 export ZEPHYR_TOOLCHAIN_VARIANT="${ZEPHYR_TOOLCHAIN_VARIANT:-gnuarmemb}"
 export GNUARMEMB_TOOLCHAIN_PATH="${GNUARMEMB_TOOLCHAIN_PATH:-/usr}"
 
+model_args=()
+if [[ -n "${APP_MODEL:-}" ]]; then
+    model_args=(-DAPP_MODEL="$APP_MODEL")
+fi
+
 exec "$west_bin" build -p "${PRISTINE:-auto}" \
     -b lp_am13e230/am13e23019 \
     "$repo_root/app" \
     -d "$repo_root/build" \
-    -- -DZEPHYR_MODULES="$repo_root;$cmsis_dir;$cmsis6_dir" "$@"
+    -- -DZEPHYR_MODULES="$repo_root;$cmsis_dir;$cmsis6_dir" "${model_args[@]}" "$@"

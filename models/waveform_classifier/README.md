@@ -2,6 +2,11 @@
 
 This directory contains the single model used by the demo.
 
+It is now the default instance of the repository's build-time model-package
+contract. `model.json` describes its tensor and artifact ABI, while
+the configure-time generator maps its declared TVM/TI names onto the common
+`app_model.h` interface. The archive itself is unchanged.
+
 - Input: `1 x 1 x 256 x 1`, signed 8-bit
 - Output: three signed 8-bit class scores in the order sawtooth, sine, square
 - Accelerator target: TI TINIElite (`TVMGEN_DEFAULT_TI_NPU`)

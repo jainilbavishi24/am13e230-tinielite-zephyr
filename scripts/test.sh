@@ -13,4 +13,5 @@ for argument in "$@"; do
     fi
 done
 
-exec "$python_bin" "$repo_root/tools/send_tensor.py" "${selection[@]}" "$@"
+cd "$repo_root"
+exec "$python_bin" -m tools.send_tensor "${selection[@]}" "$@"

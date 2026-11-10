@@ -1,2 +1,9 @@
 * text=auto eol=lf
 *.a binary
+
+# Preserve licensed vendor exports byte-for-byte so clean-clone SHA-256 checks
+# match the original Edge AI Studio output, including its CRLF line endings.
+models/electrical_fault_6class/LICENSE.txt -text whitespace=-trailing-space
+models/electrical_fault_6class/artifacts/** -text whitespace=-trailing-space
+models/electrical_fault_6class/golden_vectors/** -text whitespace=-trailing-space
+models/electrical_fault_6class/provenance/** -text whitespace=-trailing-space

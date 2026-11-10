@@ -1,5 +1,109 @@
 # Validation record
 
+## Protocol-v3 physical acceptance
+
+Status: **passed on LP-AM13E230 through XDS110 from WSL on 2026-11-10**.
+
+Both real packages were built against pinned Zephyr commit
+`9574b65fbaa01aa0c8f418bd7a6b97beb15fcc54`, erased, programmed, verified, and
+tested through application UART `/dev/ttyACM0`. The current protocol-v3 source
+therefore has its own physical evidence; it does not inherit protocol-v2 status.
+
+| Result | Waveform package | Electrical-fault package |
+|---|---:|---:|
+| Model ID | `0xc7d11096` | `0x7f95a1db` |
+| Input/output bytes | 256 / 3 | 3,072 / 6 |
+| Repeated regression | 600/600 exact | 600/600 exact |
+| Transport retries | 0 | 0 |
+| NPU DONE interrupts | exactly 5/inference | exactly 8/inference |
+| Spurious NPU interrupts | 0 | 0 |
+| Accelerator time, median | 553 us | 330 us |
+| Runtime/CPU time, median | 118 us | 525 us |
+| End-to-end time, median | 689 us | 881 us |
+| End-to-end maximum | 689 us | 892 us |
+
+For both packages, the same complete acceptance run also passed:
+
+- exact READY model ID, tensor byte sizes, dtypes, and NPU capability;
+- deliberately corrupted CRC rejection followed by normal operation;
+- deliberate NPU stall returning `-ETIMEDOUT`, cold reset, and READY recovery;
+- deliberate watchdog starvation, reset cause `0x0e`, four-second WWDT0
+  restart, and continued inference;
+- 200,000,000 Hz derived MCLK, 100,000,000 Hz UART source, three flash wait
+  states, and required clock-validation flags `0x1f`.
+
+The electrical model also passed all 12 supplied fixtures once before stress:
+12/12 exact outputs, 330 us accelerator, 525 us runtime, 881 us total, eight
+IRQs/inference, and zero spurious interrupts. Exact fixture agreement verifies
+integration regression; it does not establish classification accuracy.
+
+Machine-readable evidence:
+
+- [`waveform_clock_2026-11-10.json`](evidence/protocol_v3/waveform_clock_2026-11-10.json)
+- [`waveform_full_acceptance_2026-11-10.json`](evidence/protocol_v3/waveform_full_acceptance_2026-11-10.json)
+- [`electrical_fault_clock_2026-11-10.json`](evidence/protocol_v3/electrical_fault_clock_2026-11-10.json)
+- [`electrical_fault_fixtures_2026-11-10.json`](evidence/protocol_v3/electrical_fault_fixtures_2026-11-10.json)
+- [`electrical_fault_full_acceptance_2026-11-10.json`](evidence/protocol_v3/electrical_fault_full_acceptance_2026-11-10.json)
+
+## Protocol-v3/model-package pre-hardware gate (historical)
+
+Status: **software gates passed on 2026-11-07; physical gate later passed on
+2026-11-10 as recorded above**.
+
+This revision replaced the fixed model coupling with build-time packages,
+added a second real electrical-fault archive, and upgraded the UART handshake
+to protocol v3. No LP-AM13E230 was available during this phase, so the project
+correctly withheld physical claims until the later acceptance run.
+
+Completed without hardware:
+
+- Package validation and SHA-256 checks accepted both real packages. Model IDs
+  `0xc7d11096` and `0x7f95a1db` match the first 32 bits of their archives.
+- The then-current 26/26 host tests passed. They include the real float32 electrical-fault path
+  plus a synthetic alternate package with a
+  64-byte input, four-element int16 output, different symbol names, and
+  different alignment, proving the metadata path is not fixed to 256/3/int8.
+- Ruff lint/format, ShellCheck, ClangFormat, and Cppcheck passed.
+- Five/five Zephyr `native_sim` protocol tests passed with AddressSanitizer and
+  UndefinedBehaviorSanitizer after updating the version-dependent CRC vectors.
+- Pristine builds for both real packages against pinned Zephyr commit
+  `9574b65fbaa01aa0c8f418bd7a6b97beb15fcc54` completed with GNU Arm Embedded
+  GCC 10.3.1.
+- ELF inspection found `app_model_reset`, `app_model_run`,
+  `app_model_is_finished`, `app_model_continue`, `tvmgen_default_run`, and
+  `TI_NPU_NNC_IRQHandler`.
+- Current waveform cross-build footprint: 25,656 bytes flash and 43,616 bytes
+  RAM.
+- Current electrical-fault cross-build footprint: 31,752 bytes flash and
+  41,320 bytes RAM. Its ELF contains `TINIE_zeroPaddingNHWC_lib`,
+  `TI_NPU_NNC_IRQHandler`, `tvmgen_default_run`, the completion flag, and the
+  required `__aeabi_memclr4` compatibility helper.
+
+Commands:
+
+```bash
+python -m tools.model_package models/waveform_classifier
+python -m tools.model_package models/electrical_fault_6class
+(cd models/waveform_classifier && sha256sum --check SHA256SUMS)
+(cd models/electrical_fault_6class && sha256sum --check SHA256SUMS)
+ruff check tools tests
+ruff format --check tools tests
+python -m unittest discover -s tests -v
+shellcheck scripts/*.sh
+./scripts/static_check.sh
+./scripts/build.sh
+APP_MODEL=electrical_fault_6class PRISTINE=always ./scripts/build.sh
+
+# Run from the west workspace root:
+ZEPHYR_TOOLCHAIN_VARIANT=host west twister \
+  -T am13e230-tinielite-zephyr/tests/protocol -p native_sim \
+  --inline-logs --enable-asan --enable-ubsan
+```
+
+Every previously required hardware item was completed on 2026-11-10. All
+sections below this pre-hardware record are retained historical evidence for
+protocol v2 or earlier revisions unless they explicitly state otherwise.
+
 ## Clean repository checks
 
 Performed on 2026-10-19 in WSL Ubuntu 22.04:
@@ -17,7 +121,7 @@ Performed on 2026-10-19 in WSL Ubuntu 22.04:
 - Model SHA-256 verification: pass
 - ELF inspection: four TINIElite kernels, TI handler, model entry point, and NPU
   memory callbacks present
-- TI DSLite erase/program/verify of the current image: pass
+- TI DSLite erase/program/verify of the then-current protocol-v2 image: pass
 - Physical-board smoke regression: 6/6 exact vectors, zero transport retries,
   five NPU completion interrupts per inference, and zero spurious interrupts
 
@@ -50,7 +154,7 @@ consecutive reopen/CRC-fault/recovery runs then passed, covering another 60/60
 inferences with zero retries.
 
 Summary evidence is retained in
-[`evidence/hardware_uart_pinctrl_2026-10-17.json`](evidence/hardware_uart_pinctrl_2026-10-17.json).
+[`evidence/protocol_v2/hardware_uart_pinctrl_2026-10-17.json`](evidence/protocol_v2/hardware_uart_pinctrl_2026-10-17.json).
 
 ## Polling-to-interrupt occupancy comparison
 
@@ -137,14 +241,14 @@ Command:
 
 ```bash
 ./scripts/pipeline.sh --clock-status \
-  --json-output docs/evidence/hardware_clock_2026-10-17.json
+  --json-output docs/evidence/protocol_v2/hardware_clock_2026-10-17.json
 ```
 
 Read-back result: pass. Derived MCLK was 200,000,000 Hz, UART configuration was
 100,000,000 Hz, flash wait states were three, `SYSPLLCFG0=0x00000031`,
 `SYSPLLCFG1=0x00001f01`, and all required validation flags (`0x1f`) were set.
 Raw evidence is retained in
-[`evidence/hardware_clock_2026-10-17.json`](evidence/hardware_clock_2026-10-17.json).
+[`evidence/protocol_v2/hardware_clock_2026-10-17.json`](evidence/protocol_v2/hardware_clock_2026-10-17.json).
 
 ## Polling protocol and stress baseline
 
@@ -157,7 +261,7 @@ tested with:
 ZEPHYR_BASE=/tmp/am13e230-zephyr-clean \
   ./scripts/pipeline.sh --fault-test --json-output /tmp/protocol.json
 ./scripts/test.sh --repeat 100 --quiet --fault-test \
-  --json-output docs/evidence/hardware_stress_2026-10-17.json
+  --json-output docs/evidence/protocol_v2/hardware_stress_2026-10-17.json
 ```
 
 Results:
@@ -171,7 +275,7 @@ Results:
 - End-to-end latency: 666 us minimum, 668 us median and p95, 679 us maximum.
 
 Every stress result and its score/timing data is retained in
-[`evidence/hardware_stress_2026-10-17.json`](evidence/hardware_stress_2026-10-17.json).
+[`evidence/protocol_v2/hardware_stress_2026-10-17.json`](evidence/protocol_v2/hardware_stress_2026-10-17.json).
 These were the clock-validated polling baseline. The interrupt-driven result
 below supersedes it for the current firmware.
 
@@ -188,9 +292,9 @@ The flashed image was verified with:
 
 ```bash
 ./scripts/test.sh --fault-test --repeat 100 --quiet \
-  --json-output docs/evidence/hardware_irq_stress_2026-10-17.json
+  --json-output docs/evidence/protocol_v2/hardware_irq_stress_2026-10-17.json
 ./scripts/test.sh --clock-status \
-  --json-output docs/evidence/hardware_irq_clock_2026-10-17.json
+  --json-output docs/evidence/protocol_v2/hardware_irq_clock_2026-10-17.json
 ```
 
 Results:
@@ -207,9 +311,9 @@ Results:
   wait states, required validation flags `0x1f`.
 
 Raw per-inference and clock-register evidence is retained in
-[`evidence/hardware_irq_stress_2026-10-17.json`](evidence/hardware_irq_stress_2026-10-17.json)
+[`evidence/protocol_v2/hardware_irq_stress_2026-10-17.json`](evidence/protocol_v2/hardware_irq_stress_2026-10-17.json)
 and
-[`evidence/hardware_irq_clock_2026-10-17.json`](evidence/hardware_irq_clock_2026-10-17.json).
+[`evidence/protocol_v2/hardware_irq_clock_2026-10-17.json`](evidence/protocol_v2/hardware_irq_clock_2026-10-17.json).
 
 ## NPU timeout and reset recovery gate
 
@@ -234,7 +338,7 @@ Results:
 
 Machine-readable evidence, including explicit pass fields for both injected
 faults, is retained in
-[`evidence/hardware_recovery_2026-10-17.json`](evidence/hardware_recovery_2026-10-17.json).
+[`evidence/protocol_v2/hardware_recovery_2026-10-17.json`](evidence/protocol_v2/hardware_recovery_2026-10-17.json).
 
 ## Independent hardware-watchdog recovery gate
 
@@ -261,4 +365,4 @@ Results:
 - Latency: 554 us accelerator wait, 129 us runtime/CPU, and 701 us end-to-end.
 
 Machine-readable results are retained in
-[`evidence/hardware_watchdog_recovery_2026-10-17.json`](evidence/hardware_watchdog_recovery_2026-10-17.json).
+[`evidence/protocol_v2/hardware_watchdog_recovery_2026-10-17.json`](evidence/protocol_v2/hardware_watchdog_recovery_2026-10-17.json).

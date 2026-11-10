@@ -1,12 +1,14 @@
 /* SPDX-License-Identifier: Apache-2.0 */
 
 #include "app_uart.h"
+#include "app_model.h"
 
 #include <errno.h>
 #include <limits.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <string.h>
 
 #include <zephyr/device.h>
 #include <zephyr/drivers/uart.h>
@@ -15,12 +17,19 @@
 #define UART_NODE                    DT_CHOSEN(zephyr_console)
 #define FRAME_HEADER_SIZE            8U
 #define FRAME_CRC_SIZE               4U
-#define FRAME_MAX_PAYLOAD_SIZE       APP_NPU_INPUT_SIZE
-#define RESULT_PAYLOAD_SIZE          23U
+#define READY_PAYLOAD_SIZE           12U
+#define RESULT_METRICS_SIZE          20U
+#define RESULT_PAYLOAD_SIZE          (APP_MODEL_OUTPUT_SIZE_BYTES + RESULT_METRICS_SIZE)
 #define CLOCK_STATUS_WORDS           12U
 #define CLOCK_STATUS_PAYLOAD_SIZE    (CLOCK_STATUS_WORDS * sizeof(uint32_t))
 #define WATCHDOG_STATUS_WORDS        3U
 #define WATCHDOG_STATUS_PAYLOAD_SIZE (WATCHDOG_STATUS_WORDS * sizeof(uint32_t))
+#define FRAME_MODEL_MAX_PAYLOAD_SIZE                                                               \
+	((APP_MODEL_INPUT_SIZE_BYTES > RESULT_PAYLOAD_SIZE) ? APP_MODEL_INPUT_SIZE_BYTES           \
+							    : RESULT_PAYLOAD_SIZE)
+#define FRAME_MAX_PAYLOAD_SIZE                                                                     \
+	((FRAME_MODEL_MAX_PAYLOAD_SIZE > CLOCK_STATUS_PAYLOAD_SIZE) ? FRAME_MODEL_MAX_PAYLOAD_SIZE \
+								    : CLOCK_STATUS_PAYLOAD_SIZE)
 
 static const struct device *const uart_dev = DEVICE_DT_GET(UART_NODE);
 
@@ -131,10 +140,14 @@ static int send_frame(enum app_uart_frame_type type, uint16_t sequence, const ui
 
 static void send_ready(void)
 {
-	uint8_t capabilities[4];
+	uint8_t capabilities[READY_PAYLOAD_SIZE];
 
-	encode_le16(&capabilities[0], APP_NPU_INPUT_SIZE);
-	encode_le16(&capabilities[2], APP_NPU_OUTPUT_SIZE);
+	encode_le32(&capabilities[0], APP_MODEL_ID);
+	encode_le16(&capabilities[4], APP_MODEL_INPUT_SIZE_BYTES);
+	encode_le16(&capabilities[6], APP_MODEL_OUTPUT_SIZE_BYTES);
+	capabilities[8] = APP_MODEL_INPUT_DTYPE;
+	capabilities[9] = APP_MODEL_OUTPUT_DTYPE;
+	encode_le16(&capabilities[10], APP_MODEL_CAPABILITY_FLAGS);
 	(void)send_frame(APP_UART_FRAME_READY, 0U, capabilities, sizeof(capabilities));
 }
 
@@ -143,7 +156,7 @@ int app_uart_init(void)
 	return device_is_ready(uart_dev) ? 0 : -ENODEV;
 }
 
-int app_uart_receive_request(int8_t *buffer, uint32_t size, struct app_uart_request *request)
+int app_uart_receive_request(uint8_t *buffer, uint32_t size, struct app_uart_request *request)
 {
 	uint8_t header[FRAME_HEADER_SIZE] = {
 		APP_UART_FRAME_MAGIC_0,
@@ -196,7 +209,7 @@ int app_uart_receive_request(int8_t *buffer, uint32_t size, struct app_uart_requ
 	}
 	request->type = (enum app_uart_frame_type)header[3];
 
-	ret = read_exact((uint8_t *)buffer, payload_length, start, APP_UART_RX_TIMEOUT_MS);
+	ret = read_exact(buffer, payload_length, start, APP_UART_RX_TIMEOUT_MS);
 	if (ret == 0) {
 		ret = read_exact(received_crc, sizeof(received_crc), start, APP_UART_RX_TIMEOUT_MS);
 	}
@@ -207,8 +220,7 @@ int app_uart_receive_request(int8_t *buffer, uint32_t size, struct app_uart_requ
 		return ret;
 	}
 
-	if (decode_le32(received_crc) !=
-	    app_protocol_frame_crc32(header, (const uint8_t *)buffer, payload_length)) {
+	if (decode_le32(received_crc) != app_protocol_frame_crc32(header, buffer, payload_length)) {
 		app_uart_send_error(frame_sequence, APP_UART_ERROR_CRC, -EBADMSG);
 		return -EBADMSG;
 	}
@@ -239,23 +251,21 @@ void app_uart_send_error(uint16_t sequence, enum app_uart_error_code code, int e
 	(void)send_frame(APP_UART_FRAME_ERROR, sequence, payload, sizeof(payload));
 }
 
-int app_uart_send_result(uint16_t sequence, const int8_t *result, uint32_t size,
+int app_uart_send_result(uint16_t sequence, const uint8_t *result, uint32_t size,
 			 const struct app_npu_metrics *metrics)
 {
 	uint8_t payload[RESULT_PAYLOAD_SIZE];
 
-	if ((result == NULL) || (metrics == NULL) || (size != APP_NPU_OUTPUT_SIZE)) {
+	if ((result == NULL) || (metrics == NULL) || (size != APP_MODEL_OUTPUT_SIZE_BYTES)) {
 		return -EINVAL;
 	}
 
-	payload[0] = (uint8_t)result[0];
-	payload[1] = (uint8_t)result[1];
-	payload[2] = (uint8_t)result[2];
-	encode_le32(&payload[3], metrics->accelerator_us);
-	encode_le32(&payload[7], metrics->runtime_us);
-	encode_le32(&payload[11], metrics->total_us);
-	encode_le32(&payload[15], metrics->npu_interrupts);
-	encode_le32(&payload[19], metrics->npu_spurious_interrupts);
+	memcpy(payload, result, size);
+	encode_le32(&payload[size], metrics->accelerator_us);
+	encode_le32(&payload[size + 4U], metrics->runtime_us);
+	encode_le32(&payload[size + 8U], metrics->total_us);
+	encode_le32(&payload[size + 12U], metrics->npu_interrupts);
+	encode_le32(&payload[size + 16U], metrics->npu_spurious_interrupts);
 	return send_frame(APP_UART_FRAME_RESULT, sequence, payload, sizeof(payload));
 }
 

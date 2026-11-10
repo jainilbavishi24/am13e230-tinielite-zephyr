@@ -53,6 +53,13 @@
 
 <p>The largest score is treated as the predicted class. These values are signed <code>int8</code> model outputs, not calibrated probabilities. The board also returns measured execution times and NPU interrupt counters so the host can verify that hardware acceleration actually occurred.</p>
 
+<p>This is the <strong>default model</strong>. The common firmware is now
+build-time model-package selectable: a validated manifest supplies tensor
+sizes/types, artifact identity, and generated-runtime C names. CMake converts
+that metadata into the small adapter C file in the build directory. The
+protocol advertises the tensor/artifact contract at boot. Selection still
+requires rebuild and flash; it is not arbitrary runtime loading.</p>
+
 <p><strong>Edge AI</strong> means the inference is executed on the device at the edge of the system rather than sending the tensor to a cloud server. The PC currently supplies test data and checks results, but it does not perform the neural-network inference.</p>
 
 <h2 id="problem">2. The engineering problem</h2>
@@ -208,12 +215,12 @@ a duplicate board name. Volume 0 gives the complete visual explanation.</p>
   <li><strong>Clock initialization:</strong> a pre-kernel routine safely configures flash wait states, starts the 25 MHz crystal, locks the PLL, and moves MCLK to 200 MHz.</li>
   <li><strong>Driver initialization:</strong> Zephyr initializes pin routing, UNICOMM UART, TINIElite power/privilege/interrupt state, and application devices.</li>
   <li><strong>Safety initialization:</strong> the application configures WWDT0 for an independent four-second reset and verifies the NPU device is ready.</li>
-  <li><strong>Readiness:</strong> the firmware drains stale UART bytes and sends a CRC-protected <code>READY</code> frame declaring 256 input bytes and three outputs.</li>
+  <li><strong>Readiness:</strong> the firmware drains stale UART bytes and sends a CRC-protected <code>READY</code> frame declaring the selected archive ID, input/output byte sizes and dtypes, and NPU flag.</li>
   <li><strong>Host preprocessing:</strong> Python reads a float fixture and quantizes 256 values to <code>int8</code>.</li>
-  <li><strong>Request:</strong> Python sends a protocol-v2 frame containing type, sequence, payload length, tensor, and CRC-32.</li>
+  <li><strong>Request:</strong> after an exact package match, Python sends a protocol-v3 frame containing type, sequence, payload length, tensor, and CRC-32.</li>
   <li><strong>Validation:</strong> firmware checks UART errors, magic, version, type, length, deadline, and CRC.</li>
   <li><strong>Acknowledgement:</strong> a valid inference request receives a sequence-matched <code>ACK</code>.</li>
-  <li><strong>Runtime start:</strong> the application prepares interrupt state and calls <code>tvmgen_default_run()</code>.</li>
+  <li><strong>Runtime start:</strong> the application prepares interrupt state and calls the package-neutral <code>app_model_run()</code>; the configure-time generated adapter calls the manifest-selected graph entry point.</li>
   <li><strong>NPU execution:</strong> generated code copies microcode/parameters into the TINIElite SRAM windows and starts a hardware stage.</li>
   <li><strong>Completion:</strong> DONE IRQ 41 enters the small driver ISR, which acknowledges the interrupt, increments a counter, and gives a semaphore.</li>
   <li><strong>Continuation:</strong> the application wakes and calls the generated <code>TI_NPU_NNC_IRQHandler()</code> in thread context. The runtime either launches another stage or marks the graph finished.</li>
@@ -235,7 +242,8 @@ not say that the neural network was trained here.</p>
   <tr><td>Clock initialization and telemetry</td><td>Correct timing, UART baud, flash safety, and latency claims require a known clock.</td><td>Read-back validated 200 MHz MCLK and three flash wait states.</td></tr>
   <tr><td>Pinctrl integration</td><td>PA0/PA1 must be routed to UNICOMM UART functions.</td><td>Standard Zephyr pinctrl data replaces hardcoded application pin writes.</td></tr>
   <tr><td>Polling UART driver</td><td>No suitable Zephyr driver existed for the dual-base UNICOMM peripheral.</td><td>TX, RX, baud configuration, and hardware error reporting work.</td></tr>
-  <tr><td>Protocol v2</td><td>A raw fixed packet/checksum could not reliably detect, correlate, or recover from failures.</td><td>Length, version, sequence, CRC-32, errors, deadlines, resynchronization, retries.</td></tr>
+  <tr><td>Protocol v3</td><td>A raw fixed packet/checksum could not reliably detect, correlate, or recover from failures, and v2 still assumed one fixed tensor contract.</td><td>Length, version, sequence, CRC-32, errors, deadlines, resynchronization, retries, plus exact model ID/sizes/dtypes.</td></tr>
+  <tr><td>Model-package boundary</td><td>Generated archives can use different symbols, struct fields, tensor dimensions, and output types.</td><td>Validated manifest plus a stable four-function adapter keeps common inference/transport/recovery code independent of those generated names.</td></tr>
   <tr><td>TINIElite adapter</td><td>The generated archive expects hardware memory callbacks and completion handling.</td><td>Power/reset/privilege, bounded SRAM writes, IRQ 41, semaphore delivery.</td></tr>
   <tr><td>Hybrid runtime integration</td><td>Generated execution continues in stages rather than one blocking NPU call.</td><td>Runtime start/wait/continuation loop with metrics.</td></tr>
   <tr><td>NPU timeout recovery</td><td>A missing interrupt must not hang forever or leave opaque runtime state reused.</td><td>100 ms bounded wait, structured error, cold reset, restored readiness.</td></tr>

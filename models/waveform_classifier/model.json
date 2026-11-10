@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "name": "waveform_classifier",
+  "display_name": "Waveform classifier",
+  "model_id": "0xc7d11096",
+  "target": {
+    "device_family": "AM13E2",
+    "accelerator": "TINIElite",
+    "requires_npu": true
+  },
+  "artifacts": {
+    "library": "artifacts/mod.a",
+    "header": "artifacts/tvmgen_default.h",
+    "entry_symbol": "tvmgen_default_run"
+  },
+  "runtime": {
+    "input_struct": "tvmgen_default_inputs",
+    "output_struct": "tvmgen_default_outputs",
+    "completion_symbol": "tvmgen_default_finished",
+    "continuation_symbol": "TI_NPU_NNC_IRQHandler"
+  },
+  "input": {
+    "shape": [1, 1, 256, 1],
+    "dtype": "int8",
+    "size_bytes": 256,
+    "runtime_field": "onnx__Add_0"
+  },
+  "output": {
+    "shape": [1, 3],
+    "dtype": "int8",
+    "size_bytes": 3,
+    "runtime_field": "output",
+    "labels": ["Sawtooth", "Sine", "Square"]
+  },
+  "preprocessing": {
+    "type": "ti_affine_shift_header",
+    "bias_symbol": "tvmgen_default_bias_data",
+    "scale_symbol": "tvmgen_default_scale_data",
+    "shift_symbol": "tvmgen_default_shift_data"
+  },
+  "golden_vectors": {
+    "format": "ti_c_arrays_v1",
+    "path": "golden_vectors/test_vector.c",
+    "input_array": "model_test_input",
+    "output_array": "golden_output"
+  },
+  "io_alignment": 16
+}

@@ -96,6 +96,16 @@
   <li>Added host unit tests, sanitized Zephyr-native ztests, static analysis, formatting, cross-build CI, symbol checks, and build artifacts.</li>
 </ul>
 
+<h3>Phase G — Build-time model packages and protocol v3 (November 2026)</h3>
+
+<ul>
+  <li>Moved tensor/artifact identity into validated <code>model.json</code> manifests and generated common configuration.</li>
+  <li>Added a stable adapter interface so generated struct fields and symbol names no longer leak into common NPU/server code.</li>
+  <li>Bound model ID to the archive SHA-256 and made READY advertise exact model ID, byte sizes, dtypes, and NPU flags.</li>
+  <li>Passed 28 host tests, five ASan/UBSan native tests, static checks, and pristine Arm builds for both packages.</li>
+  <li>When hardware returned, freshly flashed both protocol-v3 images and passed fixture, clock, IRQ, CRC, NPU-timeout, watchdog, and stress acceptance.</li>
+</ul>
+
 <h3>Repository milestones</h3>
 
 <table>
@@ -125,14 +135,14 @@ dependency.</p>
 <table>
   <tr><th>Earlier statement</th><th>Current reality</th></tr>
   <tr><td>Multithreaded UART thread + <code>k_msgq</code></td><td>The final server is intentionally single-request and synchronous. NPU completion still uses ISR/semaphore concurrency.</td></tr>
-  <tr><td>259-byte packet + additive checksum</td><td>Protocol v2 uses a variable-length header, sequence number, CRC-32, and structured responses. An inference request is 268 bytes.</td></tr>
+  <tr><td>259-byte packet + additive checksum</td><td>Protocol v3 uses variable length, sequence, CRC-32, structured responses, and selected-model identity/sizes/dtypes. The default-model request is 268 bytes.</td></tr>
   <tr><td>NPU completion through CTL5 polling</td><td>Current completion uses physical DONE IRQ 41; polling is retained only as historical baseline evidence.</td></tr>
-  <tr><td>“282 µs pure NPU” / “340 µs hybrid”</td><td>Invalid as current latency because hardware ran at 32 MHz while software converted cycles as 200 MHz. Current recovery image: 554/129/701 µs.</td></tr>
+  <tr><td>“282 µs pure NPU” / “340 µs hybrid”</td><td>Invalid because hardware ran at 32 MHz while software converted cycles as 200 MHz. Last hardware-validated v2 recovery image: 554/129/701 µs.</td></tr>
   <tr><td>“100% accuracy”</td><td>Incorrect scientific claim. Six fixtures matched exactly; no independent dataset exists.</td></tr>
   <tr><td>DSLite is Windows-only</td><td>Linux UniFlash/DSLite 9.7 was installed and hardware flashing from WSL was verified.</td></tr>
   <tr><td>Hardcoded COM9 and Windows paths</td><td>Current client discovers Linux serial devices or accepts <code>TINI_UART_PORT</code>; scripts use repository-relative paths and environment overrides.</td></tr>
   <tr><td>Modifications live inside Zephyr</td><td>Current work is an out-of-tree module and manifest repository.</td></tr>
-  <tr><td>Several CPU/NPU model variants available</td><td>The maintainable public project contains only the active generated <code>mod.a</code>, header, and six fixtures. No equivalent CPU model is available.</td></tr>
+  <tr><td>Several CPU/NPU model variants available</td><td>Two real licensed NPU archives now validate and cross-link through the same generated-adapter path, but only the default has earlier physical-board evidence and no CPU-equivalent archive exists.</td></tr>
 </table>
 
 <h2 id="failures">3. Major bugs, experiments, and lessons</h2>
@@ -248,20 +258,29 @@ dependency.</p>
 
 <h2 id="results">6. Hardware results and performance</h2>
 
-<h3>6.1 Current recovery-enabled image</h3>
+<h3>6.1 Current protocol-v3 physical acceptance (10 November 2026)</h3>
+
+<p>Both current model packages were freshly built, erased, programmed,
+verified, and exercised on LP-AM13E230 through XDS110 from WSL. Exact scores
+below are supplied-fixture regression evidence, not an accuracy study.</p>
 
 <table>
-  <tr><th>Measurement</th><th>Result</th></tr>
-  <tr><td>Golden fixtures</td><td>6/6 exact output vectors.</td></tr>
-  <tr><td>Stress regression</td><td>600/600 exact results; zero retries.</td></tr>
-  <tr><td>NPU completions</td><td>5 per inference; 3,000 total.</td></tr>
-  <tr><td>Spurious NPU interrupts</td><td>0.</td></tr>
-  <tr><td>Accelerator wait</td><td>554 µs median.</td></tr>
-  <tr><td>Generated runtime/CPU portion</td><td>129 µs median.</td></tr>
-  <tr><td>Total inference</td><td>701 µs median.</td></tr>
-  <tr><td>Clock state</td><td>200 MHz MCLK; 100 MHz UART source; 3 flash wait states.</td></tr>
-  <tr><td>Firmware footprint</td><td>25,492 bytes flash; 43,616 bytes RAM.</td></tr>
+  <tr><th>Measurement</th><th>Waveform</th><th>Electrical fault</th></tr>
+  <tr><td>Stress regression</td><td>600/600 exact</td><td>600/600 exact</td></tr>
+  <tr><td>Transport retries</td><td>0</td><td>0</td></tr>
+  <tr><td>NPU completions</td><td>5 per inference</td><td>8 per inference</td></tr>
+  <tr><td>Spurious NPU interrupts</td><td>0</td><td>0</td></tr>
+  <tr><td>Accelerator time, median</td><td>553 µs</td><td>330 µs</td></tr>
+  <tr><td>Generated runtime/CPU, median</td><td>118 µs</td><td>525 µs</td></tr>
+  <tr><td>Total inference, median</td><td>689 µs</td><td>881 µs</td></tr>
+  <tr><td>Clock state</td><td colspan="2">200 MHz MCLK; 100 MHz UART source; 3 flash wait states</td></tr>
+  <tr><td>Firmware footprint</td><td>25,656 B flash / 43,616 B RAM</td><td>31,752 B flash / 41,320 B RAM</td></tr>
 </table>
+
+<p>Both images also rejected a corrupted CRC, recovered from a deliberate NPU
+timeout via cold reset, and recovered from deliberate WWDT0 starvation with
+reset cause <code>0x0e</code>. Historical protocol-v2 measurements remain in
+the repository for development comparison.</p>
 
 <h3>6.2 Polling versus interrupt completion</h3>
 
@@ -288,7 +307,10 @@ dependency.</p>
   <tr><th>Claim</th><th>Evidence</th><th>Status</th></tr>
   <tr><td>The firmware builds reproducibly.</td><td>Pinned manifest, clean local build, public GitHub Actions cross-build.</td><td><span class="tag done">Proven</span></td></tr>
   <tr><td>The generated NPU path is linked.</td><td>ELF symbols for TINIElite kernels and continuation handler.</td><td><span class="tag done">Proven</span></td></tr>
-  <tr><td>Physical NPU completions drive progress.</td><td>IRQ 41 counters, host enforcement, 3,000 completions/zero spurious.</td><td><span class="tag done">Proven</span></td></tr>
+  <tr><td>Common firmware is not fixed to one tensor metadata contract.</td><td>Validated manifest/adapter path plus synthetic alternate 64-byte-input/int16-output test.</td><td><span class="tag done">Software-proven</span></td></tr>
+  <tr><td>A second real model works end to end.</td><td>Electrical-fault package: 12/12 fixtures and 600/600 stress on hardware.</td><td><span class="tag done">Proven for bundled package</span></td></tr>
+  <tr><td>Protocol v3 works on physical hardware.</td><td>Both images passed identity, fixtures, clock, CRC, IRQ, timeout, watchdog, and stress gates.</td><td><span class="tag done">Proven</span></td></tr>
+  <tr><td>Physical NPU completions drive progress.</td><td>IRQ 41 counters and host enforcement: five or eight per inference, zero spurious.</td><td><span class="tag done">Proven</span></td></tr>
   <tr><td>Six supplied cases reproduce golden outputs.</td><td>Exact three-byte comparisons on physical board.</td><td><span class="tag done">Proven</span></td></tr>
   <tr><td>The system runs at 200 MHz safely.</td><td>PLL/source/divisor/flash raw register read-back.</td><td><span class="tag done">Proven</span></td></tr>
   <tr><td>Transport recovers from corruption.</td><td>Deliberate CRC damage and UART BREAK tests.</td><td><span class="tag done">Proven</span></td></tr>
@@ -333,9 +355,9 @@ dependency.</p>
     <ul>
       <li>“I integrated a supplied TVM/TI model archive; I did not train it.”</li>
       <li>“I built out-of-tree Zephyr platform support and the surrounding inference system.”</li>
-      <li>“Six supplied fixtures matched exactly across 600 repeated inferences.”</li>
-      <li>“We verified five physical NPU completion interrupts per inference.”</li>
-      <li>“The current recovery image measured 701 µs median on a read-back-validated 200 MHz clock.”</li>
+      <li>“Both bundled packages matched supplied fixtures across 600 repeated inferences with zero retries.”</li>
+      <li>“We verified five waveform or eight electrical-model NPU completion interrupts per inference, with zero spurious interrupts.”</li>
+      <li>“Current protocol-v3 median totals were 689 µs for waveform and 881 µs for electrical fault on a read-back-validated 200 MHz clock.”</li>
       <li>“The design recovers from CRC damage, NPU timeout, UART errors, and complete main-loop deadlock.”</li>
     </ul>
   </div>

@@ -1,0 +1,2 @@
+const NUMBER_OF_CLASSES = 6;
+const char *classIdToName[NUMBER_OF_CLASSES] = {"class_0_no_fault", "class_1_bc_fault", "class_2_abc_fault", "class_3_ag_fault", "class_4_abg_fault", "class_5_abcg_fault"};

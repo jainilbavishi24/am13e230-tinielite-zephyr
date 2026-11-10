@@ -22,13 +22,21 @@ jobs:
           ruff format --check tools tests
       - name: Run host-side unit tests
         run: python -m unittest discover -s tests -v
+      - name: Validate model packages
+        run: |
+          python -m tools.model_package models/waveform_classifier
+          python -m tools.model_package models/electrical_fault_6class
       - name: Check Python syntax
-        run: python -m py_compile tools/send_tensor.py tests/test_host_tools.py
+        run: >-
+          python -m py_compile tools/generate_model_adapter.py
+          tools/model_package.py tools/send_tensor.py
+          tests/test_host_tools.py tests/test_model_package.py
       - name: Check shell scripts
         run: shellcheck scripts/*.sh
       - name: Verify generated artifacts
-        working-directory: models/waveform_classifier
-        run: sha256sum --check SHA256SUMS
+        run: |
+          (cd models/waveform_classifier && sha256sum --check SHA256SUMS)
+          (cd models/electrical_fault_6class && sha256sum --check SHA256SUMS)
 
   firmware-build:
     runs-on: ubuntu-24.04
@@ -67,25 +75,33 @@ jobs:
       - name: Run C format and static analysis checks
         working-directory: am13e230-tinielite-zephyr
         run: ./scripts/static_check.sh
-      - name: Cross-compile firmware
-        working-directory: am13e230-tinielite-zephyr
-        run: ./scripts/build.sh
-      - name: Verify linked accelerator and interrupt symbols
+      - name: Cross-compile and inspect every real model package
         working-directory: am13e230-tinielite-zephyr
         run: |
-          arm-none-eabi-nm build/zephyr/zephyr.elf > build/zephyr/symbols.txt
-          grep -q 'tvmgen_default_ti_npu_convolveNHWC_0' build/zephyr/symbols.txt
-          grep -q 'TI_NPU_NNC_IRQHandler' build/zephyr/symbols.txt
-          grep -q 'app_protocol_frame_crc32' build/zephyr/symbols.txt
-          grep -q 'tinyengine_wait_for_completion' build/zephyr/symbols.txt
-          grep -q 'app_watchdog_init' build/zephyr/symbols.txt
-          grep -q 'pinctrl_configure_pins' build/zephyr/symbols.txt
+          for model in waveform_classifier electrical_fault_6class; do
+            APP_MODEL="$model" PRISTINE=always ./scripts/build.sh
+            output="ci-artifacts/$model"
+            mkdir -p "$output"
+            arm-none-eabi-nm build/zephyr/zephyr.elf > "$output/symbols.txt"
+            grep -q 'tvmgen_default_run' "$output/symbols.txt"
+            grep -q 'TI_NPU_NNC_IRQHandler' "$output/symbols.txt"
+            grep -q 'app_model_run' "$output/symbols.txt"
+            grep -q 'app_protocol_frame_crc32' "$output/symbols.txt"
+            grep -q 'tinyengine_wait_for_completion' "$output/symbols.txt"
+            grep -q 'app_watchdog_init' "$output/symbols.txt"
+            grep -q 'pinctrl_configure_pins' "$output/symbols.txt"
+            if [ "$model" = waveform_classifier ]; then
+              grep -q 'tvmgen_default_ti_npu_convolveNHWC_0' "$output/symbols.txt"
+            else
+              grep -q 'TINIE_zeroPaddingNHWC_lib' "$output/symbols.txt"
+              grep -q '__aeabi_memclr4' "$output/symbols.txt"
+            fi
+            cp build/zephyr/zephyr.elf "$output/"
+            cp build/zephyr/zephyr.hex "$output/"
+            cp build/zephyr/zephyr.map "$output/"
+          done
       - uses: actions/upload-artifact@v4
         with:
-          name: am13e230-firmware
-          path: |
-            am13e230-tinielite-zephyr/build/zephyr/zephyr.elf
-            am13e230-tinielite-zephyr/build/zephyr/zephyr.hex
-            am13e230-tinielite-zephyr/build/zephyr/zephyr.map
-            am13e230-tinielite-zephyr/build/zephyr/symbols.txt
+          name: am13e230-firmware-all-models
+          path: am13e230-tinielite-zephyr/ci-artifacts/
           if-no-files-found: error

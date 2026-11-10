@@ -1,0 +1,47 @@
+{
+  "timestamp_utc": "2026-11-10T08:39:12.996211+00:00",
+  "protocol_version": 3,
+  "model": {
+    "name": "waveform_classifier",
+    "display_name": "Waveform classifier",
+    "id": "0xc7d11096",
+    "target_device_family": "AM13E2",
+    "accelerator": "TINIElite",
+    "input_shape": [
+      1,
+      1,
+      256,
+      1
+    ],
+    "input_dtype": "int8",
+    "input_size_bytes": 256,
+    "output_shape": [
+      1,
+      3
+    ],
+    "output_dtype": "int8",
+    "output_size_bytes": 3,
+    "labels": [
+      "Sawtooth",
+      "Sine",
+      "Square"
+    ],
+    "preprocessing": "ti_affine_shift_header"
+  },
+  "clock_status": {
+    "expected_mclk_hz": 200000000,
+    "derived_mclk_hz": 200000000,
+    "uart_clock_hz": 100000000,
+    "mclkcfg": 117506560,
+    "hsclken": 256,
+    "hsclkcfg": 0,
+    "pllcfg0": 49,
+    "pllcfg1": 7937,
+    "genclken": 0,
+    "clkstatus": 538970896,
+    "flash_control": 33555200,
+    "validation_flags": 31,
+    "valid": true,
+    "flash_wait_states": 3
+  }
+}

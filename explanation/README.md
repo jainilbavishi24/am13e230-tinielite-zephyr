@@ -31,3 +31,9 @@ In particular, the six supplied fixtures prove deterministic regression
 behavior, not general model accuracy. The original model, training pipeline,
 independent dataset, and model-generation scripts are not available.
 
+The pack distinguishes historical protocol-v2 evidence from the current
+build-time model-package/protocol-v3 revision. The latter passes host,
+sanitizer-backed native, static, cross-build, and complete physical-board gates
+for both real model archives through the same manifest-driven, configure-time
+generated adapter path.
+

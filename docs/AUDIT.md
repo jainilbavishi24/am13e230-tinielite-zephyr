@@ -1,6 +1,8 @@
 # Critical engineering audit
 
-Audit date: 2026-10-17
+Original audit date: 2026-10-17
+
+Latest hardware and software update: 2026-11-10
 
 ## Verdict
 
@@ -10,6 +12,12 @@ ELF links generated `tvmgen_default_ti_npu_convolveNHWC_*` and
 LaunchPad, and native WSL flashing and UART inference have been demonstrated.
 It is not merely printing expected answers or silently running a CPU-only
 model.
+
+The current source adds a validated build-time model-package boundary and
+protocol v3. Its host/native/static/cross-build gates pass, and both bundled
+real packages passed complete physical acceptance on 2026-11-10. The retained
+protocol-v2 evidence remains development history rather than the basis of the
+current claims.
 
 It remains an engineering prototype. The original repository overstated its
 maturity in several places: six supplied vectors do not establish model
@@ -28,7 +36,7 @@ not re-audited; its exact revision was identified and pinned.
 ## Current code-quality review
 
 The project-owned C, Python, shell, CMake, Kconfig, devicetree, workflow, and
-documentation files were reviewed again on 2026-10-19. The review and automated
+documentation files were reviewed again through 2026-11-10. The reviews and automated
 gates found no unresolved critical correctness defect in the exercised path.
 The following maintainability and robustness issues were corrected:
 
@@ -39,16 +47,17 @@ The following maintainability and robustness issues were corrected:
   baud configurations.
 - Made host diagnostic parsing reject malformed error payloads and invalid
   watchdog running flags.
-- Made automatic serial-port selection deterministic.
+- Made automatic serial-port selection prefer XDS110's application `if00`
+  interface and clear stale pre-flash frames before waiting for fresh READY.
 - Added pinned Ruff linting and formatting to the local and GitHub Actions
   quality gates.
 - Installed and verified Device Tree Compiler 1.6.1, removing the missing-DTC
   configuration warning.
 
-The reviewed image was rebuilt, programmed, verified, and passed all six
-hardware fixtures with zero transport retries after these changes. Remaining
-items are recorded below as explicit platform or artifact limitations rather
-than hidden code-quality claims.
+Both current protocol-v3 images were rebuilt, programmed, verified, and passed
+their complete hardware acceptance matrices with zero transport retries.
+Remaining items are recorded below as explicit platform or artifact
+limitations rather than hidden code-quality claims.
 
 ## Confirmed correct
 
@@ -59,8 +68,8 @@ than hidden code-quality claims.
 | NPU memory limits | 256 instruction words, 512 parameter words | Matches TI SDK driverlib |
 | NPU IRQ number | IRQ 41 | Matches TI device header |
 | Memory | 512 KiB flash; 96 KiB primary SRAM plus a separate 32 KiB bank/alias | Physical total is 128 KiB; linker currently uses 96 KiB |
-| Model shape | 256 signed 8-bit inputs, three signed 8-bit scores | Header and protocol agree |
-| WSL workflow | Linux build, Linux UniFlash/DSLite program/verify, `/dev/ttyACM0` exchange | Previously demonstrated on hardware |
+| Model shapes | Waveform: 256 int8 inputs / 3 int8 outputs; electrical: 768 float32 inputs / 6 int8 outputs | Manifests, generated headers, READY, and physical inference agree |
+| WSL workflow | Linux build, Linux UniFlash/DSLite program/verify, XDS110 `if00`/`/dev/ttyACM0` exchange | Demonstrated for both protocol-v3 images |
 
 ## Serious findings in the original layout
 
@@ -127,11 +136,29 @@ than hidden code-quality claims.
 - Added a 4-second independent WWDT0 watchdog fed only by main-loop progress;
   deliberate feed starvation produced reset cause `0x0e`, restarted cleanly,
   and was followed by 600/600 exact inferences.
+- Removed common-firmware dependence on one generated archive's path, tensor
+  sizes, output type, struct fields, and entry symbol. Package-specific names
+  now live in validated manifest metadata behind `app_model.h`; CMake emits the
+  selected package's adapter into the build directory.
+- Added manifest/schema/path/shape/type/alignment validation, archive-derived
+  model identity, protocol-v3 READY capability negotiation, and exact host
+  mismatch rejection.
+- Added synthetic rejection/alternate-type tests and pristine Arm cross-builds
+  for two real packages. The second package exercises a 3,072-byte float32
+  input, six-byte int8 output, Simple Window preprocessing, different generated
+  field name, and a separate licensed archive.
+- Hardware-validated both protocol-v3 packages on 2026-11-10. Each completed
+  600/600 exact repeated fixtures with zero retries, clock read-back, CRC
+  recovery, NPU-timeout recovery, watchdog recovery, and zero spurious IRQs;
+  waveform reported five and electrical fault eight DONE IRQs per inference.
 
 ## Remaining limitations
 
+- Both real archives now validate, cross-link, and run physically through the
+  common generated-adapter/protocol path. This proves compatibility for these
+  two packages, not universal compatibility with arbitrary static archives.
 - The framed transport passed deliberate CRC corruption/recovery and 600
-  consecutive hardware inferences with 600 exact results and zero retries.
+  consecutive hardware inferences per model with exact results and zero retries.
   Multi-hour soak, repeated reset, brownout, and broader fault-injection tests
   are still pending.
 - WWDT0 now covers a stopped main loop after application initialization, but
@@ -144,10 +171,13 @@ than hidden code-quality claims.
   only be logged rather than propagated into the generated runtime.
 - GitHub Actions firmware cross-build, linked-symbol checks, and artifact upload
   pass remotely. A digest-pinned build container remains future hardening.
-- Six golden fixtures are regression coverage, not an accuracy evaluation.
-- The original model, preprocessing/training code, and generation scripts are
-  unavailable. An equivalent CPU build, model regeneration, and defensible
-  independent accuracy study require those external inputs.
+- Six waveform and 12 electrical-fault golden fixtures are regression coverage,
+  not an independent accuracy evaluation.
+- The waveform source model/training pipeline is unavailable. The electrical-
+  fault export includes training metadata and a held-out 87.4845% result, but
+  ABCG recall is 9/99 and its small overlapping-window dataset does not support
+  a production or real-world generalization claim. An equivalent CPU build and
+  defensible independent study still require additional inputs.
 - AM13E230 collateral is preview-era and current TI pages contain changing
   frequency information. Pin the document/SDK revision used for every claim.
 

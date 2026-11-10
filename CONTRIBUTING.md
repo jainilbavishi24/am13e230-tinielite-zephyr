@@ -28,6 +28,13 @@ shellcheck scripts/*.sh
 ./scripts/build.sh
 ```
 
+Validate every selected model package explicitly:
+
+```bash
+python -m tools.model_package models/<name>
+APP_MODEL=<name> ./scripts/build.sh
+```
+
 Protocol changes must also pass the sanitized Zephyr-native suite from the west
 workspace root:
 
@@ -40,7 +47,7 @@ ZEPHYR_TOOLCHAIN_VARIANT=host west twister \
 ## Hardware-facing changes
 
 Changes to the SoC, clock, devicetree, pinctrl, UART, TINIElite driver,
-watchdog, generated-runtime integration, or wire protocol require physical
+watchdog, model package/generated-runtime integration, or wire protocol require physical
 board validation:
 
 ```bash
@@ -50,7 +57,8 @@ board validation:
 ```
 
 Update [docs/VALIDATION.md](docs/VALIDATION.md) and add machine-readable
-evidence under `docs/evidence/` when a change alters hardware behavior,
+evidence under the matching `docs/evidence/protocol_v*/` directory when a
+change alters hardware behavior,
 latency, memory footprint, or recovery semantics. Record the board, probe
 firmware, tool versions, commit, commands, and complete result summary.
 
@@ -62,4 +70,12 @@ firmware, tool versions, commit, commands, and complete result summary.
 - Bound waits and retries; do not introduce unbounded failure paths.
 - Preserve structured errors and sequence validation across protocol changes.
 - Treat the six bundled vectors as regression fixtures, not an accuracy study.
+- Keep generated symbol/struct differences in package manifest metadata; the
+  configure-time generator owns the adapter and common firmware must use
+  `app_model.h`.
+- For a new model, review license and hashes, verify archive-derived model ID,
+  inspect linked symbols, and never copy another model's latency or IRQ count.
 - Keep commits focused and update documentation in the same change as behavior.
+
+The full package schema and acceptance matrix are documented in
+[docs/MODEL_PACKAGES.md](docs/MODEL_PACKAGES.md).

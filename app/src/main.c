@@ -8,12 +8,13 @@
 #include <zephyr/sys/reboot.h>
 
 #include "app_clock.h"
+#include "app_model.h"
 #include "app_npu.h"
 #include "app_uart.h"
 #include "app_watchdog.h"
 
-static int8_t model_input[APP_NPU_INPUT_SIZE] __aligned(16);
-static int8_t model_output[APP_NPU_OUTPUT_SIZE] __aligned(16);
+static uint8_t model_input[APP_MODEL_INPUT_SIZE_BYTES] __aligned(APP_MODEL_IO_ALIGNMENT);
+static uint8_t model_output[APP_MODEL_OUTPUT_SIZE_BYTES] __aligned(APP_MODEL_IO_ALIGNMENT);
 
 static void reboot_after_error(void)
 {
@@ -31,7 +32,9 @@ int main(void)
 	int ret;
 
 	printk("\n*** AM13E230 Zephyr TINIElite demo ***\n");
-	printk("Execution mode: interrupt-driven NPU completion, framed protocol v2\n");
+	printk("Execution mode: interrupt-driven NPU completion, framed protocol v3\n");
+	printk("Model: %s (id 0x%08x, input %u B, output %u B)\n", APP_MODEL_NAME, APP_MODEL_ID,
+	       APP_MODEL_INPUT_SIZE_BYTES, APP_MODEL_OUTPUT_SIZE_BYTES);
 
 	ret = app_uart_init();
 	if (ret != 0) {

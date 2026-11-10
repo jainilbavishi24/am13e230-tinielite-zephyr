@@ -24,6 +24,17 @@
 - [x] Add repeated/stress inference tests with machine-readable results.
 - [x] Move UART pin routing to standard Zephyr pinctrl and implement receive
   error flags with deliberate hardware BREAK/recovery validation.
+- [x] Introduce validated build-time model packages, a stable generated-model
+  API, configure-time C adapter generation from runtime ABI metadata,
+  archive-derived identity, and protocol-v3 variable tensor metadata.
+- [x] Exercise alternate sizes/types through a synthetic package unit test and
+  cross-link the real default package in a pristine Arm build.
+- [x] Flash and repeat the complete hardware acceptance matrix for the current
+  protocol-v3/model-package revision.
+- [x] Integrate and cross-build a second real AM13E2/TINIElite package with a
+  different float32 tensor contract and Simple Window preprocessing.
+- [x] Physically validate the electrical-fault package with its 12 fixtures,
+  clock/IRQ checks, transport faults, reset recovery, and stress run.
 
 ## P2 — evidence and automation
 
@@ -33,8 +44,11 @@
   reproducibility.
 - [x] Add Cppcheck/format enforcement and sanitized Zephyr Twister tests for
   protocol validation and CRC logic.
-- [ ] Validate on an independent labeled dataset and report confusion matrix,
-  per-class precision/recall, dataset provenance, and preprocessing.
+- [x] Add manifest/schema/hash validation and CI coverage for model packages.
+- [x] Record the electrical-fault export's held-out confusion matrix,
+  per-class recall, training configuration, and preprocessing limitations.
+- [ ] Validate on an independent labeled dataset with group-wise separation,
+  balanced classes, operating-condition coverage, and full provenance.
 - [ ] Benchmark warm-up, distribution, jitter, CPU-only baseline, NPU utilization,
   power, and binary/RAM footprints under a verified clock configuration.
 

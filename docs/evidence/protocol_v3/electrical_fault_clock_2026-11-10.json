@@ -1,0 +1,50 @@
+{
+  "timestamp_utc": "2026-11-10T08:41:26.713712+00:00",
+  "protocol_version": 3,
+  "model": {
+    "name": "electrical_fault_6class",
+    "display_name": "Electrical fault 6-class classifier",
+    "id": "0x7f95a1db",
+    "target_device_family": "AM13E2",
+    "accelerator": "TINIElite",
+    "input_shape": [
+      1,
+      6,
+      128,
+      1
+    ],
+    "input_dtype": "float32",
+    "input_size_bytes": 3072,
+    "output_shape": [
+      1,
+      6
+    ],
+    "output_dtype": "int8",
+    "output_size_bytes": 6,
+    "labels": [
+      "No fault",
+      "BC fault",
+      "ABC fault",
+      "AG fault",
+      "ABG fault",
+      "ABCG fault"
+    ],
+    "preprocessing": "identity_float32_le"
+  },
+  "clock_status": {
+    "expected_mclk_hz": 200000000,
+    "derived_mclk_hz": 200000000,
+    "uart_clock_hz": 100000000,
+    "mclkcfg": 117506560,
+    "hsclken": 256,
+    "hsclkcfg": 0,
+    "pllcfg0": 49,
+    "pllcfg1": 7937,
+    "genclken": 0,
+    "clkstatus": 538970896,
+    "flash_control": 33555200,
+    "validation_flags": 31,
+    "valid": true,
+    "flash_wait_states": 3
+  }
+}

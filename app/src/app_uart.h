@@ -18,9 +18,9 @@ struct app_uart_request {
 };
 
 int app_uart_init(void);
-int app_uart_receive_request(int8_t *buffer, uint32_t size, struct app_uart_request *request);
+int app_uart_receive_request(uint8_t *buffer, uint32_t size, struct app_uart_request *request);
 void app_uart_send_error(uint16_t sequence, enum app_uart_error_code code, int error);
-int app_uart_send_result(uint16_t sequence, const int8_t *result, uint32_t size,
+int app_uart_send_result(uint16_t sequence, const uint8_t *result, uint32_t size,
 			 const struct app_npu_metrics *metrics);
 int app_uart_send_clock_status(uint16_t sequence, const struct app_clock_status *status);
 int app_uart_send_watchdog_status(uint16_t sequence, const struct app_watchdog_status *status);

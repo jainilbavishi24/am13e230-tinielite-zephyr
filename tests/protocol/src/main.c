@@ -21,7 +21,7 @@ ZTEST(app_protocol, test_crc32_empty_ack)
 		0x00,
 	};
 
-	zassert_equal(app_protocol_frame_crc32(header, NULL, 0U), 0xED5BA133U);
+	zassert_equal(app_protocol_frame_crc32(header, NULL, 0U), 0x26077296U);
 }
 
 ZTEST(app_protocol, test_crc32_inference_payload)
@@ -41,7 +41,7 @@ ZTEST(app_protocol, test_crc32_inference_payload)
 	for (uint32_t i = 0U; i < INPUT_SIZE; ++i) {
 		payload[i] = (uint8_t)i;
 	}
-	zassert_equal(app_protocol_frame_crc32(header, payload, sizeof(payload)), 0xC9D6FF2EU);
+	zassert_equal(app_protocol_frame_crc32(header, payload, sizeof(payload)), 0x0FE43423U);
 }
 
 ZTEST(app_protocol, test_valid_requests)

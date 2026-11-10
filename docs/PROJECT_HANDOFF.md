@@ -7,7 +7,10 @@ agent. It covers the current implementation, evidence, limits, and commands.
 **Branch:** main
 **Validated environment:** WSL 2 / Ubuntu 22.04, GNU Arm Embedded GCC 10.3.1,
 TI UniFlash 9.7, LP-AM13E230 LaunchPad and its XDS110
-**Baseline at creation:** 176ef09 — Add comprehensive project explanation PDFs
+**Current-state rule:** run `git log -1 --oneline`; do not assume an old handoff
+hash is the checked-out revision. The model-package/v3 software and physical
+gates were last run on 2026-11-10. At handoff time these changes and evidence
+were intentionally still uncommitted; inspect `git status` before proceeding.
 
 ## 1. Authority and reading order
 
@@ -33,49 +36,64 @@ material. This Markdown file is the agent-ready source of truth.
 ## 2. Project in plain terms
 
 ~~~text
-256 host waveform samples (float)
- -> generated normalization and int8 quantization
- -> USB UART, framed protocol v2
+selected package fixture (waveform or six-channel electrical window)
+ -> package-declared preprocessing (affine int8 or identity float32)
+ -> USB UART, framed protocol v3 with model identity/sizes/types
  -> Zephyr application on AM13E230 Cortex-M33
  -> generated TVM/TI hybrid graph:
       CPU orchestration + supported TINIElite NPU stages
- -> three signed scores: sawtooth, sine, square
+ -> selected output tensor (three waveform or six electrical-fault scores)
  -> UART result: scores, timings, NPU IRQ diagnostics
 ~~~
 
-Inference runs on the physical MCU; no cloud participates. The supplied model
-takes int8 shape 1 x 1 x 256 x 1 and produces three int8 scores. Host
+Inference runs on the physical MCU; no cloud participates. The default waveform
+model takes int8 shape 1 x 1 x 256 x 1 and produces three int8 scores. Host
 preprocessing uses generated bias -70.02075, scale 187.0, shift 6, truncation,
-and int8 clipping.
+and int8 clipping. The second `electrical_fault_6class` model takes float32
+shape 1 x 6 x 128 x 1 (Ia, Ib, Ic, Va, Vb, Vc), uses Simple Window identity
+preprocessing, and produces six int8 scores.
 
 AM13E230 is not supported by pinned upstream Zephyr. This repository therefore
 implements an out-of-tree board/SoC port plus DTS, pinctrl, UART, clock,
 watchdog, NPU, WSL, host tool, test, and CI integration—without modifying
 upstream Zephyr.
 
+The application is build-time model-package selectable. `model.json` provides
+identity, tensor, artifact, and generated-runtime ABI metadata. CMake validates
+that metadata and generates the small C adapter which isolates vendor names;
+there is no hand-written per-model C file. It is not a runtime loader for
+arbitrary `.a` files. Read
+[MODEL_PACKAGES.md](MODEL_PACKAGES.md) before adding or selecting another model.
+
 ## 3. Honest claims
 
 ### Supported
 
-- A licensed generated TVM/TI binary archive, mod.a, is integrated with Zephyr
-  and the AM13E230 TINIElite NPU.
+- Two licensed generated TVM/TI `mod.a` archives are integrated behind the same
+  Zephyr and AM13E230 TINIElite NPU path.
 - The project supplies the out-of-tree platform port, robust protocol/recovery,
   WSL-native build/flash/test flow, host client, tests, and CI.
-- Six supplied golden fixtures gave exact physical-board score vectors. A
-  recovery test completed 600/600 repeated inferences with zero retries.
-- The current image recorded five acknowledged NPU DONE IRQs per inference:
-  3,000 completions and zero spurious entries in that run.
+- Both current protocol-v3 packages passed physical acceptance on 2026-11-10.
+  Each completed 600/600 exact repeated fixtures with zero transport retries.
+- Waveform recorded five acknowledged NPU DONE IRQs per inference; electrical
+  fault recorded eight. Both had zero spurious entries across 600 runs.
 - Hardware tests covered CRC recovery, NPU timeout/cold reset, watchdog
   starvation/reset-cause, UART BREAK recovery, and post-reset inference.
 - Clock read-back verified 200 MHz MCLK, 100 MHz UART source, three flash waits.
-- Recovery-enabled median timing: 554 us NPU wait, 129 us runtime/CPU portion,
-  701 us end-to-end. Conditions and evidence: VALIDATION.md.
+- Current median timing: waveform 553/118/689 us and electrical fault
+  330/525/881 us for accelerator/runtime/total. Conditions: VALIDATION.md.
+- The current protocol-v3/model-package source passes 28 host tests, five
+  sanitized native tests, static checks, and pristine Arm cross-builds for both
+  real packages, in addition to the physical gates above.
 
 ### Never claim
 
-- “100% accuracy”: six regression fixtures are not an independent evaluation.
-- Model training, model generation/regeneration, or independent model testing:
-  source model/training/generation inputs are unavailable.
+- “100% accuracy”: regression fixtures verify deterministic outputs, not
+  generalization. The electrical model's held-out result is 706/807 (87.4845%)
+  with only 9/99 ABCG recall.
+- A complete reproducible waveform training pipeline, or production-quality
+  independent validation of the electrical model: the required source data,
+  group-wise evaluation, and operating-condition coverage are unavailable.
 - Production-ready, certified, or verified for all workloads.
 - NPU-vs-CPU speedup, a wholly NPU graph, power saving, or total CPU
   utilization: CPU-equivalent model and measurement instruments are absent.
@@ -85,25 +103,27 @@ upstream Zephyr.
 Resume-safe version:
 
 > Built an out-of-tree Zephyr port and WSL-native build/flash/test workflow for
-> TI's preview AM13E230 Cortex-M33 MCU; integrated a TVM-generated hybrid
-> TINIElite NPU model and verified accelerator symbols and on-board inference
-> over a custom UART regression protocol. Six golden vectors and 600 repeated
-> recovery-test inferences passed with five acknowledged DONE IRQs per
-> inference, zero spurious IRQs, CRC recovery, NPU-timeout reset recovery,
-> watchdog reset validation, and 200 MHz clock read-back.
+> TI's preview AM13E230 Cortex-M33 MCU; implemented manifest-driven build-time
+> integration for two TVM/TI TINIElite NPU models with different tensor types,
+> then verified both on hardware through a CRC-protected UART protocol. Each
+> completed 600/600 exact fixture regressions with zero retries/spurious IRQs,
+> plus NPU-timeout recovery, watchdog reset validation, and 200 MHz clock
+> read-back.
 
 ## 4. Completion state
 
 | Area | State |
 |---|---|
-| Out-of-tree platform, build, hashes, symbols | Passed baseline |
-| Protocol: version/length/sequence/CRC/errors/resync | Passed |
-| Six exact fixtures and repeated regression | Passed |
-| Explicit clock setup and read-back | Passed |
-| NPU timeout/cold reset and WWDT0 recovery | Passed |
-| CI, host tests, native ASan/UBSan ztests, static checks | Passed baseline |
+| Out-of-tree platform, build, hashes, symbols | Current v3 software and hardware gates passed |
+| Build-time model-package abstraction | Passed with two real cross-links and physical runs |
+| Protocol v3: identity/version/length/sequence/CRC/errors/resync | Software and physical gates passed |
+| Supplied fixtures and repeated regression | Waveform 600/600; electrical fault 600/600 on v3 hardware |
+| Explicit clock setup and read-back | Passed for both v3 images |
+| NPU timeout/cold reset and WWDT0 recovery | Passed for both v3 images |
+| CI, host tests, native ASan/UBSan ztests, static checks | Current local software gate passed |
 | UART pinctrl/error reporting | Passed; transfer remains polling |
-| Independent accuracy evaluation | External input required |
+| Electrical held-out evaluation | Recorded, but weak ABCG recall and dataset-independence limits |
+| Independent real-world accuracy evaluation | External input required |
 | CPU baseline, power, exact utilization | External inputs/instrumentation required |
 | Zephyr-upstream-quality split | Pending |
 
@@ -121,7 +141,7 @@ Resume-safe version:
 | UART | data/control 0x40601000; wrapper 0x40632000; PA0 TX, PA1 RX; 115200; 100 MHz source |
 | NPU | base 0x408ff000; CTL5 +0x1120; instr +0x2000 (256 words); param +0x2800 (512 words); IRQ 41 |
 | Watchdog | WWDT0 0x400d0000; 32.768 kHz; four seconds |
-| Model | models/waveform_classifier/artifacts/mod.a plus header and six fixtures |
+| Models | Waveform: 256 int8 in / 3 int8 out / 6 fixtures; electrical: 768 float32 in / 6 int8 out / 12 fixtures |
 | Key exports | tvmgen_default_run, tvmgen_default_finished, TI_NPU_NNC_IRQHandler |
 
 Do not confuse the UART data/control and wrapper address blocks. The model
@@ -134,18 +154,23 @@ compatible regenerated model/runtime interface, which is not available.
 | Path | Responsibility |
 |---|---|
 | app/src/main.c | single-request server, dispatch |
-| app/src/app_npu.c | generated runtime, 100 ms waits, semaphore, NPU metrics |
+| app/src/app_model.h | stable selected-model interface and generated config |
+| app/src/app_npu.c | model-independent runtime control, 100 ms waits, semaphore, metrics |
 | app/src/app_uart.c / app_protocol.c | framed polling transport, validation, CRC32 |
 | app/src/app_clock.c / app_watchdog.c | clock read-back; WWDT0 control |
 | boards/, soc/, dts/ | out-of-tree board/SoC/startup/bindings/pinctrl |
 | soc/ti/am13x/clock.c | PRE_KERNEL_1 clock tree, RAM-resident flash configuration |
 | drivers/serial/, drivers/misc/tinyengine/ | UNICOMM and NPU callback/ISR/semaphore drivers |
-| models/waveform_classifier/ | licensed archive/header/fixtures/SHA: immutable input |
-| tools/send_tensor.py | quantization, client, fixtures/faults, JSON evidence |
+| models/ | selectable manifests/artifacts/licenses/fixtures |
+| tools/model_package.py | package schema, path, tensor, runtime-ABI, and archive-ID validation |
+| tools/generate_model_adapter.py | deterministic configure-time C adapter generation from the selected manifest |
+| tools/send_tensor.py | selected preprocessing, client, fixtures/faults, JSON evidence |
 | tests/ | Python tests and native_sim protocol ztests |
 | scripts/ | build, flash, test, quality, WSL USB setup |
-| config/AM13E23019_Zephyr.ccxml | XDS110/DSLite configuration |
-| docs/evidence/ | machine-readable board evidence |
+| config/debug/AM13E23019_Zephyr.ccxml | XDS110/DSLite configuration |
+| config/udev/ | restricted XDS110 USB permission rule |
+| docs/evidence/protocol_v2/ | retained machine-readable v2 board evidence |
+| docs/evidence/protocol_v3/ | current 2026-11-10 waveform/electrical board evidence |
 
 One request is processed at a time by design. It serializes opaque model state,
 READY ordering, recovery, timing, and watchdog feeds. NPU completion remains
@@ -155,12 +180,12 @@ or nonzero spurious interrupts. A timeout returns an error, drains UART, and
 cold-resets because runtime state is opaque. WWDT0 is fed only by main-loop
 forward progress.
 
-## 7. Protocol v2
+## 7. Protocol v3
 
 All multi-byte values are little-endian.
 
 ~~~text
-magic 5a a5 | version 02 | type | uint16 sequence | uint16 length
+magic 5a a5 | version 03 | type | uint16 sequence | uint16 length
 payload | uint32 IEEE CRC-32
 ~~~
 
@@ -169,11 +194,11 @@ CRC-32 (0xedb88320, initial/final xor 0xffffffff), matching binascii.crc32.
 
 | Type | Meaning |
 |---:|---|
-| 0x01 | 256-byte signed-int8 inference request |
+| 0x01 | input tensor bytes; exact advertised byte length |
 | 0x02 / 0x05 | clock status / watchdog status request |
 | 0x03 / 0x04 | NPU stall / watchdog stall; diagnostic builds only |
-| 0x80 / 0x81 | READY / ACK |
-| 0x82 | RESULT: three int8 scores plus accel/runtime/total us, completions, spurious counts |
+| 0x80 / 0x81 | READY(model ID, sizes, dtypes, flags) / ACK |
+| 0x82 | RESULT: selected output bytes plus accel/runtime/total us, completions, spurious counts |
 | 0x83 / 0x84 | clock status / watchdog status |
 | 0xff | ERROR: code plus signed int16 detail |
 
@@ -181,6 +206,12 @@ Errors: 1 timeout, 2 version, 3 type, 4 length, 5 CRC, 6 inference, 7 internal,
 8 UART transport. A frame has one absolute one-second receive deadline. Both
 host and firmware resynchronize after damaged frames. Read PROTOCOL.md before
 changing any wire behavior.
+
+READY is 12 bytes packed `<IHHBBH`: archive-derived uint32 model ID, uint16
+input bytes, uint16 output bytes, uint8 input/output dtype codes, and uint16
+flags. The host must match all fields with its selected package before sending
+input. See PROTOCOL.md for dtype codes and complete semantics. Both current v3
+model packages passed this handshake and the full physical acceptance matrix.
 
 ## 8. Fresh WSL setup and software checks
 
@@ -213,7 +244,10 @@ TI UniFlash Linux 9.7 is only needed to flash hardware. Default location:
 ~~~bash
 git status --short --branch
 git log -1 --oneline
+python -m tools.model_package models/waveform_classifier
+python -m tools.model_package models/electrical_fault_6class
 (cd models/waveform_classifier && sha256sum --check SHA256SUMS)
+(cd models/electrical_fault_6class && sha256sum --check SHA256SUMS)
 ruff check tools tests
 ruff format --check tools tests
 python -m unittest discover -s tests -v
@@ -221,6 +255,22 @@ python -m unittest discover -s tests -v
 shellcheck scripts/*.sh
 ./scripts/build.sh
 ~~~
+
+Select a model consistently for build and host:
+
+~~~bash
+APP_MODEL=waveform_classifier ./scripts/build.sh
+APP_MODEL=waveform_classifier ./scripts/test.sh
+
+APP_MODEL=electrical_fault_6class PRISTINE=always ./scripts/build.sh
+APP_MODEL=electrical_fault_6class ./scripts/test.sh
+~~~
+
+The electrical package's software contract is model ID `0x7f95a1db`, 3,072
+input bytes (`[1,6,128,1]` float32), six output bytes (`[1,6]` int8), and 16-byte
+buffer alignment. Its generated run metadata contains an inactive GUI value
+`num_frame_concat: 8`; do not use it. The compiled generated header and vectors
+authoritatively show one frame, six variables, 128 samples, and 768 floats.
 
 Run Zephyr-native tests from the **west workspace root**:
 
@@ -253,8 +303,11 @@ lsusb
 ls -l /dev/ttyACM* /dev/serial/by-id/
 ~~~
 
-The client uses TINI_UART_PORT if set, then a lexical by-id port, then
-/dev/ttyACM0. Do not commit private serial paths.
+XDS110 exposes two CDC ports. The application/User UART is interface `if00`
+(observed as `/dev/ttyACM0`); `if03`/`ttyACM1` is not the application stream.
+The client uses `TINI_UART_PORT` when set, otherwise prefers a by-id `-if00`
+path, then `/dev/ttyACM0`. It clears buffered pre-flash frames before waiting
+for the firmware's next READY. Do not commit private serial paths.
 
 Build, flash, and run fixtures:
 
@@ -285,7 +338,8 @@ Hardware acceptance commands intentionally reset/stall the board:
 The last command needs diagnostic-only app/prj.conf options
 CONFIG_APP_NPU_FAULT_INJECTION=y and CONFIG_APP_WATCHDOG_FAULT_INJECTION=y.
 Disable them in deployment configurations. Changed hardware behavior requires
-reviewed JSON in docs/evidence/ and a VALIDATION.md update.
+reviewed JSON in the matching `docs/evidence/protocol_v*/` directory and a
+VALIDATION.md update.
 
 ## 10. Troubleshooting and acceptance rules
 
@@ -308,7 +362,7 @@ reviewed JSON in docs/evidence/ and a VALIDATION.md update.
 | Python/parser | Ruff, format, Python tests; native ztests for framing. |
 | Protocol | Above plus native ztests and physical CRC/recovery where possible; update PROTOCOL.md. |
 | App/driver/DTS | Static checks, clean build/symbols; physical pipeline and relevant fault/clock gate. |
-| Clock/reset/watchdog | Build plus physical clock/recovery test; update evidence/VALIDATION.md. |
+| Clock/reset/watchdog | Build plus physical clock/recovery test; update the versioned evidence directory and VALIDATION.md. |
 | Model artifacts | Do not edit without explicit owner authority, licence, and new hashes. |
 | CI | Equivalent local checks, then wait for remote success before claiming it. |
 
@@ -330,11 +384,15 @@ Key files:
 
 | File | Meaning |
 |---|---|
-| docs/evidence/hardware_clock_2026-10-17.json | 200 MHz MCLK, 100 MHz UART, flash waits |
-| docs/evidence/hardware_irq_stress_2026-10-17.json | 600 runs, five IRQs/run, zero spurious |
-| docs/evidence/hardware_recovery_2026-10-17.json | CRC recovery, NPU timeout/cold reset, 600 post-reset |
-| docs/evidence/hardware_uart_pinctrl_2026-10-17.json | UART BREAK/reopen/recovery |
-| docs/evidence/hardware_stress_2026-10-17.json | Clock-valid historical polling comparison |
+| docs/evidence/protocol_v2/hardware_clock_2026-10-17.json | 200 MHz MCLK, 100 MHz UART, flash waits |
+| docs/evidence/protocol_v2/hardware_irq_stress_2026-10-17.json | 600 runs, five IRQs/run, zero spurious |
+| docs/evidence/protocol_v2/hardware_recovery_2026-10-17.json | CRC recovery, NPU timeout/cold reset, 600 post-reset |
+| docs/evidence/protocol_v2/hardware_uart_pinctrl_2026-10-17.json | UART BREAK/reopen/recovery |
+| docs/evidence/protocol_v2/hardware_stress_2026-10-17.json | Clock-valid historical polling comparison |
+| docs/evidence/protocol_v3/waveform_full_acceptance_2026-11-10.json | Current waveform CRC/reset/stress/IRQ result |
+| docs/evidence/protocol_v3/electrical_fault_fixtures_2026-11-10.json | Current electrical 12-fixture exact regression |
+| docs/evidence/protocol_v3/electrical_fault_full_acceptance_2026-11-10.json | Current electrical CRC/reset/stress/IRQ result |
+| docs/evidence/protocol_v3/*_clock_2026-11-10.json | Current per-image clock/register read-back |
 
 Prioritized future work: independent labelled model evaluation; CPU/power/trace
 benchmarking; long-soak/reset/brownout/UART fault testing; async UART with full
@@ -369,9 +427,12 @@ is an out-of-tree Zephyr project: never patch upstream Zephyr. The licensed
 binary model archive is immutable unless authority and new licence/hash details
 are provided.
 
-Use accurate scope: this is hardware-validated on-board NPU integration and
-regression testing, not model training, production certification, or an
-independent accuracy study. Do not quote invalid 282/340 us historical timing.
+Use accurate scope: both protocol-v3 packages passed physical acceptance on
+2026-11-10, including 600/600 exact fixture regressions, IRQ/clock/CRC/NPU-
+timeout/watchdog gates. Exact fixtures are integration regression, not model
+accuracy. The electrical model's held-out result is recorded but it is not
+production-certified or independently validated. Do not quote invalid 282/340
+us historical timing.
 Run relevant local checks in PROJECT_HANDOFF.md; for hardware changes use its
 WSL/XDS110 attach, flash, and evidence procedure. Ask before destructive Git
 actions, model changes, external publication, or scope expansion. Report

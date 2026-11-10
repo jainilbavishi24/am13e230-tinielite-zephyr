@@ -105,7 +105,34 @@ memory callbacks, NPU register access, interrupts, clocks, input tensor
 preprocessing, and a way to test it on the board. It is not valid to say the
 archive was trained or regenerated here.</p>
 
-<h3>2.4 Why the linker matters in this project</h3>
+<h3>2.4 What does “model-package selectable” mean?</h3>
+
+<p>The original application named this one archive, its 256-byte input, its
+three-byte output, and its generated C structures directly. The current design
+moves those differences into <code>models/&lt;name&gt;/model.json</code>. The manifest
+declares tensor sizes and types plus the vendor-generated struct, field, entry,
+completion, and continuation names. CMake validates the package, runs
+<code>tools/generate_model_adapter.py</code>, compiles the resulting
+<code>build/generated/model_adapter.c</code>, and statically links the selected
+archive.</p>
+
+<p>The generated adapter is ordinary C source, but nobody has to write it for
+each compatible package. It creates the vendor input/output structs, places the
+application buffers into the manifest-selected fields, calls the selected
+entry point, and exposes reset/finished/continue operations through the stable
+<code>app_model.h</code> API. This is <strong>code generation</strong>: structured
+metadata is converted into repetitive source code before the compiler runs.</p>
+
+<p>This is <strong>build-time model agnosticism</strong>, not runtime loading.
+A different compatible model can be selected without rewriting the UART server
+or NPU wait/recovery logic, but firmware must still be rebuilt and flashed.
+An arbitrary <code>.a</code> cannot be sent over UART because it is target object
+code with linker symbols and relocations, not a self-describing model file.
+Generation removes repetitive hand-written glue; it cannot infer tensor meaning,
+preprocessing, labels, or an incompatible runtime ABI that the archive does not
+describe.</p>
+
+<h3>2.5 Why the linker matters in this project</h3>
 
 <p>A static archive is not automatically copied in full. Linkers usually pull
 only members that satisfy a needed symbol. The application link uses
@@ -274,6 +301,7 @@ W.”</strong></p>
   <tr><td>Zephyr did not know this preview board existed.</td><td>Out-of-tree board, SoC, devicetree, pinctrl, and driver support.</td><td>Firmware can build reproducibly for the real LP-AM13E230 instead of relying on private edits.</td></tr>
   <tr><td>The real clock was not configured to match assumed timing.</td><td>Crystal/PLL/flash initialization plus register telemetry.</td><td>UART settings, flash safety, and measured microseconds are tied to actual 200 MHz hardware.</td></tr>
   <tr><td>Raw serial bytes could be damaged, truncated, or stale.</td><td>Versioned UART frames with length, CRC-32, sequence, errors, deadline, and resync.</td><td>A test client can identify the correct response and recover rather than silently accepting bad data.</td></tr>
+  <tr><td>Common firmware was coupled to one generated model ABI.</td><td>Validated model manifests, stable adapter API, archive-derived identity, and protocol-v3 tensor metadata.</td><td>Compatible packages can be selected at build time, while host/board mismatches fail before inference.</td></tr>
   <tr><td>The supplied model archive needed hardware-specific functions.</td><td>TINIElite callbacks, NPU power/privilege setup, SRAM staging, IRQ handling.</td><td>The generated runtime can use the real accelerator, not just be stored as a file.</td></tr>
   <tr><td>A missing NPU completion could hang the application.</td><td>100 ms bounded wait, structured error, cold reset.</td><td>Known accelerator failures become observable/recoverable instead of infinite waits.</td></tr>
   <tr><td>A total CPU/application hang cannot execute software timeout logic.</td><td>Independently clocked WWDT0, fed only by main-loop progress.</td><td>The board can reset even when normal firmware control flow is broken.</td></tr>
@@ -294,7 +322,7 @@ W.”</strong></p>
 <ol>
   <li>You run <code>./scripts/build.sh</code>.</li>
   <li>west finds pinned Zephyr/modules and discovers this out-of-tree project through <code>module.yml</code>.</li>
-  <li>CMake selects project/application/driver sources and <code>mod.a</code>.</li>
+  <li>CMake validates the selected <code>model.json</code>, selects sources, adapter, header, and archive.</li>
   <li>Kconfig resolves which features are compiled; devicetree generates the hardware constants.</li>
   <li>The Arm compiler produces object code; the linker makes <code>zephyr.elf</code>; conversion makes <code>zephyr.hex</code>.</li>
   <li><code>./scripts/flash.sh</code> uses Linux DSLite and XDS110 to erase, program, and verify the board.</li>
@@ -309,6 +337,8 @@ W.”</strong></p>
 <div class="qa"><div class="question">What is object code?</div><div class="answer">Object code is the binary machine-code translation of one source file. It can still contain unresolved references. The linker combines object code and libraries into the final ELF firmware.</div></div>
 
 <div class="qa"><div class="question">What is a static library?</div><div class="answer">It is an archive of object code, usually a .a file. Here mod.a is a supplied generated model archive. At link time the required members become part of the final firmware, so there is no dynamic loading on the board.</div></div>
+
+<div class="qa"><div class="question">Is the project model agnostic?</div><div class="answer">It is build-time selectable across compatible AM13E2/TINIElite packages. A manifest supplies tensor and artifact metadata, and a small adapter hides generated names. It is not a runtime loader: each archive must be compatible, validated, linked into a new ELF, flashed, and tested.</div></div>
 
 <div class="qa"><div class="question">What does out-of-tree mean here?</div><div class="answer">The AM13E230 board, SoC, devicetree, and drivers live in our own repository, not inside upstream Zephyr. module.yml lets a clean pinned Zephyr checkout discover them during build. This keeps changes reproducible and separate from upstream.</div></div>
 

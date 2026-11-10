@@ -1,7 +1,7 @@
 /* SPDX-License-Identifier: Apache-2.0 */
 
 #include "app_npu.h"
-#include "model_runtime_abi.h"
+#include "app_model.h"
 
 #include <errno.h>
 #include <stdint.h>
@@ -10,8 +10,6 @@
 #include <zephyr/devicetree.h>
 #include <zephyr/drivers/tinyengine.h>
 #include <zephyr/kernel.h>
-#include <tvmgen_default.h>
-
 #define TINYENGINE_NODE      DT_COMPAT_GET_ANY_STATUS_OKAY(ti_am13e230x_tinyengine)
 #define NPU_STAGE_TIMEOUT_MS 100U
 
@@ -22,14 +20,8 @@ int app_npu_init(void)
 	return device_is_ready(npu_dev) ? 0 : -ENODEV;
 }
 
-int app_npu_run_inference(int8_t *input, int8_t *output, struct app_npu_metrics *metrics)
+int app_npu_run_inference(void *input, void *output, struct app_npu_metrics *metrics)
 {
-	struct tvmgen_default_inputs inputs = {
-		.onnx__Add_0 = input,
-	};
-	struct tvmgen_default_outputs outputs = {
-		.output = output,
-	};
 	uint32_t total_start;
 	uint32_t total_us;
 	uint32_t accelerator_us = 0U;
@@ -44,7 +36,7 @@ int app_npu_run_inference(int8_t *input, int8_t *output, struct app_npu_metrics 
 		return -EINVAL;
 	}
 
-	tvmgen_default_finished = 0;
+	app_model_reset();
 	ret = tinyengine_prepare_inference();
 	if (ret != 0) {
 		return ret;
@@ -54,13 +46,13 @@ int app_npu_run_inference(int8_t *input, int8_t *output, struct app_npu_metrics 
 	total_start = k_cycle_get_32();
 
 	runtime_start = k_cycle_get_32();
-	run_status = tvmgen_default_run(&inputs, &outputs);
+	run_status = app_model_run(input, output);
 	runtime_us += k_cyc_to_us_floor32(k_cycle_get_32() - runtime_start);
 	if (run_status != 0) {
 		return -EIO;
 	}
 
-	while (tvmgen_default_finished == 0) {
+	while (!app_model_is_finished()) {
 		uint32_t accelerator_start = k_cycle_get_32();
 
 		ret = tinyengine_wait_for_completion(K_MSEC(NPU_STAGE_TIMEOUT_MS));
@@ -71,7 +63,7 @@ int app_npu_run_inference(int8_t *input, int8_t *output, struct app_npu_metrics 
 
 		/* Continue the generated runtime after one hardware stage completes. */
 		runtime_start = k_cycle_get_32();
-		TI_NPU_NNC_IRQHandler();
+		app_model_continue();
 		runtime_us += k_cyc_to_us_floor32(k_cycle_get_32() - runtime_start);
 	}
 	total_us = k_cyc_to_us_floor32(k_cycle_get_32() - total_start);

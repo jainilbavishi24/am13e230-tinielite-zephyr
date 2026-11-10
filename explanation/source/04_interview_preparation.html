@@ -53,7 +53,13 @@
 
 <h3>2.2 Sixty-second answer</h3>
 
-<p>“The board was a preview TI microcontroller with a Cortex-M33 and TINIElite NPU, but the pinned Zephyr release did not support it. I built an out-of-tree board/SoC integration, configured the real 200 MHz clock, and implemented pinctrl, a polling UNICOMM UART driver, and the NPU adapter required by a supplied TVM-generated model archive. A Python client quantizes 256 waveform samples and sends them using a versioned CRC-32 UART protocol. The generated runtime executes a hybrid graph; the NPU raises IRQ 41 after hardware stages, a minimal ISR signals a semaphore, and the application continues the runtime in thread context with a timeout. I added cold-reset recovery, an independent hardware watchdog, WSL-native build/flash/test, and CI. Hardware stress testing completed 600 exact fixture inferences with 3,000 acknowledged NPU interrupts, zero spurious interrupts, and zero retries. I integrated the model; I did not train it, and the six fixtures are not a general accuracy claim.”</p>
+<p>“The board was a preview TI microcontroller with a Cortex-M33 and TINIElite NPU, but the pinned Zephyr release did not support it. I built an out-of-tree board/SoC integration, configured the real 200 MHz clock, and implemented pinctrl, a polling UNICOMM UART driver, and a manifest-driven adapter for supplied TVM/TI model archives. A Python client prepares the selected typed tensor and sends it through a versioned CRC-32 UART protocol. The hybrid generated runtime executes CPU and NPU stages; IRQ 41 signals each completed hardware stage, and thread code continues the runtime with a timeout. I added cold-reset recovery, an independent hardware watchdog, WSL-native build/flash/test, and CI. Two real packages with different shapes and preprocessing passed the same physical matrix: 600/600 exact fixture regressions each, zero retries/spurious interrupts, plus clock, CRC, timeout, and watchdog checks. I integrated the models; I did not claim that fixture equality is general accuracy.”</p>
+
+<p>If asked about the latest extension, add: “I then separated generated-model
+differences behind validated build-time packages and a stable generated
+adapter, upgraded READY to negotiate exact model/tensor identity, and proved
+the design with a second real float32 model. Both protocol-v3 packages passed
+the same complete hardware acceptance matrix.”</p>
 
 <h3>2.3 “What was difficult?” answer</h3>
 
@@ -66,13 +72,14 @@
 <pre>Float waveform[256]
         │  host reads generated bias/scale/shift
         ▼
-Signed int8 tensor[256]
-        │  protocol v2: magic/version/type/seq/len/payload/CRC32
+Signed int8 tensor[256] (default package)
+        │  protocol v3: model ID/sizes/dtypes + framed request/CRC32
         ▼
 UART @ 115200 ──► Zephyr request validator ──► ACK
                                              │
                                              ▼
-                                   tvmgen_default_run()
+                                   app_model_run()
+                                      │ generated adapter
                                       │           │
                                  CPU stages   TINIElite stage
                                                    │ DONE IRQ 41
@@ -167,7 +174,7 @@ AM13E230: Cortex-M33, flash/SRAM, UNICOMM, TINIElite, WWDT0</pre>
 
 <div class="qa"><div class="question">27. How does resynchronization work?</div><div class="answer">Both sides scan for two magic bytes. The host keeps a sliding buffer and, after an invalid candidate, drops one byte and searches again so it can recover even when a new frame begins inside a damaged candidate.</div></div>
 
-<div class="qa"><div class="question">28. What is the purpose of READY?</div><div class="answer">It means the server is idle and communicates expected input/output sizes. It also provides a clear post-reset synchronization point.</div></div>
+<div class="qa"><div class="question">28. What is the purpose of READY?</div><div class="answer">It means the server is idle and communicates the selected archive-derived model ID, exact tensor byte sizes and dtypes, and NPU capability flag. The host rejects any package mismatch. READY also provides a clear post-reset synchronization point.</div></div>
 
 <div class="qa"><div class="question">29. What is the purpose of ACK?</div><div class="answer">It confirms a particular sequence passed framing and CRC checks and was accepted before the longer inference or fault action begins.</div></div>
 
@@ -178,6 +185,10 @@ AM13E230: Cortex-M33, flash/SRAM, UNICOMM, TINIElite, WWDT0</pre>
 <div class="qa"><div class="question">30a. What is object code, and why is <code>mod.a</code> important?</div><div class="answer">Object code is processor-specific binary produced when the compiler translates a C file. A <code>.a</code> static library is an archive containing object code. <code>mod.a</code> is supplied compiled model/runtime code, not model source. At link time, the linker combines required archive members with Zephyr, drivers, and application object files into <code>zephyr.elf</code>; CI checks symbols in that final ELF. The flashable <code>zephyr.hex</code> is then derived from the ELF. This is why the project integrated a supplied model rather than training or dynamically loading one.</div></div>
 
 <div class="qa"><div class="question">31. What is an ABI?</div><div class="answer">The binary contract between separately compiled components: symbol names, parameter types, calling convention, layouts, and behavior. Our NPU callbacks must exactly match what <code>mod.a</code> expects.</div></div>
+
+<div class="qa"><div class="question">31a. Is this now model agnostic?</div><div class="answer">It is build-time selectable across compatible AM13E2/TINIElite packages. A validated manifest supplies tensor/artifact metadata and a four-function adapter hides generated C names. It is not runtime loading: each static archive must be compatible, linked into a new ELF, flashed, and physically validated.</div></div>
+
+<div class="qa"><div class="question">31b. What proves the abstraction before a second model exists?</div><div class="answer">The default real archive cross-builds through the adapter, while unit tests validate a synthetic alternate package with a 64-byte input, int16 output, different alignment, and different names. That proves metadata is not hardcoded, but it does not substitute for a second real NPU archive; that remains external input.</div></div>
 
 <div class="qa"><div class="question">32. What callbacks does the archive need?</div><div class="answer"><code>NPU_getCtlReg</code>, <code>NPU_setInstrMem</code>, and <code>NPU_setParamMem</code>. They expose the control address and safely stage generated words into NPU SRAM.</div></div>
 
@@ -340,17 +351,19 @@ AM13E230: Cortex-M33, flash/SRAM, UNICOMM, TINIElite, WWDT0</pre>
   <tr><td>Board / SoC / CPU</td><td>TI LP-AM13E230 / AM13E23019 / Arm Cortex-M33</td></tr>
   <tr><td>Accelerator</td><td>TINIElite NPU</td></tr>
   <tr><td>RTOS</td><td>Pinned development revision of Zephyr (commit recorded in <code>west.yml</code>)</td></tr>
-  <tr><td>Input / output</td><td>256 signed int8 values / 3 signed int8 scores</td></tr>
+  <tr><td>Default package input / output</td><td>256 signed int8 values / 3 signed int8 scores; common protocol supports manifest-declared byte sizes/types</td></tr>
   <tr><td>Classes</td><td>Sawtooth, sine, square</td></tr>
   <tr><td>Clock</td><td>200 MHz MCLK; 100 MHz UART source; 25 MHz crystal</td></tr>
   <tr><td>UART</td><td>115200 baud, 8N1, polling byte API</td></tr>
-  <tr><td>NPU interrupt</td><td>IRQ 41, five completions per inference</td></tr>
+  <tr><td>NPU interrupt</td><td>IRQ 41; waveform: five completions/inference; electrical fault: eight</td></tr>
   <tr><td>NPU stage timeout</td><td>100 ms</td></tr>
   <tr><td>Hardware watchdog</td><td>WWDT0, 32.768 kHz source, four-second timeout</td></tr>
-  <tr><td>Protocol</td><td>Version 2, little-endian, sequence + length + IEEE CRC-32</td></tr>
-  <tr><td>Current recovery-image timing</td><td>554 µs wait, 129 µs runtime, 701 µs total median</td></tr>
-  <tr><td>Stress evidence</td><td>600/600 exact fixtures, zero retries, 3,000 DONE IRQs, zero spurious</td></tr>
-  <tr><td>Footprint</td><td>25,492 B flash; 43,616 B RAM including 32 KiB main stack</td></tr>
+  <tr><td>Protocol</td><td>Version 3 with archive-derived model ID, sizes, dtypes, flags, sequence, and CRC-32; hardware-validated for both packages</td></tr>
+  <tr><td>Current waveform timing</td><td>553 µs accelerator, 118 µs runtime, 689 µs total median</td></tr>
+  <tr><td>Current electrical timing</td><td>330 µs accelerator, 525 µs runtime, 881 µs total median</td></tr>
+  <tr><td>Current stress evidence</td><td>600/600 exact per package, zero retries/spurious IRQs; CRC, NPU-timeout, and watchdog recovery passed</td></tr>
+  <tr><td>Current v3 software gate</td><td>28 host tests, 5 ASan/UBSan native tests, static checks, pristine Arm links</td></tr>
+  <tr><td>Current v3 footprints</td><td>Waveform: 25,656 B flash / 43,616 B RAM; electrical: 31,752 B / 41,320 B</td></tr>
   <tr><td>Model ownership</td><td>Generated artifact supplied externally; training/source model unavailable</td></tr>
 </table>
 
